@@ -1,0 +1,106 @@
+[
+    {
+      "taskName": "Lunch",
+      "taskStartHour": 11,
+      "taskEndHour": 14,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "Lunch Maybe",
+      "taskStartHour": 12,
+      "taskEndHour": 15,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "Dinner",
+      "taskStartHour": 20,
+      "taskEndHour": 23,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Family"
+    },
+    {
+      "taskName": "Mood",
+      "taskStartHour": 0,
+      "taskEndHour": 2,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "WTF",
+      "taskStartHour": 1,
+      "taskEndHour": 3,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "DudeTime",
+      "taskStartHour": 15,
+      "taskEndHour": 16,
+      "taskDate": "2024-09-26",
+      "taskType": "alone",
+      "taskCore": "Friendship"
+    },
+    {
+      "taskName": "Meeting",
+      "taskStartHour": 12,
+      "taskEndHour": 15,
+      "taskDate": "2024-09-24",
+      "taskType": "Co-Op",
+      "taskCore": "Career"
+    },
+    {
+      "taskName": "Game",
+      "taskStartHour": 11,
+      "taskEndHour": 15,
+      "taskDate": "2024-09-24",
+      "taskType": "Co-Op",
+      "taskCore": "Leisure"
+    },
+    {
+      "taskName": "Paint",
+      "taskStartHour": 1,
+      "taskEndHour": 5,
+      "taskDate": "2024-09-24",
+      "taskType": "Co-Op",
+      "taskCore": "Leisure"
+    },
+    {
+      "taskName": "Movie",
+      "taskStartHour": 17,
+      "taskEndHour": 19,
+      "taskDate": "2024-09-24",
+      "taskType": "Co-Op",
+      "taskCore": "Leisure"
+    },
+    {
+      "taskName": "Sleep",
+      "taskStartHour": 14,
+      "taskEndHour": 18,
+      "taskDate": "2024-09-24",
+      "taskType": "Co-Op",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "Try",
+      "taskStartHour": 14,
+      "taskEndHour": 18,
+      "taskDate": "2024-09-27",
+      "taskType": "Co-Op",
+      "taskCore": "Health"
+    },
+    {
+      "taskName": "Try",
+      "taskStartHour": 14,
+      "taskEndHour": 18,
+      "taskDate": "2024-09-27",
+      "taskType": "Co-Op",
+      "taskCore": "Health"
+    }
+]
