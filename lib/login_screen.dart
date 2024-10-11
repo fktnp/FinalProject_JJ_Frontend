@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart'; 
+import 'package:dio/dio.dart';
+import 'package:flutter_application_1/main.dart'; 
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
 import 'register_screen.dart';
@@ -8,50 +9,42 @@ class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final Dio dio = Dio();
 
   LoginScreen({super.key});
 
 Future<void> login(BuildContext context) async {
   if (_formKey.currentState!.validate()) {
-    String username = _userNameController.text;
-    String password = _passwordController.text;
-
-    // สร้าง Dio instance
-    Dio dio = Dio();
-
     try {
-      dio.options.headers['Content-Type'] = 'application/json';
+      dio.options.headers['Content-Type'] = 'application/json'; // ตั้งค่า Header สำหรับ JSON
       
-      // API endpoint สำหรับการ login (ปรับ URL ให้ตรงกับ API ของคุณ)
-      String url = 'http://localhost:8080/v1/user/login';
+      // นำค่าจาก TextEditingController มาใช้ในการส่งข้อมูล
+      String username = _userNameController.text; // ใช้ email แทน username
+      String password = _passwordController.text;
 
       // ทำ POST request
-      Response response = await dio.post(
-        url,
-        data: {
-          "user_id": "e8dc9a17-cbf8-4685-91f5-d070a44b849a", 
-          "email": username,                  
-          "password": password  
-        },
-      );
-
+      Response response = await dio.post('http://10.0.2.2:8080/v1/user/login', data: {
+        "user_id" : "d6376b01-3cf2-4b44-b66a-3754fadcb105",
+        "email": username,
+        "password": password,
+      });
       // ตรวจสอบ response
       if (response.statusCode == 200) {
-        // ถ้า login สำเร็จ, คุณสามารถดำเนินการเพิ่มเติมได้
-        print('Login success: ${response.data}');
-        Navigator.pushNamed(context, '/home'); // ไปยังหน้า home
+        print('Login successful: ${response.data}');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyHomePage()), // ไปยังหน้า home
+        );
       } else {
-        // ถ้า login ไม่สำเร็จ
         print('Login failed: ${response.data}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${response.data['message']}')),
         );
       }
-    } catch (e) {
-      // จัดการข้อผิดพลาดจากการเรียก API
-      print('Error: $e');
+    } on DioError catch (e) {
+      print('Dio error: ${e.response?.statusCode} - ${e.message}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred: $e')),
+        SnackBar(content: Text('Error occurred: ${e.message}')),
       );
     }
   }
@@ -77,15 +70,15 @@ Future<void> login(BuildContext context) async {
                 const SizedBox(height: 50),
                 CustomTextField(
                   controller: _userNameController,
-                  hintText: 'Username',
+                  hintText: 'Email',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
+                      return 'Please enter your email';
                     }
                     return null;
                   },
                   decoration: InputDecoration(
-                  hintText: 'Username',
+                  hintText: 'Email',
                   filled: true,
                   fillColor: const Color(0xFFFFECDB),
                   border: OutlineInputBorder(
