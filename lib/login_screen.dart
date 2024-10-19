@@ -10,6 +10,7 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Dio dio = Dio();
+  
 
   LoginScreen({super.key});
 
@@ -23,8 +24,8 @@ Future<void> login(BuildContext context) async {
       String password = _passwordController.text;
 
       // ทำ POST request
-      Response response = await dio.post('http://10.0.2.2:8080/v1/user/login', data: {
-        "user_id" : "d6376b01-3cf2-4b44-b66a-3754fadcb105",
+      Response response = await dio.post('http://10.250.105.93:8080/v1/user/login', data: {
+        "user_id" : "ffa2d7fd-bdbe-48da-9874-eed74a585ec3",
         "email": username,
         "password": password,
       });
