@@ -72,7 +72,7 @@ class AddFromGoal {
   try 
   { dio.options.headers['Content-Type'] = 'application/json'; // ตั้งค่า Header สำหรับ JSON
     Response response = await dio.post(
-      'http://localhost:8080/v1/job', // Replace with the actual API endpoint
+      'http://10.250.105.93:8080/v1/job', // Replace with the actual API endpoint
       data: data,
     );
 

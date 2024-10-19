@@ -314,8 +314,8 @@ class GoalSection extends StatelessWidget {
             right: 10,
             child: FixedBottomButton(
               onPressed: () {
-                showGoalAddBottomSheet(
-                    context); //showGoalAddBottomSheet(context)ของเพิ่มย่อย
+                AddFromGoal(context: context, goal: goal).show();
+                 //showGoalAddBottomSheet(context)ของเพิ่มย่อย
                 // AddFromGoal(context: context, goal: goal).show(); ของอันหลัก
                 // เรียกใช้ฟังก์ชัน showOverlay
               },
