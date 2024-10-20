@@ -24,7 +24,7 @@ Future<void> login(BuildContext context) async {
       String password = _passwordController.text;
 
       // ทำ POST request
-      Response response = await dio.post('http://10.250.105.93:8080/v1/user/login', data: {
+      Response response = await dio.post('http://10.0.2.2:8080/v1/user/login', data: {
         "user_id" : "ffa2d7fd-bdbe-48da-9874-eed74a585ec3",
         "email": username,
         "password": password,
@@ -34,7 +34,7 @@ Future<void> login(BuildContext context) async {
         print('Login successful: ${response.data}');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MyHomePage()), // ไปยังหน้า home
+          MaterialPageRoute(builder: (context) => const MyHomePage()), // ไปยังหน้า home
         );
       } else {
         print('Login failed: ${response.data}');
@@ -42,7 +42,7 @@ Future<void> login(BuildContext context) async {
           SnackBar(content: Text('Login failed: ${response.data['message']}')),
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('Dio error: ${e.response?.statusCode} - ${e.message}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error occurred: ${e.message}')),
@@ -138,7 +138,11 @@ Future<void> login(BuildContext context) async {
                   padding: const EdgeInsets.all(10),
                 ),
                   onPressed: () {
-                    login(context);  // เรียกใช้ฟังก์ชัน login
+                    // login(context);  // เรียกใช้ฟังก์ชัน login
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyHomePage()),
+                    );
                   },
                 ),
               ],

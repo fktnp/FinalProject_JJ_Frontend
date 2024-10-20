@@ -12,9 +12,9 @@ class TaskDetailPage extends StatelessWidget {
       backgroundColor: const Color(0xFFFFECDB), 
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFDCBC),
-        title: Align(
+        title: const Align(
           alignment: Alignment.centerRight,
-          child: const Text(
+          child: Text(
             'Goal',
             style: TextStyle(color: Colors.black),
           ),
@@ -54,13 +54,13 @@ class TaskDetailPage extends StatelessWidget {
               // แสดงแท็บ
               TabBar(
                 tabs: [
-                  Container(
+                  SizedBox(
                     width: 120, // ปรับความกว้างของแท็บ Routine
-                    child: Tab(text: 'Routine'),
+                    child: const Tab(text: 'Routine'),
                   ),
-                  Container(
+                  SizedBox(
                     width: 120, // ปรับความกว้างของแท็บ Goal
-                    child: Tab(text: 'Goal'),
+                    child: const Tab(text: 'Goal'),
                   ),
                 ],
                 labelColor: Colors.black,
@@ -116,12 +116,12 @@ class TaskDetailPage extends StatelessWidget {
                         color: const Color(0xFFFFDCBC), // สีพื้นหลัง
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Goal Details', // เพิ่มรายละเอียด Goal ที่นี่
-                            style: const TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 20),
                           ),
                           // เพิ่มข้อมูลอื่นๆ เกี่ยวกับ Goal ที่นี่
                         ],
