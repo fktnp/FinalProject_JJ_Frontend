@@ -22,6 +22,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
 
   List<DateTime> multiMonthList = List.empty();
   DateTime currentDateTime = DateTime.now();
+  late PageController pageController;
+
 
   @override
   void initState() {
@@ -29,6 +31,21 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     multiMonthList = _generateMultiMonthDates(currentDateTime, monthsBefore: 2, monthsAfter: 2);
     
     super.initState();
+
+    // คำนวณ weekIndex
+    int weekIndex = calculateWeekIndex(multiMonthList, currentDateTime);
+    
+    // สร้าง PageController ด้วย initialPage เป็น 0
+    pageController = PageController(initialPage: 0, viewportFraction: 1);
+    
+    // เลื่อนหน้าไปที่ weekIndex
+    Future.delayed(Duration.zero, () {
+      pageController.animateToPage(
+        weekIndex,
+        duration: Duration(milliseconds: 800), // ระยะเวลาในการเลื่อน
+        curve: Curves.easeInOut, // รูปแบบการเคลื่อนไหว
+      );
+    });
   }
 
   // Function to generate dates across multiple months
@@ -62,17 +79,35 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     );
   }
 
+  int calculateWeekIndex(List<DateTime> multiMonthList, DateTime currentDateTime) {
+    // คำนวณ index ของวันปัจจุบัน
+    int currentDayIndex = multiMonthList.indexWhere((date) =>
+        date.year == currentDateTime.year &&
+        date.month == currentDateTime.month &&
+        date.day == currentDateTime.day);
+    
+    // หาจำนวนสัปดาห์
+    return currentDayIndex >= 0 ? currentDayIndex ~/ 7 : 0;
+  }
+
+  
   Widget sortSevenDay() {
     List<List<DateTime>> weeks = [];
     for (int i = 0; i < multiMonthList.length; i += 7) {
       weeks.add(multiMonthList.sublist(i, i + 7 > multiMonthList.length ? multiMonthList.length : i + 7));
     }
 
+    // int weekIndex = calculateWeekIndex(multiMonthList, currentDateTime);
+
+    // // สร้าง PageController ด้วย initialPage เป็น weekIndex เลื่อนไป index array หน้านั้นเลยอ้ะ!
+    // pageController = PageController(initialPage: weekIndex,viewportFraction : 1);
+
+
     return SizedBox(
       width: width * 1,
       height: height * 0.112,
       child: PageView.builder(
-        controller: PageController(viewportFraction: 1),
+        controller: pageController,
         itemCount: weeks.length,
         itemBuilder: (BuildContext context, int index) {
           return Row(
@@ -165,6 +200,12 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     height = MediaQuery.of(context).size.height;
 
     return topView();
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose(); // อย่าลืม dispose pageController
+    super.dispose();
   }
 
 }
