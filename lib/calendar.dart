@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_application_1/sub_components_calendar/DayDateRow.dart';
+import 'package:intl/intl.dart';
 
 class MyCalendarView extends StatefulWidget {
   const MyCalendarView({super.key});
@@ -52,12 +54,18 @@ class CalendarViewState extends State<MyCalendarView> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildToggleButton('Day', 'day', screenWidth, screenHeight),
-                    _buildToggleButton(
-                        'Month', 'month', screenWidth, screenHeight),
-                    _buildToggleButton(
-                        'Year', 'year', screenWidth, screenHeight),
+                    _buildToggleButton('Month', 'month', screenWidth, screenHeight),
+                    _buildToggleButton('Year', 'year', screenWidth, screenHeight),
                   ],
                 ),
+                _currentView == 'day'
+                    ? CurrentDayDateRow(
+                        title: 'try',
+                        onDateChanged: _onDateChanged,
+                      )
+                    : _currentView == 'month'
+                        ? const CurrentMonthRow()
+                        : const CurrentYearRow(),
               ],
             ),
           ),
@@ -66,8 +74,7 @@ class CalendarViewState extends State<MyCalendarView> {
     );
   }
 
-  Widget _buildToggleButton(
-      String text, String view, double screenWidth, double screenHeight) {
+  Widget _buildToggleButton(String text, String view, double screenWidth, double screenHeight) {
     final isActive = _currentView == view;
     return GestureDetector(
       onTap: () => _onViewChanged(view),
@@ -98,3 +105,4 @@ class CalendarViewState extends State<MyCalendarView> {
     );
   }
 }
+
