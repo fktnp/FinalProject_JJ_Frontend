@@ -3,6 +3,8 @@ import 'package:flutter_application_1/sub_components_calendar/DayDateRow.dart';
 import 'package:flutter_application_1/sub_components_calendar/MonthDateRow.dart';
 import 'package:flutter_application_1/sub_components_calendar/YearDateRow.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'dart:math';
+
 
 class MyCalendarView extends StatefulWidget {
   const MyCalendarView({super.key});
@@ -15,11 +17,43 @@ class CalendarViewState extends State<MyCalendarView> {
   String _currentView = 'day';
   DateTime currentDateTime = DateTime.now();
   late CalendarController _calendarController;
+  late CalendarDataSource _calendarDataSource; // Declare a CalendarDataSource
 
   @override
   void initState() {
     super.initState();
     _calendarController = CalendarController();
+    _generateSampleTasks(); // Create sample tasks
+  }
+
+  void _generateSampleTasks() {
+    List<Appointment> appointments = []; // Create a local appointments list
+    Random random = Random(); // Create a Random object
+    DateTime now = DateTime.now();
+
+    for (int i = 0; i < 10; i++) {
+      // Randomly select a number of days from -10 to +10
+      int randomDays = random.nextInt(21) - 10; // Generates a number between -10 and 10
+
+      // Randomly select a start hour
+      int randomHour = random.nextInt(24); // Generates a number between 0 and 23
+
+      // Randomly select a duration between 1 to 3 hours
+      int randomDuration = random.nextInt(3) + 1; // Generates a number between 1 and 3
+
+      appointments.add(Appointment(
+        startTime: DateTime(now.year, now.month, now.day)
+            .add(Duration(days: randomDays))
+            .add(Duration(hours: randomHour)), // Random hour
+        endTime: DateTime(now.year, now.month, now.day)
+            .add(Duration(days: randomDays))
+            .add(Duration(hours: randomHour + randomDuration)), // End time based on random duration
+        subject: 'Task ${i + 1}', // Task name
+        color: Colors.blue, // Task color
+        isAllDay: false, // Not an all-day event
+      ));
+    }
+    _calendarDataSource = AppointmentDataSource(appointments); // Initialize the data source
   }
 
   void _onViewChanged(String view) {
@@ -43,7 +77,6 @@ class CalendarViewState extends State<MyCalendarView> {
     setState(() {
       currentDateTime = date;
       _calendarController.displayDate = date;
-      // _calendarController.selectedDate = date;
     });
   }
 
@@ -83,6 +116,7 @@ class CalendarViewState extends State<MyCalendarView> {
                     ? CurrentDayDateRow(
                         title: 'try',
                         onDateChanged: _onDateChanged,
+                        tragetDateShow: currentDateTime,
                       )
                     : _currentView == 'month'
                         ? CurrentMonthRow(onDateChanged: _onDateChanged,)
@@ -104,12 +138,25 @@ class CalendarViewState extends State<MyCalendarView> {
                             ? CalendarView.month
                             : CalendarView.schedule,
                     initialDisplayDate: currentDateTime,
-                    headerHeight: 0, // ซ่อน header โดยตั้งค่า height เป็น 0
+                    headerHeight: 0, // Hide header
                     onTap: (CalendarTapDetails details) {
-                      if (details.targetElement == CalendarElement.calendarCell) {
-                        _onDateChanged(details.date!);
-                      }
-                    },
+                          if (details.targetElement == CalendarElement.calendarCell || 
+                              details.targetElement == CalendarElement.appointment){
+                            // Set the selected date in the controller
+                            _calendarController.displayDate = details.date!;
+                            // Change the view to day
+                            _onViewChanged('day');
+                            // Update the current date
+                            _onDateChanged(details.date!);
+                          }
+                        },
+                    dataSource: _calendarDataSource, // Set the data source here
+                    scheduleViewSettings: const ScheduleViewSettings(
+                      monthHeaderSettings: MonthHeaderSettings(
+                        backgroundColor: Colors.black,
+                        //ไว้แต่งหน้าไอแถบ ดำๆ หน้า  year เพิ่มนะ
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -149,5 +196,12 @@ class CalendarViewState extends State<MyCalendarView> {
         ),
       ),
     );
+  }
+}
+
+// Custom CalendarDataSource class to hold appointments
+class AppointmentDataSource extends CalendarDataSource {
+  AppointmentDataSource(List<Appointment> source) {
+    appointments = source;
   }
 }

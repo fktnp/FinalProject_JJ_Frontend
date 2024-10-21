@@ -5,11 +5,14 @@ import 'package:intl/intl.dart';
 class CurrentDayDateRow extends StatefulWidget {
   final String title;
   final Function(DateTime) onDateChanged;
+  final DateTime tragetDateShow;
+
 
   const CurrentDayDateRow({
     super.key,
     required this.title,
     required this.onDateChanged,
+    required this.tragetDateShow,
   });
 
   @override
@@ -27,6 +30,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
 
   @override
   void initState() {
+    currentDateTime = widget.tragetDateShow;
+
     // Generate dates for the current, previous, and next 2 months
     multiMonthList = _generateMultiMonthDates(currentDateTime, monthsBefore: 2, monthsAfter: 2);
     
