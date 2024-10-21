@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_application_1/sub_components_calendar/DayDateRow.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_application_1/sub_components_calendar/MonthDateRow.dart';
+import 'package:flutter_application_1/sub_components_calendar/YearDateRow%20copy%202.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class MyCalendarView extends StatefulWidget {
   const MyCalendarView({super.key});
@@ -13,16 +14,36 @@ class MyCalendarView extends StatefulWidget {
 class CalendarViewState extends State<MyCalendarView> {
   String _currentView = 'day';
   DateTime currentDateTime = DateTime.now();
+  late CalendarController _calendarController;
+
+  @override
+  void initState() {
+    super.initState();
+    _calendarController = CalendarController();
+  }
 
   void _onViewChanged(String view) {
     setState(() {
       _currentView = view;
+      switch (view) {
+        case 'day':
+          _calendarController.view = CalendarView.day;
+          break;
+        case 'month':
+          _calendarController.view = CalendarView.month;
+          break;
+        case 'year':
+          _calendarController.view = CalendarView.schedule;
+          break;
+      }
     });
   }
 
   void _onDateChanged(DateTime date) {
     setState(() {
       currentDateTime = date;
+      _calendarController.displayDate = date;
+      // _calendarController.selectedDate = date;
     });
   }
 
@@ -64,8 +85,33 @@ class CalendarViewState extends State<MyCalendarView> {
                         onDateChanged: _onDateChanged,
                       )
                     : _currentView == 'month'
-                        ? const CurrentMonthRow()
-                        : const CurrentYearRow(),
+                        ? CurrentMonthRow(onDateChanged: _onDateChanged,)
+                        : CurrentYearRow(onDateChanged: _onDateChanged,),
+                Expanded(
+                  child: SfCalendar(
+                    timeSlotViewSettings: const TimeSlotViewSettings(
+                      timeTextStyle: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      timeFormat: 'HH:mm',
+                    ),
+                    controller: _calendarController,
+                    view: _currentView == 'day'
+                        ? CalendarView.day
+                        : _currentView == 'month'
+                            ? CalendarView.month
+                            : CalendarView.schedule,
+                    initialDisplayDate: currentDateTime,
+                    headerHeight: 0, // ซ่อน header โดยตั้งค่า height เป็น 0
+                    onTap: (CalendarTapDetails details) {
+                      if (details.targetElement == CalendarElement.calendarCell) {
+                        _onDateChanged(details.date!);
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -105,4 +151,3 @@ class CalendarViewState extends State<MyCalendarView> {
     );
   }
 }
-

@@ -96,13 +96,6 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     for (int i = 0; i < multiMonthList.length; i += 7) {
       weeks.add(multiMonthList.sublist(i, i + 7 > multiMonthList.length ? multiMonthList.length : i + 7));
     }
-
-    // int weekIndex = calculateWeekIndex(multiMonthList, currentDateTime);
-
-    // // สร้าง PageController ด้วย initialPage เป็น weekIndex เลื่อนไป index array หน้านั้นเลยอ้ะ!
-    // pageController = PageController(initialPage: weekIndex,viewportFraction : 1);
-
-
     return SizedBox(
       width: width * 1,
       height: height * 0.112,
@@ -210,26 +203,3 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
 
 }
 
-class CurrentMonthRow extends StatelessWidget {
-  const CurrentMonthRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // Add your month row implementation here
-      child: const Text('Current Month Row'),
-    );
-  }
-}
-
-class CurrentYearRow extends StatelessWidget {
-  const CurrentYearRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // Add your year row implementation here
-      child: const Text('Current Year Row'),
-    );
-  }
-}
