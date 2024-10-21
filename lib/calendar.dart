@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_application_1/task.dart';
 import 'package:intl/intl.dart';
 import '/utils/date_utils.dart' as date_util;
-import 'task.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -769,13 +769,13 @@ class DayTimeTable extends StatefulWidget {
 }
 
 class DayTimeTableState extends State<DayTimeTable> {
-  late Future<List<Task>> tasksFuture;
+  late Future<List<ServerTask>> tasksFuture;
   List<int> numbers = List.filled(24, 0); // ตัวแปรนับจำนวน task ในแต่ละช่วงเวลา
 
   @override
   void initState() {
     super.initState();
-    tasksFuture = loadTasks();
+    tasksFuture = fetchTasks();
   }
 
   void resetNumbers() {
@@ -799,7 +799,7 @@ class DayTimeTableState extends State<DayTimeTable> {
           topRight: Radius.circular(30),
         ),
       ),
-      child: FutureBuilder<List<Task>>(
+      child: FutureBuilder<List<ServerTask>>(
         future: tasksFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -816,9 +816,9 @@ class DayTimeTableState extends State<DayTimeTable> {
 
             final tasks = snapshot.data!
                 .where((task) =>
-                    task.taskDate.year == widget.currentDate.year &&
-                    task.taskDate.month == widget.currentDate.month &&
-                    task.taskDate.day == widget.currentDate.day)
+                    task.startTimeGoal.year == widget.currentDate.year &&
+                    task.startTimeGoal.month == widget.currentDate.month &&
+                    task.startTimeGoal.day == widget.currentDate.day)
                 .toList();
 
             return ListView.builder(
@@ -829,8 +829,8 @@ class DayTimeTableState extends State<DayTimeTable> {
                 final tasksAtThisHour = tasks
                     .where(
                       (task) =>
-                          index >= task.taskStartHour &&
-                          index <= task.taskEndHour,
+                          index >= task.startTimeGoal.hour &&
+                          index <= task.lastTimeGoal.hour,
                     )
                     .toList();
 
@@ -857,30 +857,30 @@ class DayTimeTableState extends State<DayTimeTable> {
                     if (tasksAtThisHour.isNotEmpty)
                       ...tasksAtThisHour.map((task) {
                         int quantity = 0;
-                        if (task.taskName == "WTF") {
+                        if (task.name == "WTF") {
                           quantity = 1;
-                          numbers[task.taskStartHour] = quantity;
+                          numbers[task.startTimeGoal.hour] = quantity;
                         } else {
                           quantity = 0;
                         }
 
                         return Positioned(
-                          top: (task.taskStartHour - index + 0.5) *
+                          top: (task.startTimeGoal.hour - index + 0.5) *
                               screenHeight *
                               0.08, // ชิดกับเส้นเริ่มต้น
                           left: screenWidth * 0.15 +
                               (screenWidth *
                                   0.30 *
                                   quantity), // วาง task ตามค่า number
-                          child: Stack(
-                            children: tasksAtThisHour
-                                .map((task) => AddedDayTask(
-                                    task: task,
-                                    boxheight: (task.taskEndHour -
-                                            task.taskStartHour) *
-                                        screenHeight *
-                                        0.08))
-                                .toList(),
+                          child: const Stack(
+                            // children: tasksAtThisHour
+                            //     .map((task) => AddedDayTask(
+                            //         task: task,
+                            //         boxheight: (task.taskEndHour -
+                            //                 task.taskStartHour) *
+                            //             screenHeight *
+                            //             0.08))
+                            //     .toList(),
                           ),
                         );
                       }),

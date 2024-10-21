@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'task.dart'; // ตรวจสอบว่ามีการนำเข้า Task class ที่นี่
+import 'task.dart';
 
 class TaskDetailPage extends StatelessWidget {
-  final Task task;
+  final ServerTask task;
 
   const TaskDetailPage({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFECDB), 
+      backgroundColor: const Color(0xFFFFECDB),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFDCBC),
-        title: Align(
+        title: const Align(
           alignment: Alignment.centerRight,
-          child: const Text(
+          child: Text(
             'Goal',
             style: TextStyle(color: Colors.black),
           ),
@@ -36,29 +36,25 @@ class TaskDetailPage extends StatelessWidget {
             children: [
               // แสดงชื่อของเป้าหมาย
               Text(
-                task.taskName,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                task.name,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
-                task.taskDate.toString(),
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Time: ${task.taskStartHour.toString().padLeft(2, '0')}:00 - ${task.taskEndHour.toString().padLeft(2, '0')}:00',
+                'Date : ${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 10),
 
               // แสดงแท็บ
               TabBar(
-                tabs: [
-                  Container(
+                tabs: const [
+                  SizedBox(
                     width: 120, // ปรับความกว้างของแท็บ Routine
                     child: Tab(text: 'Routine'),
                   ),
-                  Container(
+                  SizedBox(
                     width: 120, // ปรับความกว้างของแท็บ Goal
                     child: Tab(text: 'Goal'),
                   ),
@@ -66,7 +62,8 @@ class TaskDetailPage extends StatelessWidget {
                 labelColor: Colors.black,
                 unselectedLabelColor: Colors.black,
                 indicator: BoxDecoration(
-                  color: const Color(0xFFFFDCBC), // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
+                  color: const Color(
+                      0xFFFFDCBC), // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
                   borderRadius: BorderRadius.circular(20), // ขอบมนของแท็บ
                 ),
               ),
@@ -77,14 +74,17 @@ class TaskDetailPage extends StatelessWidget {
                   children: [
                     // หน้า Routine
                     Container(
-                      width: MediaQuery.of(context).size.width - 32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
+                      width: MediaQuery.of(context).size.width -
+                          32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
                       padding: const EdgeInsets.all(16.0),
-                      color: const Color(0xFFFFDCBC), // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
+                      color: const Color(
+                          0xFFFFDCBC), // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
                       child: ListView.builder(
                         itemCount: 24, // จำนวนชั่วโมง (0-23)
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0), // เพิ่มระยะห่างระหว่างบรรทัด
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0), // เพิ่มระยะห่างระหว่างบรรทัด
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -96,8 +96,10 @@ class TaskDetailPage extends StatelessWidget {
                                 // เส้นขีด
                                 Expanded(
                                   child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                                    height: 1, // ความสูงของเส้นขีด (ปรับให้บางลง)
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    height:
+                                        1, // ความสูงของเส้นขีด (ปรับให้บางลง)
                                     color: Colors.black, // สีของเส้นขีด
                                   ),
                                 ),
@@ -107,8 +109,7 @@ class TaskDetailPage extends StatelessWidget {
                         },
                       ),
                     ),
-                    
-                    
+
                     // หน้า Goal
                     Container(
                       padding: const EdgeInsets.all(16.0),
@@ -116,12 +117,12 @@ class TaskDetailPage extends StatelessWidget {
                         color: const Color(0xFFFFDCBC), // สีพื้นหลัง
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Goal Details', // เพิ่มรายละเอียด Goal ที่นี่
-                            style: const TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 20),
                           ),
                           // เพิ่มข้อมูลอื่นๆ เกี่ยวกับ Goal ที่นี่
                         ],
@@ -137,4 +138,3 @@ class TaskDetailPage extends StatelessWidget {
     );
   }
 }
-
