@@ -104,7 +104,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          // titleView(),
+          titleView(),
           sortTwelveYears(),
         ],
       ),
