@@ -45,7 +45,7 @@ class MyHomePageState extends State<MyHomePage> {
         index: _currentIndex,
         children: const [
           SettingsPage(),
-          CalendarView(),
+          MyCalendarView(),
           TryTodotoday(),
           GoalsPage(),
           TaskList(),

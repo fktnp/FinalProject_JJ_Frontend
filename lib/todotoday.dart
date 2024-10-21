@@ -42,10 +42,10 @@ class TryTodotodayState extends State<TryTodotoday> {
           child: Column(
             children: [
               const TaskForADay(),
-              CurrentDayDateRow(
-                title: "try",
-                onDateChanged: _onDateChanged, // ส่ง callback ไป
-              ),
+              // CurrentDayDateRow(
+              //   title: "try",
+              //   onDateChanged: _onDateChanged, // ส่ง callback ไป
+              // ),
               TaskTable(currentDate: currentDateTime), // ส่ง currentDate ไปที่ TaskTable
             ],
           ),

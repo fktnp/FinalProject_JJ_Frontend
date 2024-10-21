@@ -350,7 +350,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Goal'),
+        title: const Text('Add Goal'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -358,21 +358,21 @@ class _GoalSettingPageState extends State<GoaladdPage> {
           children: [
             // Goal Name Input
             TextField(
-              decoration: InputDecoration(labelText: 'Goal Name'),
+              decoration: const InputDecoration(labelText: 'Goal Name'),
               onChanged: (value) {
                 setState(() {
                   goalName = value;
                 });
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
 
             // Time Picker for Start Time
             ListTile(
               title: Text(startTime != null
                   ? "Start Time: ${startTime!.format(context)}"
                   : "Pick Start Time"),
-              trailing: Icon(Icons.access_time),
+              trailing: const Icon(Icons.access_time),
               onTap: () => _pickStartTime(context),
             ),
 
@@ -381,13 +381,13 @@ class _GoalSettingPageState extends State<GoaladdPage> {
               title: Text(endTime != null
                   ? "End Time: ${endTime!.format(context)}"
                   : "Pick End Time"),
-              trailing: Icon(Icons.access_time),
+              trailing: const Icon(Icons.access_time),
               onTap: () => _pickEndTime(context),
             ),
 
             // Frequency Dropdown
             DropdownButton<String>(
-              hint: Text('Select Frequency'),
+              hint: const Text('Select Frequency'),
               value: frequency,
               onChanged: (String? newValue) {
                 setState(() {
@@ -408,16 +408,16 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
 
             // Frequency Specific Options
             if (frequency == 'Daily')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: dayInterval,
-                    hint: Text('Day(s)'),
+                    hint: const Text('Day(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         dayInterval = value;
@@ -435,10 +435,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Weekly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: weekInterval,
-                    hint: Text('Week(s)'),
+                    hint: const Text('Week(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         weekInterval = value;
@@ -451,7 +451,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('On these days'),
+                  const Text('On these days'),
                   Wrap(
                     spacing: 8.0,
                     children: daysOfWeek.map((day) {
@@ -475,10 +475,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Monthly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: monthInterval,
-                    hint: Text('Month(s)'),
+                    hint: const Text('Month(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         monthInterval = value;
@@ -491,10 +491,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('On day'),
+                  const Text('On day'),
                   DropdownButton<int>(
                     value: selectedDayOfMonth,
-                    hint: Text('Day of Month'),
+                    hint: const Text('Day of Month'),
                     onChanged: (int? value) {
                       setState(() {
                         selectedDayOfMonth = value;
@@ -512,10 +512,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Yearly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: yearInterval,
-                    hint: Text('Year(s)'),
+                    hint: const Text('Year(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         yearInterval = value;
@@ -528,10 +528,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('In month'),
+                  const Text('In month'),
                   DropdownButton<String>(
                     value: selectedMonth,
-                    hint: Text('Month'),
+                    hint: const Text('Month'),
                     onChanged: (String? value) {
                       setState(() {
                         selectedMonth = value;
@@ -552,7 +552,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
               title: Text(endDate != null
                   ? "End Date: ${endDate!.toLocal()}".split(' ')[0]
                   : "Pick End Date"),
-              trailing: Icon(Icons.calendar_today),
+              trailing: const Icon(Icons.calendar_today),
               onTap: () => _pickEndDate(context),
             ),
 
@@ -573,15 +573,15 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                 print('Selected Month: $selectedMonth');
                 print('End Date: $endDate');
               },
-              child: const Icon(
-                Icons.add,
-                color: Colors.black, 
-                size: 30, 
-              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFECDB), 
                 shape: const CircleBorder(), 
                 padding: const EdgeInsets.all(20), 
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.black, 
+                size: 30, 
               ),
             )
           ],
