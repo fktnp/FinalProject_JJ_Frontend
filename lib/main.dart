@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/task.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'setting.dart';
-import 'task.dart';
 import 'todotoday.dart';
 import 'calendar.dart';
 
@@ -39,6 +39,7 @@ class MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
 
     return Scaffold(
       body: IndexedStack(
@@ -48,7 +49,7 @@ class MyHomePageState extends State<MyHomePage> {
           CalendarView(),
           TryTodotoday(),
           GoalsPage(),
-          TaskList(),
+          TaskListPage(),
         ],
       ),
       bottomNavigationBar: SizedBox(
@@ -70,40 +71,60 @@ class MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
               icon: Image.asset(
                 'lib/Pic/settings.png',
-                width: _currentIndex == 0 ? 32 : 38,
-                height: _currentIndex == 0 ? 32 : 38,
+                width: _currentIndex == 0
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.09,
+                height: _currentIndex == 0
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
               ),
               label: 'Setting',
             ),
             BottomNavigationBarItem(
               icon: Image.asset(
                 'lib/Pic/calendar.png',
-                width: _currentIndex == 1 ? 32 : 38,
-                height: _currentIndex == 1 ? 32 : 38,
+                width: _currentIndex == 1
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
+                height: _currentIndex == 1
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
               ),
               label: 'Calendar',
             ),
             BottomNavigationBarItem(
               icon: Image.asset(
                 'lib/Pic/Task.png',
-                width: _currentIndex == 2 ? 32 : 38,
-                height: _currentIndex == 2 ? 32 : 38,
+                width: _currentIndex == 2
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
+                height: _currentIndex == 2
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
               ),
               label: 'Tasks',
             ),
             BottomNavigationBarItem(
               icon: Image.asset(
                 'lib/Pic/goal.png',
-                width: _currentIndex == 3 ? 32 : 38,
-                height: _currentIndex == 3 ? 32 : 38,
+                width: _currentIndex == 3
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
+                height: _currentIndex == 3
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
               ),
               label: 'Goals',
             ),
             BottomNavigationBarItem(
               icon: Image.asset(
                 'lib/Pic/Co-op.png',
-                width: _currentIndex == 4 ? 32 : 38,
-                height: _currentIndex == 4 ? 32 : 38,
+                width: _currentIndex == 4
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
+                height: _currentIndex == 4
+                    ? screenWidth * 0.075
+                    : screenWidth * 0.085,
               ),
               label: 'Co-op',
             ),
@@ -112,13 +133,4 @@ class MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  // Widget _buildPage(String title) {
-  //   return Center(
-  //     child: Text(
-  //       title,
-  //       style: const TextStyle(fontSize: 24),
-  //     ),
-  //   );
-  // }
 }

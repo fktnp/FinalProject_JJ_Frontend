@@ -1,270 +1,144 @@
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'dart:io';
+import 'package:http/http.dart' as http;
 
-class TaskList extends StatefulWidget {
-  const TaskList({super.key});
+Future<List<ServerTask>> fetchTasks() async {
+  final response = await http.get(Uri.parse('http://10.0.2.2:8080/v1/job'));
 
-  @override
-  TaskListState createState() => TaskListState();
+  if (response.statusCode == 200) {
+    final List<dynamic> taskListJson = jsonDecode(response.body);
+    return taskListJson.map((json) => ServerTask.fromJson(json)).toList();
+  } else {
+    throw Exception('Failed to load tasks');
+  }
 }
 
-class TaskListState extends State<TaskList> {
-  late Future<List<Task>> tasksFuture;
+class ServerTask {
+  final String jobId;
+  final String userId;
+  final String name;
+  final String status;
+  final String category;
+  final String details;
+  final DateTime startTimeGoal;
+  final DateTime lastTimeGoal;
+  final int percentProgress;
+
+  ServerTask({
+    required this.jobId,
+    required this.userId,
+    required this.name,
+    required this.status,
+    required this.category,
+    required this.details,
+    required this.startTimeGoal,
+    required this.lastTimeGoal,
+    required this.percentProgress,
+  });
+
+  factory ServerTask.fromJson(Map<String, dynamic> json) {
+    return ServerTask(
+      jobId: json['JobID'],
+      userId: json['UserID'],
+      name: json['Name'],
+      status: json['Status'],
+      category: json['Category'],
+      details: json['Details'],
+      startTimeGoal: DateTime.parse(json['StartTimeGoal']),
+      lastTimeGoal: DateTime.parse(json['LastTimeGoal']),
+      percentProgress: json['PercentProgress'],
+    );
+  }
+
+  // Add the copyWith method here
+  ServerTask copyWith({
+    String? jobId,
+    String? userId,
+    String? name,
+    String? status,
+    String? category,
+    String? details,
+    DateTime? startTimeGoal,
+    DateTime? lastTimeGoal,
+    int? percentProgress,
+  }) {
+    return ServerTask(
+      jobId: jobId ?? this.jobId,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      status: status ?? this.status,
+      category: category ?? this.category,
+      details: details ?? this.details,
+      startTimeGoal: startTimeGoal ?? this.startTimeGoal,
+      lastTimeGoal: lastTimeGoal ?? this.lastTimeGoal,
+      percentProgress: percentProgress ?? this.percentProgress,
+    );
+  }
+}
+
+class TaskListPage extends StatefulWidget {
+  const TaskListPage({super.key});
+
+  @override
+  State<TaskListPage> createState() => _TaskListPageState();
+}
+
+class _TaskListPageState extends State<TaskListPage> {
+  late Future<List<ServerTask>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    tasksFuture = loadTasks();
+    futureTasks = fetchTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Task>>(
-      future: tasksFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No tasks found');
-        } else {
-          final tasks = snapshot.data!;
-          return Stack(
-            children: [
-              Container(
-                width: 200,
-                height: 400,
-                color: const Color.fromARGB(255, 26, 73, 7),
-              ),
-              Positioned(
-                top: 10,
-                left: 10,
-                bottom: 10,
-                child: Container(
-                  width: 300,
-                  height: 160,
-                  color: Colors.amber,
-                ),
-              ),
-              // ListView.builder(
-              //   itemCount: tasks.length,
-              //   itemBuilder: (context, index) {
-              //     final task = tasks[index];
-              //     return ListTile(
-              //       title: Text(task.taskName),
-              //       subtitle: Text(
-              //           '${task.taskStartHour}:00 - ${task.taskEndHour}:00'),
-              //     );
-              //   },
-              // )
-            ],
-          );
-        }
-      },
-    );
-  }
-}
-
-Future<List<Task>> loadTasks() async {
-  final jsonString = await rootBundle.loadString('lib/components/trytask.json');
-  final List<dynamic> jsonList = json.decode(jsonString);
-  return jsonList.map((json) => Task.fromJson(json)).toList();
-}
-
-class Task {
-  final int taskStartHour;
-  final int taskEndHour;
-  final DateTime taskDate;
-  final String taskName;
-  final String taskType;
-  final String taskCore;
-
-  Task({
-    required this.taskStartHour,
-    required this.taskEndHour,
-    required this.taskDate,
-    required this.taskName,
-    required this.taskType,
-    required this.taskCore,
-  });
-
-  factory Task.fromJson(Map<String, dynamic> json) {
-    return Task(
-      taskStartHour: json['taskStartHour'],
-      taskEndHour: json['taskEndHour'],
-      taskDate: DateTime.parse(json['taskDate']),
-      taskName: json['taskName'],
-      taskType: json['taskType'],
-      taskCore: json['taskCore'],
-    );
-  }
-
-  get description => null;
-}
-
-class AddedDayTask extends StatelessWidget {
-  final Task task;
-  final double boxheight;
-  const AddedDayTask({super.key, required this.task, required this.boxheight});
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-
-    return Container(
-        height: boxheight,
-        width: screenWidth * 0.28,
-        decoration: BoxDecoration(
-          color: Colors.brown,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              task.taskName,
-              style: const TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 26, 26, 26),
-                decoration: TextDecoration.none,
-              ),
-            ),
-            Text(
-              '${task.taskStartHour.toString().padLeft(2, '0')}:00 - ${task.taskEndHour.toString().padLeft(2, '0')}:00',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 26, 26, 26),
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ],
-        ));
-  }
-}
-
-class TodayTask extends StatelessWidget {
-  final Task task;
-  const TodayTask({super.key, required this.task});
-
-  Color _getRandomPastelColor() {
-    final Random random = Random();
-    final int r = (random.nextInt(256) + 255) ~/ 2;
-    final int g = (random.nextInt(256) + 255) ~/ 2;
-    final int b = (random.nextInt(256) + 255) ~/ 2;
-    return Color.fromARGB(255, r, g, b);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-    final screenHeight = mediaQuery.size.height;
-    final Color randomPastelColor = _getRandomPastelColor();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      height: screenHeight * 0.09,
-      width: screenWidth * 0.9,
-      decoration: BoxDecoration(
-        color: randomPastelColor,
-        borderRadius: BorderRadius.circular(20.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Task List'),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
-                screenHeight * 0.005, screenWidth * 0.05, 0),
-            child: Text(
-              task.taskName,
-              style: TextStyle(
-                fontSize: screenHeight * 0.03,
-                color: const Color.fromARGB(255, 26, 26, 26),
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-                screenWidth * 0.05, 0, screenWidth * 0.05, 0),
-            child: Text(
-              '${task.taskStartHour.toString().padLeft(2, '0')}:00 - ${task.taskEndHour.toString().padLeft(2, '0')}:00',
-              style: TextStyle(
-                fontSize: screenHeight * 0.024,
-                color: const Color.fromARGB(
-                    255, 26, 26, 26), // Ensure text is visible
-                decoration: TextDecoration.none,
-              ),
-            ),
-          )
-        ],
+      body: FutureBuilder<List<ServerTask>>(
+        future: futureTasks,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No tasks available'));
+          } else {
+            final tasks = snapshot.data!;
+
+            return ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final task = tasks[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(task.name),
+                    subtitle: Text(
+                        'Start: ${task.startTimeGoal} \nEnd: ${task.lastTimeGoal}'),
+                    trailing: Text('${task.percentProgress}%'),
+                  ),
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }
 }
 
-class TaskManager {
-  // Path to the provided JSON file
-  final String filePath = 'lib/components/trytask.json';
-
-  Future<File> _getFile() async {
-    return File(filePath);
-  }
-
-  Future<List<dynamic>> _readTasks() async {
-    try {
-      final file = await _getFile();
-      final content = await file.readAsString();
-      return jsonDecode(content);
-    } catch (e) {
-      return []; // If file reading fails, return an empty list
-    }
-  }
-
-  Future<void> _writeTasks(List<dynamic> tasks) async {
-    final file = await _getFile();
-    await file.writeAsString(jsonEncode(tasks));
-  }
-
-  Future<void> addTask(String taskName, int startHour, int endHour,
-      DateTime taskDate, String goal) async {
-    // Load existing tasks
-    final tasks = await _readTasks();
-
-    // Create new task
-    final newTask = {
-      "taskName": taskName,
-      "taskStartHour": startHour,
-      "taskEndHour": endHour,
-      "taskDate": taskDate
-          .toIso8601String()
-          .split('T')
-          .first, // Save only the date part
-      "taskType": "alone",
-      "taskCore": goal, // Set the goal from passed variable
-    };
-
-    // Add the new task to the existing tasks
-    tasks.add(newTask);
-
-    // Write back to JSON
-    await _writeTasks(tasks);
-  }
-}
 
 class GoaladdPage extends StatefulWidget {
   const GoaladdPage({super.key});
   @override
-  _GoalSettingPageState createState() => _GoalSettingPageState();
+  GoalSettingPageState createState() => GoalSettingPageState();
 }
 
-class _GoalSettingPageState extends State<GoaladdPage> {
+class GoalSettingPageState extends State<GoaladdPage> {
   // Variables for storing user input
   String? goalName;
   TimeOfDay? startTime;
@@ -350,7 +224,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Goal'),
+        title: const Text('Add Goal'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -358,21 +232,21 @@ class _GoalSettingPageState extends State<GoaladdPage> {
           children: [
             // Goal Name Input
             TextField(
-              decoration: InputDecoration(labelText: 'Goal Name'),
+              decoration: const InputDecoration(labelText: 'Goal Name'),
               onChanged: (value) {
                 setState(() {
                   goalName = value;
                 });
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
 
             // Time Picker for Start Time
             ListTile(
               title: Text(startTime != null
                   ? "Start Time: ${startTime!.format(context)}"
                   : "Pick Start Time"),
-              trailing: Icon(Icons.access_time),
+              trailing: const Icon(Icons.access_time),
               onTap: () => _pickStartTime(context),
             ),
 
@@ -381,13 +255,13 @@ class _GoalSettingPageState extends State<GoaladdPage> {
               title: Text(endTime != null
                   ? "End Time: ${endTime!.format(context)}"
                   : "Pick End Time"),
-              trailing: Icon(Icons.access_time),
+              trailing: const Icon(Icons.access_time),
               onTap: () => _pickEndTime(context),
             ),
 
             // Frequency Dropdown
             DropdownButton<String>(
-              hint: Text('Select Frequency'),
+              hint: const Text('Select Frequency'),
               value: frequency,
               onChanged: (String? newValue) {
                 setState(() {
@@ -408,16 +282,16 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
 
             // Frequency Specific Options
             if (frequency == 'Daily')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: dayInterval,
-                    hint: Text('Day(s)'),
+                    hint: const Text('Day(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         dayInterval = value;
@@ -435,10 +309,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Weekly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: weekInterval,
-                    hint: Text('Week(s)'),
+                    hint: const Text('Week(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         weekInterval = value;
@@ -451,7 +325,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('On these days'),
+                  const Text('On these days'),
                   Wrap(
                     spacing: 8.0,
                     children: daysOfWeek.map((day) {
@@ -475,10 +349,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Monthly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: monthInterval,
-                    hint: Text('Month(s)'),
+                    hint: const Text('Month(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         monthInterval = value;
@@ -491,10 +365,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('On day'),
+                  const Text('On day'),
                   DropdownButton<int>(
                     value: selectedDayOfMonth,
-                    hint: Text('Day of Month'),
+                    hint: const Text('Day of Month'),
                     onChanged: (int? value) {
                       setState(() {
                         selectedDayOfMonth = value;
@@ -512,10 +386,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
             if (frequency == 'Yearly')
               Column(
                 children: [
-                  Text('Repeat every'),
+                  const Text('Repeat every'),
                   DropdownButton<int>(
                     value: yearInterval,
-                    hint: Text('Year(s)'),
+                    hint: const Text('Year(s)'),
                     onChanged: (int? value) {
                       setState(() {
                         yearInterval = value;
@@ -528,10 +402,10 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                             ))
                         .toList(),
                   ),
-                  Text('In month'),
+                  const Text('In month'),
                   DropdownButton<String>(
                     value: selectedMonth,
-                    hint: Text('Month'),
+                    hint: const Text('Month'),
                     onChanged: (String? value) {
                       setState(() {
                         selectedMonth = value;
@@ -552,7 +426,7 @@ class _GoalSettingPageState extends State<GoaladdPage> {
               title: Text(endDate != null
                   ? "End Date: ${endDate!.toLocal()}".split(' ')[0]
                   : "Pick End Date"),
-              trailing: Icon(Icons.calendar_today),
+              trailing: const Icon(Icons.calendar_today),
               onTap: () => _pickEndDate(context),
             ),
 
@@ -573,15 +447,15 @@ class _GoalSettingPageState extends State<GoaladdPage> {
                 print('Selected Month: $selectedMonth');
                 print('End Date: $endDate');
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFECDB),
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(20),
+              ),
               child: const Icon(
                 Icons.add,
-                color: Colors.black, 
-                size: 30, 
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFECDB), 
-                shape: const CircleBorder(), 
-                padding: const EdgeInsets.all(20), 
+                color: Colors.black,
+                size: 30,
               ),
             )
           ],

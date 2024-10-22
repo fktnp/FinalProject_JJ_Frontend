@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
 import 'components/custom_button.dart';
-import 'taskdetail.dart'; 
+import 'taskdetail.dart';
 import 'task.dart';
 
 class GoalsPage extends StatefulWidget {
@@ -12,8 +12,6 @@ class GoalsPage extends StatefulWidget {
 }
 
 class _GoalsPageState extends State<GoalsPage> {
-  late Future<List<Task>> tasksFuture;
-
   final List<String> goals = [
     'Health',
     'Financial',
@@ -26,15 +24,19 @@ class _GoalsPageState extends State<GoalsPage> {
 
   String? selectedGoal;
 
+  late Future<List<ServerTask>> futureTasks;
+
   @override
   void initState() {
     super.initState();
-    tasksFuture = loadTasks();
+    futureTasks = fetchTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
   }
 
-  List<Task> filterTasks(List<Task> tasks, String? goal) {
-    if (goal == null) return [];
-    return tasks.where((task) => task.taskCore == goal).toList();
+  List<ServerTask> filterTasks(List<ServerTask> tasks, String? selectedGoal) {
+    if (selectedGoal == null) return [];
+    return tasks
+        .where((task) => task.category == selectedGoal)
+        .toList(); // ใช้ category ในการกรอง
   }
 
   @override
@@ -64,8 +66,8 @@ class _GoalsPageState extends State<GoalsPage> {
       body: Container(
         color: const Color(0xFFFFECDB),
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<Task>>(
-            future: tasksFuture,
+        child: FutureBuilder<List<ServerTask>>(
+            future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -83,7 +85,7 @@ class _GoalsPageState extends State<GoalsPage> {
                         itemBuilder: (context, index) {
                           final goal = goals[index];
                           final showTask = tasks
-                              .where((task) => task.taskCore == goal)
+                              .where((task) => task.category == goal)
                               .toList();
 
                           return Padding(
@@ -106,7 +108,8 @@ class _GoalsPageState extends State<GoalsPage> {
                                   ),
                                 ),
                                 backgroundColor: const Color(0xFFFFDCBC),
-                                collapsedBackgroundColor: const Color(0xFFFFDCBC),
+                                collapsedBackgroundColor:
+                                    const Color(0xFFFFDCBC),
                                 shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
@@ -142,62 +145,8 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 }
 
-// class GoalSection extends StatelessWidget {
-//   final String goal;
-//   final List<Task> tasks;
-//   final List<Task> filteredTasks;
-//   final bool conditionToShowButton; // Assuming this is a boolean to control button visibility
-
-//   const GoalSection({
-//     super.key,
-//     required this.goal,
-//     required this.tasks,
-//     required this.filteredTasks,
-//     this.conditionToShowButton = true,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Stack(
-//       children: [
-//         Column(
-//           children: [
-//             Card(
-//               color: const Color(0xFFFFDCBC),
-//               shape: const RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20)),
-//               ),
-//               child: ListTile(
-//                 contentPadding: const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-//                 title: Text(
-//                   '$goal Planning',
-//                   style: const TextStyle(fontSize: 18),
-//                 ),
-//               ),
-//             ),
-//             if (filteredTasks.isNotEmpty)
-//               ...filteredTasks.map((task) => GoalTask(task: task)),
-//           ],
-//         ),
-//         if (conditionToShowButton)
-//            Positioned(
-//             bottom: 25,
-//             right: 10,
-//             child: FixedBottomButton(onPressed: () {
-//               Navigator.push(
-//                     context,
-//                     MaterialPageRoute(builder: (context) => RegisterScreen()),
-//                   );
-//              },
-//             ),
-//           ),
-//       ],
-//     );
-//   }
-// }
-
 class GoalTask extends StatelessWidget {
-  final Task task;
+  final ServerTask task;
   const GoalTask({super.key, required this.task});
 
   @override
@@ -222,21 +171,17 @@ class GoalTask extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    task.taskName,
-                    style: const TextStyle(fontSize: 18),
+                    task.name,
+                    style: const TextStyle(fontSize: 22),
                   ),
                   const SizedBox(
                     width: 20,
-                  ),
-                  Text(
-                    task.taskDate.toString(),
-                    style: const TextStyle(fontSize: 12),
                   ),
                 ],
               ),
             ),
             Text(
-              '${task.taskStartHour.toString().padLeft(2, '0')}:00 - ${task.taskEndHour.toString().padLeft(2, '0')}:00',
+              '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
               style: const TextStyle(fontSize: 16),
             ),
           ],
@@ -246,13 +191,10 @@ class GoalTask extends StatelessWidget {
   }
 }
 
-
-
-
 class GoalSection extends StatelessWidget {
   final String goal;
-  final List<Task> tasks;
-  final List<Task> filteredTasks;
+  final List<ServerTask> tasks;
+  final List<ServerTask> filteredTasks;
   final bool conditionToShowButton;
 
   const GoalSection({
@@ -315,7 +257,7 @@ class GoalSection extends StatelessWidget {
             child: FixedBottomButton(
               onPressed: () {
                 AddFromGoal(context: context, goal: goal).show();
-                 //showGoalAddBottomSheet(context)ของเพิ่มย่อย
+                //showGoalAddBottomSheet(context)ของเพิ่มย่อย
                 // AddFromGoal(context: context, goal: goal).show(); ของอันหลัก
                 // เรียกใช้ฟังก์ชัน showOverlay
               },

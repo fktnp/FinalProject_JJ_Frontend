@@ -46,7 +46,9 @@ class TryTodotodayState extends State<TryTodotoday> {
                 title: "try",
                 onDateChanged: _onDateChanged, // ส่ง callback ไป
               ),
-              TaskTable(currentDate: currentDateTime), // ส่ง currentDate ไปที่ TaskTable
+              TaskTable(
+                  currentDate:
+                      currentDateTime), // ส่ง currentDate ไปที่ TaskTable
             ],
           ),
         ),
@@ -66,7 +68,8 @@ class TaskForADay extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.only(top: screenHeight * 0.01),
-      padding: EdgeInsets.fromLTRB(screenWidth * 0.08, screenHeight * 0.01, screenWidth * 0.08, screenHeight * 0.01),
+      padding: EdgeInsets.fromLTRB(screenWidth * 0.08, screenHeight * 0.01,
+          screenWidth * 0.08, screenHeight * 0.01),
       decoration: BoxDecoration(
         color: const Color(0xFFFFECDB),
         borderRadius: BorderRadius.circular(20.0),
@@ -97,15 +100,15 @@ class TaskTable extends StatelessWidget {
     return Expanded(
       child: Container(
         width: screenWidth,
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFECDB),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFECDB),
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+            topLeft: Radius.circular(screenWidth * 0.06),
+            topRight: Radius.circular(screenWidth * 0.06),
           ),
         ),
-        child: FutureBuilder<List<Task>>(
-          future: loadTasks(), // Loading tasks from JSON
+        child: FutureBuilder<List<ServerTask>>(
+          future: fetchTasks(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -115,37 +118,77 @@ class TaskTable extends StatelessWidget {
               return const Center(child: Text('No tasks found'));
             } else {
               final tasks = snapshot.data!.where((task) =>
-                  task.taskDate.year == currentDate.year &&
-                  task.taskDate.month == currentDate.month &&
-                  task.taskDate.day == currentDate.day);
-
-              final aloneTasks = tasks.where((task) => task.taskType == 'alone').toList();
-              final coOpTasks = tasks.where((task) => task.taskType == 'Co-Op').toList();
+                  (task.startTimeGoal.isBefore(currentDate) ||
+                      task.startTimeGoal.isAtSameMomentAs(currentDate)) &&
+                  (task.lastTimeGoal.isAfter(currentDate) ||
+                      task.lastTimeGoal.isAtSameMomentAs(currentDate)));
 
               return Padding(
-                padding: EdgeInsets.fromLTRB(screenWidth * 0.05, screenHeight * 0.03, screenWidth * 0.05, 0),
+                padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
+                    screenHeight * 0.03, screenWidth * 0.05, 0),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ...aloneTasks.map((task) => TodayTask(task: task)),
-                      Text(
-                        "Co-Op",
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.03,
-                          color: const Color.fromARGB(255, 26, 26, 26),
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      ...coOpTasks.map((task) => TodayTask(task: task)),
+                      // Generate task widgets only once per task
+                      ...tasks.map((task) => TodayTask(
+                            task: task,
+                            startDate: task.startTimeGoal,
+                            endDate: task.lastTimeGoal,
+                          )),
                     ],
                   ),
-                )
+                ),
               );
             }
           },
         ),
+      ),
+    );
+  }
+}
+
+class TodayTask extends StatelessWidget {
+  final ServerTask task;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  const TodayTask(
+      {super.key,
+      required this.task,
+      required this.startDate,
+      required this.endDate});
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+
+    return Container(
+      width: screenWidth * 0.9,
+      height: screenHeight * 0.11,
+      margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
+      padding:
+          EdgeInsets.only(left: screenWidth * 0.05, top: screenHeight * 0.02),
+      decoration: BoxDecoration(
+        color: Colors.pinkAccent.shade100, // Use your color logic here
+        borderRadius: BorderRadius.circular(screenWidth * 0.05),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            task.name,
+            style: TextStyle(fontSize: screenWidth * 0.065),
+          ),
+          const SizedBox(height: 5),
+          // Show the start and end date in one line
+          Text(
+            '${startDate.day}/${startDate.month}/${startDate.year} - ${endDate.day}/${endDate.month}/${endDate.year}',
+            style: TextStyle(fontSize: screenWidth * 0.035),
+          ),
+        ],
       ),
     );
   }

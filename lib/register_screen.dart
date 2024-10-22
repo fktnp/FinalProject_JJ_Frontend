@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/login_screen.dart';
-import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
-import 'package:flutter_application_1/main.dart';
 
 class RegisterScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -40,7 +38,7 @@ class RegisterScreen extends StatelessWidget {
       } else {
         print('Registration failed: ${response.data}');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('Dio error: ${e.response?.statusCode} - ${e.message}');
     }
   }
