@@ -107,8 +107,8 @@ class TaskTable extends StatelessWidget {
             topRight: Radius.circular(screenWidth * 0.06),
           ),
         ),
-        child: FutureBuilder<List<ServerTask>>(
-          future: fetchTasks(),
+        child: FutureBuilder<List<MainTask>>(
+          future: fetchMainTasks(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -149,7 +149,7 @@ class TaskTable extends StatelessWidget {
 }
 
 class TodayTask extends StatelessWidget {
-  final ServerTask task;
+  final MainTask task;
   final DateTime startDate;
   final DateTime endDate;
 

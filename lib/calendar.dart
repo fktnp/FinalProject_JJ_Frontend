@@ -769,13 +769,13 @@ class DayTimeTable extends StatefulWidget {
 }
 
 class DayTimeTableState extends State<DayTimeTable> {
-  late Future<List<ServerTask>> tasksFuture;
+  late Future<List<MainTask>> tasksFuture;
   List<int> numbers = List.filled(24, 0); // ตัวแปรนับจำนวน task ในแต่ละช่วงเวลา
 
   @override
   void initState() {
     super.initState();
-    tasksFuture = fetchTasks();
+    tasksFuture = fetchMainTasks();
   }
 
   void resetNumbers() {
@@ -799,7 +799,7 @@ class DayTimeTableState extends State<DayTimeTable> {
           topRight: Radius.circular(30),
         ),
       ),
-      child: FutureBuilder<List<ServerTask>>(
+      child: FutureBuilder<List<MainTask>>(
         future: tasksFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -873,15 +873,15 @@ class DayTimeTableState extends State<DayTimeTable> {
                                   0.30 *
                                   quantity), // วาง task ตามค่า number
                           child: const Stack(
-                            // children: tasksAtThisHour
-                            //     .map((task) => AddedDayTask(
-                            //         task: task,
-                            //         boxheight: (task.taskEndHour -
-                            //                 task.taskStartHour) *
-                            //             screenHeight *
-                            //             0.08))
-                            //     .toList(),
-                          ),
+                              // children: tasksAtThisHour
+                              //     .map((task) => AddedDayTask(
+                              //         task: task,
+                              //         boxheight: (task.taskEndHour -
+                              //                 task.taskStartHour) *
+                              //             screenHeight *
+                              //             0.08))
+                              //     .toList(),
+                              ),
                         );
                       }),
                   ],
