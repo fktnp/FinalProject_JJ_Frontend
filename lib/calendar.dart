@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/model/calendarModel.dart';
+import 'package:flutter_application_1/model/subJobModel.dart';
 import 'package:flutter_application_1/sub_components_calendar/DayDateRow.dart';
 import 'package:flutter_application_1/sub_components_calendar/MonthDateRow.dart';
 import 'package:flutter_application_1/sub_components_calendar/YearDateRow.dart';
@@ -15,45 +18,68 @@ class MyCalendarView extends StatefulWidget {
 
 class CalendarViewState extends State<MyCalendarView> {
   String _currentView = 'day';
-  DateTime currentDateTime = DateTime.now();
+  late DateTime currentDateTime ;
   late CalendarController _calendarController;
   late CalendarDataSource _calendarDataSource; // Declare a CalendarDataSource
 
   @override
   void initState() {
     super.initState();
+    currentDateTime = DateTime.now();
     _calendarController = CalendarController();
+    _calendarDataSource = AppointmentDataSource([]); // Initialize with empty data
+
     _generateSampleTasks(); // Create sample tasks
   }
 
-  void _generateSampleTasks() {
-    List<Appointment> appointments = []; // Create a local appointments list
-    Random random = Random(); // Create a Random object
-    DateTime now = DateTime.now();
-
-    for (int i = 0; i < 10; i++) {
-      // Randomly select a number of days from -10 to +10
-      int randomDays = random.nextInt(21) - 10; // Generates a number between -10 and 10
-
-      // Randomly select a start hour
-      int randomHour = random.nextInt(24); // Generates a number between 0 and 23
-
-      // Randomly select a duration between 1 to 3 hours
-      int randomDuration = random.nextInt(3) + 1; // Generates a number between 1 and 3
-
-      appointments.add(Appointment(
-        startTime: DateTime(now.year, now.month, now.day)
-            .add(Duration(days: randomDays))
-            .add(Duration(hours: randomHour)), // Random hour
-        endTime: DateTime(now.year, now.month, now.day)
-            .add(Duration(days: randomDays))
-            .add(Duration(hours: randomHour + randomDuration)), // End time based on random duration
-        subject: 'Task ${i + 1}', // Task name
-        color: Colors.blue, // Task color
-        isAllDay: false, // Not an all-day event
-      ));
+  Future<List<CalendarModel>> fetchCalendarData() async {
+    final Dio dio = Dio();
+    final response = await dio.get('http://10.0.2.2:8080/v1/calendar/user/d6ca628a-5764-471f-ae61-1bfdb3368067'); // เปลี่ยน URL ตามที่คุณใช้
+    // print(response.statusCode);
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      return data.map((item) => CalendarModel.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load calendar data');
     }
-    _calendarDataSource = AppointmentDataSource(appointments); // Initialize the data source
+  }
+
+  Future<SubJobModel> fetchSubJob(String subJobID) async {
+    final Dio dio = Dio();
+    final response = await dio.get('http://10.0.2.2:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+
+    if (response.statusCode == 200) {
+      return SubJobModel.fromJson(response.data);
+    } else {
+      throw Exception('Failed to load subjob');
+    }
+  }
+
+
+  void _generateSampleTasks() async {
+    try {
+      List<CalendarModel> calendars = await fetchCalendarData(); // ดึงข้อมูลจาก API
+      List<Appointment> appointments = [];
+      print("calendar $calendars");
+      for (var calendar in calendars) {
+        SubJobModel subJob = await fetchSubJob(calendar.subJobID); // ดึงข้อมูล SubJob ตาม subJobID
+        print("subJobs $subJob");
+
+        appointments.add(Appointment(
+          startTime: subJob.startTimeGoal, // ใช้ startTimeGoal จาก SubJob
+          endTime: subJob.lastTimeGoal, // ใช้ lastTimeGoal จาก SubJob
+          subject: subJob.name, // ใช้ชื่อของ SubJob
+          color: subJob.status == 'completed' ? Colors.green : Colors.red, // ใช้สีตามสถานะ
+          isAllDay: false,
+        ));
+      }
+      
+      _calendarDataSource = AppointmentDataSource(appointments); // สร้าง CalendarDataSource
+      setState(() {}); // อัปเดต UI
+    } catch (e) {
+      print("log Error");
+      print('Error: $e');
+    }
   }
 
   void _onViewChanged(String view) {
@@ -125,7 +151,7 @@ class CalendarViewState extends State<MyCalendarView> {
                   child: SfCalendar(
                     timeSlotViewSettings: const TimeSlotViewSettings(
                       timeTextStyle: TextStyle(
-                        fontSize: 14,
+                        fontSize : 14,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
@@ -144,6 +170,7 @@ class CalendarViewState extends State<MyCalendarView> {
                               details.targetElement == CalendarElement.appointment){
                             // Set the selected date in the controller
                             _calendarController.displayDate = details.date!;
+                            // _calendarController.selectedDate = DateTime.now();
                             // Change the view to day
                             _onViewChanged('day');
                             // Update the current date
