@@ -24,8 +24,7 @@ Future<void> login(BuildContext context) async {
       String password = _passwordController.text;
 
       // ทำ POST request
-      Response response = await dio.post('http://10.250.105.93:8080/v1/user/login', data: {
-        "user_id" : "ffa2d7fd-bdbe-48da-9874-eed74a585ec3",
+      Response response = await dio.post('http://192.168.28.53:8080/v1/user/login', data: {
         "email": username,
         "password": password,
       });
