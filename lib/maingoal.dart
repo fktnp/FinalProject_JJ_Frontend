@@ -10,83 +10,86 @@ class AddFromGoal {
 
   AddFromGoal({required this.context, required this.goal});
 
-  TimeOfDay? selectedStartTime;
-  TimeOfDay? selectedEndTime;
-  DateTime? selectedDate;
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
 
   bool isTaskNameEmpty = false;
-  bool isDateEmpty = false;
-  bool isStartTimeEmpty = false;
-  bool isEndTimeEmpty = false;
-
-  // Commenting out Dio usage until you are ready to use it
-  final Dio dio = Dio();
+  bool isStartDateEmpty = false;
+  bool isEndDateEmpty = false;
 
   Future<void> saveTask() async {
-  // Validate input fields
-  if (taskNameController.text.isEmpty || selectedDate == null || selectedStartTime == null || selectedEndTime == null) {
-    // Handle the case where fields are empty, e.g., showing an error message
-    return;
-  }
-
-  // Gather the necessary information
-  String userId = "59ae0cbd-c715-4f1a-92cc-f9f192dc2837"; // Replace with actual user ID
-  String taskName = taskNameController.text; // Get task name from the input field
-  String status = "Pending"; // Default status or modify as needed
-  String category = "Development"; // Change as necessary
-  String details = detailController.text; // Get details from the input field
-
-  // Format date and times
-  DateTime startDateTime = DateTime(
-    selectedDate!.year,
-    selectedDate!.month,
-    selectedDate!.day,
-    selectedStartTime!.hour,
-    selectedStartTime!.minute,
-  );
-
-  DateTime endDateTime = DateTime(
-    selectedDate!.year,
-    selectedDate!.month,
-    selectedDate!.day,
-    selectedEndTime!.hour,
-    selectedEndTime!.minute,
-  );
-
-  // Convert to ISO 8601 format
-  String startTimeGoal = startDateTime.toIso8601String(); // Format to ISO 8601
-  String lastTimeGoal = endDateTime.toIso8601String(); // Format to ISO 8601
-
-  // Prepare the data map for the API request
-  Map<String, dynamic> data = {
-    "user_id": userId,
-    "name": taskName,
-    "status": status,
-    "category": category,
-    "details": details,
-    "start_time_goal": startTimeGoal,
-    "last_time_goal": lastTimeGoal,
-  };
-
-  // Make the API call to save the task
-  try 
-  { dio.options.headers['Content-Type'] = 'application/json'; // ตั้งค่า Header สำหรับ JSON
-    Response response = await dio.post(
-      'http://10.250.105.93:8080/v1/job', // Replace with the actual API endpoint
-      data: data,
-    );
-
-    if (response.statusCode == 200) {
-      // Successfully saved the task
-      Navigator.pop(context);
-    } else {
-      print('Failed to save task: ${response.statusCode}');
+    // Validate input fields
+    if (taskNameController.text.isEmpty ||
+        selectedStartDate == null ||
+        selectedEndDate == null) {
+      return; // Handle the case where fields are empty
     }
-  } catch (e) {
-    print('Error saving task: $e');
-  }
-}
 
+    // Gather the necessary information
+    String userId =
+        "59ae0cbd-c715-4f1a-92cc-f9f192dc2837"; // Replace with actual user ID
+    String taskName =
+        taskNameController.text; // Get task name from the input field
+    String status = "Pending"; // Default status
+    String category = goal; // Use goal as category
+    String details = detailController.text; // Get details from the input field
+
+    // ตั้งค่าเวลาเป็น 08:00:00 และแปลงให้เป็น ISO 8601 พร้อม timezone
+    DateTime startDateWithTime = DateTime(
+      selectedStartDate!.year,
+      selectedStartDate!.month,
+      selectedStartDate!.day,
+      8,
+      0,
+      0,
+    ).toLocal(); // แปลงวันที่เป็นเวลา 08:00:00 และใช้ local timezone
+
+    DateTime endDateWithTime = DateTime(
+      selectedEndDate!.year,
+      selectedEndDate!.month,
+      selectedEndDate!.day,
+      8,
+      0,
+      0,
+    ).toLocal(); // แปลงวันที่สิ้นสุดเป็นเวลา 08:00:00
+
+    // Convert to ISO 8601 format with timezone offset +07:00
+    String startDateGoal = _convertToISO8601WithOffset(startDateWithTime);
+    String endDateGoal = _convertToISO8601WithOffset(endDateWithTime);
+
+    // Prepare the data map for the API request
+    Map<String, dynamic> data = {
+      "user_id": userId,
+      "name": taskName,
+      "status": status,
+      "category": category,
+      "details": details,
+      "start_time_goal": startDateGoal,
+      "last_time_goal": endDateGoal,
+    };
+
+    // Make the API call to save the task
+    try {
+      var response = await Dio().post(
+        'http://10.0.2.2:8080/v1/job',
+        data: data,
+      );
+      print(response.data);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        print('Error saving task: ${e.response?.data}');
+      } else {
+        print('Error sending request: ${e.message}');
+      }
+    }
+  }
+
+  // ฟังก์ชันแปลงวันที่เป็น ISO 8601 พร้อม timezone offset +07:00
+  String _convertToISO8601WithOffset(DateTime date) {
+    final String formattedDate =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date);
+    return "$formattedDate+07:00";
+  }
 
   void show() {
     showModalBottomSheet(
@@ -141,37 +144,32 @@ class AddFromGoal {
                             ),
                             const SizedBox(height: 20),
 
-                            // Date Picker
-                            _buildDatePicker(context, setState),
-                            const SizedBox(height: 10),
-
-                            // Start Time Picker
-                            _buildTimePicker(
+                            // Start Date Picker
+                            _buildDatePicker(
                               context: context,
-                              time: selectedStartTime,
-                              isError: isStartTimeEmpty,
+                              date: selectedStartDate,
+                              isError: isStartDateEmpty,
                               setState: setState,
-                              label: 'Start Time',
-                              onTimePicked: (time) {
+                              label: 'Start Date',
+                              onDatePicked: (pickedDate) {
                                 setState(() {
-                                  selectedStartTime = time;
-                                  isStartTimeEmpty = false;
+                                  selectedStartDate = pickedDate;
+                                  isStartDateEmpty = false;
                                 });
                               },
                             ),
 
-
-                            // End Time Picker
-                            _buildTimePicker(
+                            // End Date Picker
+                            _buildDatePicker(
                               context: context,
-                              time: selectedEndTime,
-                              isError: isEndTimeEmpty,
+                              date: selectedEndDate,
+                              isError: isEndDateEmpty,
                               setState: setState,
-                              label: 'End Time',
-                              onTimePicked: (time) {
+                              label: 'End Date',
+                              onDatePicked: (pickedDate) {
                                 setState(() {
-                                  selectedEndTime = time;
-                                  isEndTimeEmpty = false;
+                                  selectedEndDate = pickedDate;
+                                  isEndDateEmpty = false;
                                 });
                               },
                             ),
@@ -189,24 +187,22 @@ class AddFromGoal {
                                   setState(() {
                                     isTaskNameEmpty =
                                         taskNameController.text.isEmpty;
-                                    isDateEmpty = selectedDate == null;
-                                    isStartTimeEmpty =
-                                        selectedStartTime == null;
-                                    isEndTimeEmpty = selectedEndTime == null;
+                                    isStartDateEmpty =
+                                        selectedStartDate == null;
+                                    isEndDateEmpty = selectedEndDate == null;
                                   });
 
                                   if (!isTaskNameEmpty &&
-                                      !isDateEmpty &&
-                                      !isStartTimeEmpty &&
-                                      !isEndTimeEmpty) {
-                                    saveTask(); // เปิดใช้งานเมื่อพร้อมบันทึก
+                                      !isStartDateEmpty &&
+                                      !isEndDateEmpty) {
+                                    saveTask();
                                     Navigator.pop(context);
                                   }
                                 },
                                 child: const Icon(
                                   Icons.add,
-                                  color: Colors.black, // กำหนดสีไอคอนเป็นสีดำ
-                                  size: 30, // กำหนดขนาดไอคอน
+                                  color: Colors.black,
+                                  size: 30,
                                 ),
                               ),
                             ),
@@ -224,7 +220,7 @@ class AddFromGoal {
     );
   }
 
-// Header Widget
+  // Header Widget
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -248,48 +244,52 @@ class AddFromGoal {
     );
   }
 
-// TextField Widget
- Widget _buildTextField({
-  required String label,
-  required TextEditingController controller,
-  String? errorText,
-}) {
-  return TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: label,
-      errorText: errorText,
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+  // TextField Widget
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    String? errorText,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: errorText,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
-    ),
-    onChanged: (value) {
-      // Handle changes here, if necessary
-    },
-  );
-}
+      onChanged: (value) {
+        // Handle changes here, if necessary
+      },
+    );
+  }
 
-
-
-// Date Picker Widget
-  Widget _buildDatePicker(BuildContext context, StateSetter setState) {
+  // Date Picker Widget
+  Widget _buildDatePicker({
+    required BuildContext context,
+    required DateTime? date,
+    required bool isError,
+    required StateSetter setState,
+    required String label,
+    required Function(DateTime) onDatePicked,
+  }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       title: Text(
-        selectedDate == null
-            ? 'Select Date'
-            : DateFormat.yMMMd().format(selectedDate!),
+        date == null ? 'Select $label' : DateFormat.yMMMd().format(date),
         style: TextStyle(
-          color: isDateEmpty ? Colors.red : Colors.black,
+          color: isError ? Colors.red : Colors.black,
           fontSize: 16,
         ),
       ),
       leading: Icon(
         Icons.calendar_today,
-        color: isDateEmpty ? Colors.red : Colors.black,
+        color: isError ? Colors.red : Colors.black,
       ),
       onTap: () async {
         final pickedDate = await showDatePicker(
@@ -299,44 +299,7 @@ class AddFromGoal {
           lastDate: DateTime(2101),
         );
         if (pickedDate != null) {
-          setState(() {
-            selectedDate = pickedDate;
-            isDateEmpty = false;
-          });
-        }
-      },
-    );
-  }
-
-// Time Picker Widget
-  Widget _buildTimePicker({
-    required BuildContext context, // ใช้ BuildContext ที่ถูกต้อง
-    required TimeOfDay? time,
-    required bool isError,
-    required StateSetter setState,
-    required String label, // เปลี่ยนจาก context เป็น label
-    required Function(TimeOfDay) onTimePicked,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-      title: Text(
-        time == null ? 'Select $label' : time.format(context), // ใช้ label แทน
-        style: TextStyle(
-          color: isError ? Colors.red : Colors.black,
-          fontSize: 16,
-        ),
-      ),
-      leading: Icon(
-        Icons.access_time,
-        color: isError ? Colors.red : Colors.black,
-      ),
-      onTap: () async {
-        final pickedTime = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
-        if (pickedTime != null) {
-          onTimePicked(pickedTime);
+          onDatePicked(pickedDate);
         }
       },
     );
