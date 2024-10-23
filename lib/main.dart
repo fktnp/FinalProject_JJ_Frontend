@@ -3,7 +3,7 @@ import 'package:flutter_application_1/task.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'setting.dart';
-import 'todotoday.dart';
+import 'todotolist.dart';
 import 'calendar.dart';
 
 void main() {
@@ -46,8 +46,8 @@ class MyHomePageState extends State<MyHomePage> {
         index: _currentIndex,
         children: const [
           SettingsPage(),
-          CalendarView(),
-          TryTodotoday(),
+          MyCalendarView(),
+          ToDoList(),
           GoalsPage(),
           TaskListPage(),
         ],

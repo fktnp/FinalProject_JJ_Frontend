@@ -12,7 +12,7 @@ class AddSubTaskForm {
   DateTime? selectedEndDate;
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
-  String selectedFrequency = 'Day';
+  String selectedFrequency = 'daily';
   Set<int> selectedWeekDays = {};
   int selectedMonthDay = 1;
   String headSubJobId = "eh";
@@ -143,11 +143,11 @@ class AddSubTaskForm {
                                 // Frequency Picker
                                 _buildFrequencyPicker(setState),
 
-                                if (selectedFrequency == 'Day')
+                                if (selectedFrequency == 'daily')
                                   _buildDailyFrequencyInput(),
-                                if (selectedFrequency == 'Week')
+                                if (selectedFrequency == 'weekly')
                                   _buildWeeklyFrequencyPicker(setState),
-                                if (selectedFrequency == 'Month')
+                                if (selectedFrequency == 'monthly')
                                   _buildMonthlyFrequencyPicker(setState),
 
                                 // Date Picker for start and end date
@@ -277,7 +277,7 @@ class AddSubTaskForm {
               color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: DropdownButton<String>(
         value: selectedFrequency,
-        items: ['Day', 'Week', 'Month'].map((String frequency) {
+        items: ['daily', 'weekly', 'monthly'].map((String frequency) {
           return DropdownMenuItem<String>(
             value: frequency,
             child: Text(frequency),

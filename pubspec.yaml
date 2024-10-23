@@ -32,7 +32,8 @@ dependencies:
     sdk: flutter
   http: ^0.13.5
   percent_indicator: ^4.0.1
-
+  syncfusion_flutter_calendar: ^20.4.49
+  
   path_provider:
   cupertino_icons: ^1.0.6
   intl: ^0.17.0
