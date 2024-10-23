@@ -23,6 +23,12 @@ class AddSubTaskForm {
     required this.userId,
   });
 
+  bool isTaskNameEmpty = false;
+  bool isStartDateEmpty = false;
+  bool isEndDateEmpty = false;
+  bool isStartTimeEmpty = false;
+  bool isEndTimeEmpty = false;
+
   Future<void> saveSubTask() async {
     // ตรวจสอบว่า UUID และข้อมูลต่าง ๆ ถูกต้อง
     if (jobId.isEmpty ||
@@ -98,99 +104,177 @@ class AddSubTaskForm {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(jobId),
-                  Text(userId),
-                  // Task Name Input
-                  _buildTextField('Task Name', taskNameController),
+                child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFECDB),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                _buildTextField(
+                                  'Task Name',
+                                  taskNameController,
+                                  isTaskNameEmpty
+                                      ? 'Task Name is required'
+                                      : null,
+                                ),
 
-                  // Frequency Picker
-                  _buildFrequencyPicker(setState),
+                                // Frequency Picker
+                                _buildFrequencyPicker(setState),
 
-                  if (selectedFrequency == 'Day') _buildDailyFrequencyInput(),
-                  if (selectedFrequency == 'Week')
-                    _buildWeeklyFrequencyPicker(setState),
-                  if (selectedFrequency == 'Month')
-                    _buildMonthlyFrequencyPicker(setState),
+                                if (selectedFrequency == 'Day')
+                                  _buildDailyFrequencyInput(),
+                                if (selectedFrequency == 'Week')
+                                  _buildWeeklyFrequencyPicker(setState),
+                                if (selectedFrequency == 'Month')
+                                  _buildMonthlyFrequencyPicker(setState),
 
-                  // Date Picker for start and end date
-                  _buildDatePicker('Start Date', selectedStartDate,
-                      (pickedDate) {
-                    setState(() => selectedStartDate = pickedDate);
-                  }),
-                  _buildDatePicker('End Date', selectedEndDate, (pickedDate) {
-                    setState(() => selectedEndDate = pickedDate);
-                  }),
+                                // Date Picker for start and end date
+                                _buildDatePicker(
+                                    'Start Date', selectedStartDate,
+                                    (pickedDate) {
+                                  setState(
+                                      () => selectedStartDate = pickedDate);
+                                }),
+                                _buildDatePicker('End Date', selectedEndDate,
+                                    (pickedDate) {
+                                  setState(() => selectedEndDate = pickedDate);
+                                }),
 
-                  // Time Picker for start and end time
-                  _buildTimePicker('Start Time', selectedStartTime,
-                      (pickedTime) {
-                    setState(() => selectedStartTime = pickedTime);
-                  }),
-                  _buildTimePicker('End Time', selectedEndTime, (pickedTime) {
-                    setState(() => selectedEndTime = pickedTime);
-                  }),
+                                // Time Picker for start and end time
+                                _buildTimePicker(
+                                    'Start Time', selectedStartTime,
+                                    (pickedTime) {
+                                  setState(
+                                      () => selectedStartTime = pickedTime);
+                                }),
+                                _buildTimePicker('End Time', selectedEndTime,
+                                    (pickedTime) {
+                                  setState(() => selectedEndTime = pickedTime);
+                                }),
 
-                  // Save Button
-                  ElevatedButton(
-                      onPressed: () {
-                        saveSubTask();
-                        Navigator.pop(context);
-                        // print(jobId);
-                        // print(userId);
-                        // print(taskNameController.text);
-                        // print("Pending");
-                        // print("");
-                        // print(selectedStartDate);
-                        // print(selectedEndDate);
-                        // print(selectedStartTime?.hour);
-                        // print(selectedEndTime?.hour);
-                        // print(selectedFrequency);
-                        // print(selectedFrequency == 'Day'
-                        //     ? int.parse(frequencyDayController.text)
-                        //     : 0);
-                        // print(selectedFrequency == 'Week'
-                        //     ? selectedWeekDays.join(",")
-                        //     : '');
-                        // print(selectedFrequency == 'Month'
-                        //     ? selectedMonthDay
-                        //     : 0);
-                      },
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.black,
-                        size: 30,
-                      )),
-                ],
-              ),
-            );
+                                const SizedBox(
+                                  height: 30,
+                                ),
+                                // Save Button
+                                ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isTaskNameEmpty =
+                                            taskNameController.text.isEmpty;
+                                        isStartDateEmpty =
+                                            selectedStartDate == null;
+                                        isEndDateEmpty =
+                                            selectedEndDate == null;
+                                        isStartTimeEmpty =
+                                            selectedStartDate == null;
+                                        isEndTimeEmpty =
+                                            selectedEndDate == null;
+                                      });
+                                      if (!isTaskNameEmpty &&
+                                          !isStartDateEmpty &&
+                                          !isEndDateEmpty &&
+                                          !isStartTimeEmpty &&
+                                          !isEndTimeEmpty) {
+                                        saveSubTask();
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: const Icon(
+                                      Icons.add,
+                                      color: Colors.black,
+                                      size: 30,
+                                    )),
+                              ],
+                            ),
+                          ),
+                          // Task Name Input
+                        ],
+                      ),
+                    )));
           },
         );
       },
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFDCBC),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: const Center(
+        child: Text(
+          'Add Sub Goal',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    String? errorText,
+  ) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: errorText,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      onChanged: (value) {
+        // Handle changes here, if necessary
+      },
+    );
+  }
+
   Widget _buildFrequencyPicker(StateSetter setState) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: DropdownButton<String>(
         value: selectedFrequency,
         items: ['Day', 'Week', 'Month'].map((String frequency) {
@@ -210,11 +294,19 @@ class AddSubTaskForm {
 
   Widget _buildDailyFrequencyInput() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.only(
+          right: MediaQuery.of(context).size.width * 0.35,
+          left: MediaQuery.of(context).size.width * 0.35),
       child: TextField(
         controller: frequencyDayController,
-        decoration: const InputDecoration(
-          labelText: 'Every X days',
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
         keyboardType: TextInputType.number,
       ),
@@ -223,19 +315,28 @@ class AddSubTaskForm {
 
   Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 10, right: 20),
       child: Column(
         children: List.generate(7, (index) {
           return CheckboxListTile(
-            title: Text([
-              'อาทิตย์',
-              'จันทร์',
-              'อังคาร',
-              'พุธ',
-              'พฤหัสบดี',
-              'ศุกร์',
-              'เสาร์'
-            ][index]),
+            title: Container(
+              margin: EdgeInsets.only(
+                right: MediaQuery.of(context).size.width * 0.35,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text([
+                'Sunday',
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday'
+              ][index]),
+            ),
             value: selectedWeekDays.contains(index),
             onChanged: (bool? selected) {
               setState(() {
@@ -253,8 +354,14 @@ class AddSubTaskForm {
   }
 
   Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: DropdownButton<int>(
         value: selectedMonthDay,
         items: List.generate(31, (index) {
@@ -274,8 +381,15 @@ class AddSubTaskForm {
 
   Widget _buildDatePicker(String label, DateTime? selectedDate,
       ValueChanged<DateTime> onDatePicked) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      margin: EdgeInsets.only(
+          top: 8, left: 8, right: MediaQuery.of(context).size.width * 0.45),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: Row(
         children: [
           Text(label),
@@ -302,8 +416,15 @@ class AddSubTaskForm {
 
   Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
       ValueChanged<TimeOfDay> onTimePicked) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      margin: EdgeInsets.only(
+          top: 8, left: 8, right: MediaQuery.of(context).size.width * 0.45),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: Row(
         children: [
           Text(label),
