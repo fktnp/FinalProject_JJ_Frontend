@@ -34,7 +34,8 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<List<CalendarModel>> fetchCalendarData() async {
     final Dio dio = Dio();
-    final response = await dio.get('http://10.0.2.2:8080/v1/calendar/user/d6ca628a-5764-471f-ae61-1bfdb3368067'); // เปลี่ยน URL ตามที่คุณใช้
+    String uerid = "d6ca628a-5764-471f-ae61-1bfdb3368067";
+    final response = await dio.get('http://10.0.2.2:8080/v1/calendar/user/$uerid'); // เปลี่ยน URL ตามที่คุณใช้
     // print(response.statusCode);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -65,9 +66,26 @@ class CalendarViewState extends State<MyCalendarView> {
         SubJobModel subJob = await fetchSubJob(calendar.subJobID); // ดึงข้อมูล SubJob ตาม subJobID
         print("subJobs $subJob");
 
+        DateTime current_startTime = DateTime(
+          calendar.DateCalendar.year, // เอาปีจาก calendar
+          calendar.DateCalendar.month, // เอาเดือนจาก calendar
+          calendar.DateCalendar.day, // เอาวันจาก calendar
+          subJob.startTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
+          subJob.startTimeGoal.minute, // เอาเวลานาทีจาก subJob
+        );
+
+        DateTime current_endTime = DateTime(
+          calendar.DateCalendar.year, // เอาปีจาก calendar
+          calendar.DateCalendar.month, // เอาเดือนจาก calendar
+          calendar.DateCalendar.day, // เอาวันจาก calendar
+          subJob.lastTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
+          subJob.lastTimeGoal.minute, // เอาเวลานาทีจาก subJob
+        );
+
+
         appointments.add(Appointment(
-          startTime: subJob.startTimeGoal, // ใช้ startTimeGoal จาก SubJob
-          endTime: subJob.lastTimeGoal, // ใช้ lastTimeGoal จาก SubJob
+          startTime: current_startTime, // ใช้ startTimeGoal จาก SubJob
+          endTime: current_endTime, // ใช้ lastTimeGoal จาก SubJob
           subject: subJob.name, // ใช้ชื่อของ SubJob
           color: subJob.status == 'completed' ? Colors.green : Colors.red, // ใช้สีตามสถานะ
           isAllDay: false,

@@ -19,7 +19,8 @@ class ToDoListState extends State<ToDoList> {
 
   Future<List<CalendarModel>> fetchCalendars() async {
       final Dio dio = Dio();
-      final response = await dio.get('http://10.0.2.2:8080/v1/calendar/user/d6ca628a-5764-471f-ae61-1bfdb3368067'); // เปลี่ยน URL ตามที่คุณใช้
+      String userid = "d6ca628a-5764-471f-ae61-1bfdb3368067";
+      final response = await dio.get('http://10.0.2.2:8080/v1/calendar/user/$userid'); // เปลี่ยน URL ตามที่คุณใช้
       // print(response.statusCode);
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
@@ -49,15 +50,21 @@ class ToDoListState extends State<ToDoList> {
       for (var calendar in calendars) {
         SubJobModel subJob = await fetchSubJob(calendar.subJobID);
         // Create a Task from the SubJobModel
-        fetchedTasks.add(Task(
-          id: calendar.id,
-          title: subJob.name,
-          details: subJob.details,
-          isCompleted: calendar.statusSubJob,
-          startDate: subJob.startDate,
-          lastDate: subJob.lastDate,
-          percentProgress: subJob.percentProgress,
-        ));
+
+        print(currentDateTime);
+        print(calendar.DateCalendar);
+
+        if (calendar.DateCalendar.year == currentDateTime.year) {
+          fetchedTasks.add(Task(
+            id: calendar.id,
+            title: subJob.name,
+            details: subJob.details,
+            isCompleted: calendar.statusSubJob,
+            startDate: subJob.startDate,
+            lastDate: subJob.lastDate,
+            percentProgress: subJob.percentProgress,
+          ));
+        }
       }
 
       // Update the tasks state
