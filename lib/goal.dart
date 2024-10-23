@@ -173,7 +173,7 @@ class GoalTask extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TaskDetailPage(task: task),
+                          builder: (context) => TaskDetailPage(maintask: task),
                         ),
                       );
                     },

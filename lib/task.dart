@@ -78,6 +78,8 @@ class SubJob {
   final String frequencyWeek;
   final int frequencyMonth;
   final String headSubJobId;
+  final int percentProgress;
+  final int totalDayPass;
 
   SubJob({
     required this.jobId,
@@ -94,28 +96,31 @@ class SubJob {
     required this.frequencyWeek,
     required this.frequencyMonth,
     required this.headSubJobId,
+    required this.percentProgress,
+    required this.totalDayPass,
   });
 
   factory SubJob.fromJson(Map<String, dynamic> json) {
     return SubJob(
-      jobId: json['job_id'],
-      userId: json['user_id'],
-      name: json['name'],
-      status: json['status'],
-      details: json['details'],
-      startTimeGoal: DateTime.parse(json['start_time_goal']),
-      lastTimeGoal: DateTime.parse(json['last_time_goal']),
-      startDate: DateTime.parse(json['start_date']),
-      lastDate: DateTime.parse(json['last_date']),
-      frequency: json['frequency'],
-      frequencyDay: json['frequency_day'],
-      frequencyWeek: json['frequency_week'],
-      frequencyMonth: json['frequency_Month'],
-      headSubJobId: json['head_sub_job_id'],
+      jobId: json['JobID'],
+      userId: json['UserID'],
+      name: json['Name'],
+      status: json['Status'],
+      details: json['Details'],
+      startTimeGoal: DateTime.parse(json['StartTimeGoal']),
+      lastTimeGoal: DateTime.parse(json['LastTimeGoal']),
+      startDate: DateTime.parse(json['StartDate']),
+      lastDate: DateTime.parse(json['LastDate']),
+      frequency: json['Frequency'],
+      frequencyDay: json['FrequencyDay'],
+      frequencyWeek: json['FrequencyWeek'],
+      frequencyMonth: json['FrequencyMonth'],
+      headSubJobId: json['HeadSubJobID'],
+      percentProgress: json['PercentProgress'],
+      totalDayPass: json['TotalDayPass'],
     );
   }
 }
-
 
 class TaskListPage extends StatefulWidget {
   const TaskListPage({super.key});
@@ -125,12 +130,12 @@ class TaskListPage extends StatefulWidget {
 }
 
 class _TaskListPageState extends State<TaskListPage> {
-  late Future<List<MainTask>> futureTasks;
+  late Future<List<SubJob>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchMainTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+    futureTasks = fetchSubTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
   }
 
   @override
@@ -139,7 +144,7 @@ class _TaskListPageState extends State<TaskListPage> {
       appBar: AppBar(
         title: const Text('Task List'),
       ),
-      body: FutureBuilder<List<MainTask>>(
+      body: FutureBuilder<List<SubJob>>(
         future: futureTasks,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
