@@ -1,366 +1,449 @@
-// import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-// class GoaladdPage extends StatefulWidget {
-//   const GoaladdPage({super.key});
-//   @override
-//   _GoalSettingPageState createState() => _GoalSettingPageState();
-// }
+class AddSubTaskForm {
+  final BuildContext context;
+  final String jobId;
+  final String userId;
+  final TextEditingController taskNameController = TextEditingController();
+  final TextEditingController frequencyDayController = TextEditingController();
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
+  TimeOfDay? selectedStartTime;
+  TimeOfDay? selectedEndTime;
+  String selectedFrequency = 'daily';
+  Set<int> selectedWeekDays = {};
+  int selectedMonthDay = 1;
+  String headSubJobId = "eh";
 
-// class _GoalSettingPageState extends State<GoaladdPage> {
-//   // Variables for storing user input
-//   String? goalName;
-//   TimeOfDay? startTime;
-//   TimeOfDay? endTime;
-//   String? frequency;
-//   DateTime? endDate;
-//   int? dayInterval; // for daily frequency
-//   int? weekInterval; // for weekly frequency
-//   List<String> selectedDaysOfWeek = []; // for days of the week
-//   int? monthInterval; // for monthly frequency
-//   int? selectedDayOfMonth; // for monthly date
-//   String? selectedMonth; // for yearly frequency
-//   int? yearInterval; // for yearly frequency
+  AddSubTaskForm({
+    required this.context,
+    required this.jobId,
+    required this.userId,
+  });
 
-//   // List of frequencies
-//   List<String> frequencies = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
-//   List<String> daysOfWeek = [
-//     'Monday',
-//     'Tuesday',
-//     'Wednesday',
-//     'Thursday',
-//     'Friday',
-//     'Saturday',
-//     'Sunday'
-//   ];
-//   List<String> monthsOfYear = [
-//     'January',
-//     'February',
-//     'March',
-//     'April',
-//     'May',
-//     'June',
-//     'July',
-//     'August',
-//     'September',
-//     'October',
-//     'November',
-//     'December'
-//   ];
+  bool isTaskNameEmpty = false;
+  bool isStartDateEmpty = false;
+  bool isEndDateEmpty = false;
+  bool isStartTimeEmpty = false;
+  bool isEndTimeEmpty = false;
 
-//   // Function to pick start time
-//   Future<void> _pickStartTime(BuildContext context) async {
-//     final TimeOfDay? picked = await showTimePicker(
-//       context: context,
-//       initialTime: TimeOfDay.now(),
-//     );
-//     if (picked != null && picked != startTime) {
-//       setState(() {
-//         startTime = picked;
-//       });
-//     }
-//   }
+  Future<void> saveSubTask() async {
+    // ตรวจสอบว่า UUID และข้อมูลต่าง ๆ ถูกต้อง
+    if (jobId.isEmpty ||
+        userId.isEmpty ||
+        taskNameController.text.isEmpty ||
+        selectedStartDate == null ||
+        selectedEndDate == null) {
+      return; // Handle the case where fields are empty
+    }
 
-//   // Function to pick end time
-//   Future<void> _pickEndTime(BuildContext context) async {
-//     final TimeOfDay? picked = await showTimePicker(
-//       context: context,
-//       initialTime: TimeOfDay.now(),
-//     );
-//     if (picked != null && picked != endTime) {
-//       setState(() {
-//         endTime = picked;
-//       });
-//     }
-//   }
+    DateTime startDateWithTime = DateTime(
+      selectedStartDate!.year,
+      selectedStartDate!.month,
+      selectedStartDate!.day,
+      selectedStartTime?.hour ?? 8,
+      selectedStartTime?.minute ?? 0,
+    ).toLocal();
 
-//   // Function to pick end date using Flutter's showDatePicker
-//   Future<void> _pickEndDate(BuildContext context) async {
-//     final DateTime? picked = await showDatePicker(
-//       context: context,
-//       initialDate: DateTime.now(),
-//       firstDate: DateTime.now(),
-//       lastDate: DateTime(2100),
-//     );
-//     if (picked != null && picked != endDate) {
-//       setState(() {
-//         endDate = picked;
-//       });
-//     }
-//   }
+    DateTime endDateWithTime = DateTime(
+      selectedEndDate!.year,
+      selectedEndDate!.month,
+      selectedEndDate!.day,
+      selectedEndTime?.hour ?? 8,
+      selectedEndTime?.minute ?? 0,
+    ).toLocal();
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: const Color(0xFFFFECDB), // สีพื้นหลัง
-//       appBar: AppBar(
-//         backgroundColor: const Color(0xFFFFDCBC), // สีหัวข้อ
-//         title: const Text('Add Goal'),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: ListView(
-//           children: [
-//             // Goal Name Input
-//             TextField(
-//               decoration: const InputDecoration(labelText: 'Goal Name'),
-//               onChanged: (value) {
-//                 setState(() {
-//                   goalName = value;
-//                 });
-//               },
-//             ),
-//             const SizedBox(height: 16.0),
+    String startDateGoal = _convertToISO8601WithOffset(startDateWithTime);
+    String endDateGoal = _convertToISO8601WithOffset(endDateWithTime);
 
-//             // Time Picker for Start Time
-//             ListTile(
-//               title: Text(startTime != null
-//                   ? "Start Time: ${startTime!.format(context)}"
-//                   : "Pick Start Time"),
-//               trailing: const Icon(Icons.access_time),
-//               onTap: () => _pickStartTime(context),
-//             ),
+    Map<String, dynamic> data = {
+      "job_id": jobId,
+      "user_id": userId,
+      "name": taskNameController.text,
+      "status": "Pending",
+      "details": "",
+      "start_time_goal": startDateGoal,
+      "last_time_goal": endDateGoal,
+      "start_date": startDateGoal,
+      "last_date": endDateGoal,
+      "frequency": selectedFrequency,
+      "frequency_day": selectedFrequency == 'Day'
+          ? int.parse(frequencyDayController.text)
+          : 0,
+      "frequency_week":
+          selectedFrequency == 'Week' ? selectedWeekDays.join(",") : '',
+      "frequency_Month": selectedFrequency == 'Month' ? selectedMonthDay : 0,
+      "head_sub_job_id": "head_sub_job_id", // Ensure this has a valid value
+    };
 
-//             // Time Picker for End Time
-//             ListTile(
-//               title: Text(endTime != null
-//                   ? "End Time: ${endTime!.format(context)}"
-//                   : "Pick End Time"),
-//               trailing: const Icon(Icons.access_time),
-//               onTap: () => _pickEndTime(context),
-//             ),
+    try {
+      var response = await Dio().post(
+        'http://192.168.1.38:8080/v1/subjob',
+        data: data,
+      );
+      print(response.data);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        print('Error status code: ${e.response?.statusCode}');
+        print('Error saving task: ${e.response?.data}');
+      } else {
+        print('Error sending request: ${e.message}');
+      }
+    }
+  }
 
-//             // Frequency Dropdown
-//             DropdownButton<String>(
-//               hint: const Text('Select Frequency'),
-//               value: frequency,
-//               onChanged: (String? newValue) {
-//                 setState(() {
-//                   frequency = newValue;
-//                   dayInterval = null;
-//                   weekInterval = null;
-//                   selectedDaysOfWeek.clear();
-//                   monthInterval = null;
-//                   selectedDayOfMonth = null;
-//                   selectedMonth = null;
-//                   yearInterval = null;
-//                 });
-//               },
-//               items: frequencies.map((String value) {
-//                 return DropdownMenuItem<String>(
-//                   value: value,
-//                   child: Text(value),
-//                 );
-//               }).toList(),
-//             ),
-//             const SizedBox(height: 16.0),
+  String _convertToISO8601WithOffset(DateTime date) {
+    final String formattedDate =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date);
+    return "$formattedDate+07:00";
+  }
 
-//             // Frequency Specific Options
-//             if (frequency == 'Daily')
-//               Column(
-//                 children: [
-//                   const Text('Repeat every'),
-//                   DropdownButton<int>(
-//                     value: dayInterval,
-//                     hint: const Text('Day(s)'),
-//                     onChanged: (int? value) {
-//                       setState(() {
-//                         dayInterval = value;
-//                       });
-//                     },
-//                     items: List.generate(7, (index) => index + 1)
-//                         .map((int value) => DropdownMenuItem<int>(
-//                               value: value,
-//                               child: Text('$value Day(s)'),
-//                             ))
-//                         .toList(),
-//                   ),
-//                 ],
-//               ),
-//             if (frequency == 'Weekly')
-//               Column(
-//                 children: [
-//                   const Text('Repeat every'),
-//                   DropdownButton<int>(
-//                     value: weekInterval,
-//                     hint: const Text('Week(s)'),
-//                     onChanged: (int? value) {
-//                       setState(() {
-//                         weekInterval = value;
-//                       });
-//                     },
-//                     items: List.generate(4, (index) => index + 1)
-//                         .map((int value) => DropdownMenuItem<int>(
-//                               value: value,
-//                               child: Text('$value Week(s)'),
-//                             ))
-//                         .toList(),
-//                   ),
-//                   const Text('On these days'),
-//                   Wrap(
-//                     spacing: 8.0,
-//                     children: daysOfWeek.map((day) {
-//                       return FilterChip(
-//                         label: Text(day),
-//                         selected: selectedDaysOfWeek.contains(day),
-//                         onSelected: (bool selected) {
-//                           setState(() {
-//                             if (selected) {
-//                               selectedDaysOfWeek.add(day);
-//                             } else {
-//                               selectedDaysOfWeek.remove(day);
-//                             }
-//                           });
-//                         },
-//                       );
-//                     }).toList(),
-//                   ),
-//                 ],
-//               ),
-//             if (frequency == 'Monthly')
-//               Column(
-//                 children: [
-//                   const Text('Repeat every'),
-//                   DropdownButton<int>(
-//                     value: monthInterval,
-//                     hint: const Text('Month(s)'),
-//                     onChanged: (int? value) {
-//                       setState(() {
-//                         monthInterval = value;
-//                       });
-//                     },
-//                     items: List.generate(12, (index) => index + 1)
-//                         .map((int value) => DropdownMenuItem<int>(
-//                               value: value,
-//                               child: Text('$value Month(s)'),
-//                             ))
-//                         .toList(),
-//                   ),
-//                   const Text('On day'),
-//                   DropdownButton<int>(
-//                     value: selectedDayOfMonth,
-//                     hint: const Text('Day of Month'),
-//                     onChanged: (int? value) {
-//                       setState(() {
-//                         selectedDayOfMonth = value;
-//                       });
-//                     },
-//                     items: List.generate(31, (index) => index + 1)
-//                         .map((int value) => DropdownMenuItem<int>(
-//                               value: value,
-//                               child: Text('Day $value'),
-//                             ))
-//                         .toList(),
-//                   ),
-//                 ],
-//               ),
-//             if (frequency == 'Yearly')
-//               Column(
-//                 children: [
-//                   const Text('Repeat every'),
-//                   DropdownButton<int>(
-//                     value: yearInterval,
-//                     hint: const Text('Year(s)'),
-//                     onChanged: (int? value) {
-//                       setState(() {
-//                         yearInterval = value;
-//                       });
-//                     },
-//                     items: List.generate(10, (index) => index + 1)
-//                         .map((int value) => DropdownMenuItem<int>(
-//                               value: value,
-//                               child: Text('$value Year(s)'),
-//                             ))
-//                         .toList(),
-//                   ),
-//                   const Text('In month'),
-//                   DropdownButton<String>(
-//                     value: selectedMonth,
-//                     hint: const Text('Month'),
-//                     onChanged: (String? value) {
-//                       setState(() {
-//                         selectedMonth = value;
-//                       });
-//                     },
-//                     items: monthsOfYear
-//                         .map((String value) => DropdownMenuItem<String>(
-//                               value: value,
-//                               child: Text(value),
-//                             ))
-//                         .toList(),
-//                   ),
-//                 ],
-//               ),
+  void show() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+                child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFECDB),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                _buildTextField(
+                                  'Task Name',
+                                  taskNameController,
+                                  isTaskNameEmpty
+                                      ? 'Task Name is required'
+                                      : null,
+                                ),
 
-//             ListTile(
-//               title: Text(endDate != null
-//                   ? "End Date: ${endDate!.toLocal()}".split(' ')[0]
-//                   : "Pick End Date"),
-//               trailing: const Icon(Icons.calendar_today),
-//               onTap: () => _pickEndDate(context),
-//             ),
+                                // Frequency Picker
+                                _buildFrequencyPicker(setState),
 
-//             // Submit Button
-//             Center(
-//               child: ElevatedButton(
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: const Color(0xFFFFECDB),
-//                   shape: const CircleBorder(),
-//                   padding: const EdgeInsets.all(20),
-//                 ),
-//                 onPressed: () {
-//                   if (goalName == null || goalName!.isEmpty) {
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(content: Text('Please enter a goal name')),
-//                     );
-//                     return;
-//                   }
+                                if (selectedFrequency == 'daily')
+                                  _buildDailyFrequencyInput(),
+                                if (selectedFrequency == 'weekly')
+                                  _buildWeeklyFrequencyPicker(setState),
+                                if (selectedFrequency == 'monthly')
+                                  _buildMonthlyFrequencyPicker(setState),
 
-//                   if (startTime == null) {
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(content: Text('Please pick a start time')),
-//                     );
-//                     return;
-//                   }
+                                // Date Picker for start and end date
+                                _buildDatePicker(
+                                    'Start Date', selectedStartDate,
+                                    (pickedDate) {
+                                  setState(
+                                      () => selectedStartDate = pickedDate);
+                                }),
+                                _buildDatePicker('End Date', selectedEndDate,
+                                    (pickedDate) {
+                                  setState(() => selectedEndDate = pickedDate);
+                                }),
 
-//                   if (endTime == null) {
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(content: Text('Please pick an end time')),
-//                     );
-//                     return;
-//                   }
+                                // Time Picker for start and end time
+                                _buildTimePicker(
+                                    'Start Time', selectedStartTime,
+                                    (pickedTime) {
+                                  setState(
+                                      () => selectedStartTime = pickedTime);
+                                }),
+                                _buildTimePicker('End Time', selectedEndTime,
+                                    (pickedTime) {
+                                  setState(() => selectedEndTime = pickedTime);
+                                }),
 
-//                   if (frequency == null || frequency!.isEmpty) {
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(
-//                           content: Text('Please select a frequency')),
-//                     );
-//                     return;
-//                   }
+                                const SizedBox(
+                                  height: 30,
+                                ),
+                                // Save Button
+                                ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isTaskNameEmpty =
+                                            taskNameController.text.isEmpty;
+                                        isStartDateEmpty =
+                                            selectedStartDate == null;
+                                        isEndDateEmpty =
+                                            selectedEndDate == null;
+                                        isStartTimeEmpty =
+                                            selectedStartDate == null;
+                                        isEndTimeEmpty =
+                                            selectedEndDate == null;
+                                      });
+                                      if (!isTaskNameEmpty &&
+                                          !isStartDateEmpty &&
+                                          !isEndDateEmpty &&
+                                          !isStartTimeEmpty &&
+                                          !isEndTimeEmpty) {
+                                        saveSubTask();
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: const Icon(
+                                      Icons.add,
+                                      color: Colors.black,
+                                      size: 30,
+                                    )),
+                              ],
+                            ),
+                          ),
+                          // Task Name Input
+                        ],
+                      ),
+                    )));
+          },
+        );
+      },
+    );
+  }
 
-//                   // Handle the submission logic here
-//                   print('Goal Name: $goalName');
-//                   print('Start Time: ${startTime?.format(context)}');
-//                   print('End Time: ${endTime?.format(context)}');
-//                   print('Frequency: $frequency');
-//                   print('Day Interval: $dayInterval');
-//                   print('Week Interval: $weekInterval');
-//                   print('Selected Days: $selectedDaysOfWeek');
-//                   print('Month Interval: $monthInterval');
-//                   print('Selected Day of Month: $selectedDayOfMonth');
-//                   print('Year Interval: $yearInterval');
-//                   print('Selected Month: $selectedMonth');
-//                   print('End Date: $endDate');
-//                 },
-//                 child: const Icon(
-//                   Icons.add,
-//                   color: Colors.black, // ไอคอนสีดำ
-//                   size: 30, // ขนาดไอคอน
-//                 ),
-//               ),
-//             )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFDCBC),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: const Center(
+        child: Text(
+          'Add Sub Goal',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    String? errorText,
+  ) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: errorText,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      onChanged: (value) {
+        // Handle changes here, if necessary
+      },
+    );
+  }
+
+  Widget _buildFrequencyPicker(StateSetter setState) {
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: DropdownButton<String>(
+        value: selectedFrequency,
+        items: ['daily', 'weekly', 'monthly'].map((String frequency) {
+          return DropdownMenuItem<String>(
+            value: frequency,
+            child: Text(frequency),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedFrequency = newValue!;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildDailyFrequencyInput() {
+    return Padding(
+      padding: EdgeInsets.only(
+          right: MediaQuery.of(context).size.width * 0.35,
+          left: MediaQuery.of(context).size.width * 0.35),
+      child: TextField(
+        controller: frequencyDayController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        keyboardType: TextInputType.number,
+      ),
+    );
+  }
+
+  Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, right: 20),
+      child: Column(
+        children: List.generate(7, (index) {
+          return CheckboxListTile(
+            title: Container(
+              margin: EdgeInsets.only(
+                right: MediaQuery.of(context).size.width * 0.35,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text([
+                'Sunday',
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday'
+              ][index]),
+            ),
+            value: selectedWeekDays.contains(index),
+            onChanged: (bool? selected) {
+              setState(() {
+                if (selected == true) {
+                  selectedWeekDays.add(index);
+                } else {
+                  selectedWeekDays.remove(index);
+                }
+              });
+            },
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: DropdownButton<int>(
+        value: selectedMonthDay,
+        items: List.generate(31, (index) {
+          return DropdownMenuItem<int>(
+            value: index + 1,
+            child: Text('Day ${index + 1}'),
+          );
+        }),
+        onChanged: (int? newValue) {
+          setState(() {
+            selectedMonthDay = newValue!;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(String label, DateTime? selectedDate,
+      ValueChanged<DateTime> onDatePicked) {
+    return Container(
+      margin: EdgeInsets.only(
+          top: 8, left: 8, right: MediaQuery.of(context).size.width * 0.45),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: Row(
+        children: [
+          Text(label),
+          TextButton(
+            onPressed: () async {
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2101),
+              );
+              if (pickedDate != null) {
+                onDatePicked(pickedDate);
+              }
+            },
+            child: Text(selectedDate == null
+                ? 'Pick a date'
+                : selectedDate.toLocal().toString().split(' ')[0]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
+      ValueChanged<TimeOfDay> onTimePicked) {
+    return Container(
+      margin: EdgeInsets.only(
+          top: 8, left: 8, right: MediaQuery.of(context).size.width * 0.45),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: Row(
+        children: [
+          Text(label),
+          TextButton(
+            onPressed: () async {
+              TimeOfDay? pickedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (pickedTime != null) {
+                onTimePicked(pickedTime);
+              }
+            },
+            child: Text(selectedTime == null
+                ? 'Pick a time'
+                : selectedTime.format(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -3,7 +3,7 @@ import 'package:flutter_application_1/task.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'setting.dart';
-import 'todotoday.dart';
+import 'todotolist.dart';
 import 'calendar.dart';
 
 void main() {
@@ -46,15 +46,15 @@ class MyHomePageState extends State<MyHomePage> {
         index: _currentIndex,
         children: const [
           SettingsPage(),
-          CalendarView(),
-          TryTodotoday(),
+          MyCalendarView(),
+          ToDoList(),
           GoalsPage(),
           TaskListPage(),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
-          height: screenHeight * 0.08, // ความสูงลดลงให้พอดี
+          height: screenHeight * 0.08,
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: _currentIndex,
@@ -66,49 +66,69 @@ class MyHomePageState extends State<MyHomePage> {
             backgroundColor: const Color(0xFFFFDCBC),
             selectedItemColor: const Color.fromARGB(255, 26, 26, 26),
             unselectedItemColor: const Color.fromARGB(255, 255, 123, 0),
-            selectedFontSize: 0, // ไม่มีข้อความ
-            unselectedFontSize: 0, // ไม่มีข้อความ
-            showSelectedLabels: false, // ไม่แสดงข้อความ
-            showUnselectedLabels: false, // ไม่แสดงข้อความ
-            iconSize: screenWidth * 0.10, // ปรับขนาดไอคอนให้เล็กลง
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            iconSize: screenWidth * 0.10,
             items: [
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'lib/Pic/settings.png',
-                  width: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10, // ยุบลงถ้าเลือก
-                  height: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  width: _currentIndex == 0
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
+                  height: _currentIndex == 0
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'lib/Pic/calendar.png',
-                  width: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10, // ยุบลงถ้าเลือก
-                  height: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  width: _currentIndex == 1
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
+                  height: _currentIndex == 1
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'lib/Pic/Task.png',
-                  width: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10, // ยุบลงถ้าเลือก
-                  height: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  width: _currentIndex == 2
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
+                  height: _currentIndex == 2
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'lib/Pic/goal.png',
-                  width: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10, // ยุบลงถ้าเลือก
-                  height: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  width: _currentIndex == 3
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
+                  height: _currentIndex == 3
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'lib/Pic/Co-op.png',
-                  width: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10, 
-                  height: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  width: _currentIndex == 4
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
+                  height: _currentIndex == 4
+                      ? screenWidth * 0.08
+                      : screenWidth * 0.10,
                 ),
                 label: '',
               ),

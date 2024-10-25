@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'components/custom_button.dart';
 import 'taskdetail.dart';
 import 'task.dart';
@@ -24,15 +25,15 @@ class _GoalsPageState extends State<GoalsPage> {
 
   String? selectedGoal;
 
-  late Future<List<ServerTask>> futureTasks;
+  late Future<List<MainTask>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+    futureTasks = fetchMainTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
   }
 
-  List<ServerTask> filterTasks(List<ServerTask> tasks, String? selectedGoal) {
+  List<MainTask> filterTasks(List<MainTask> tasks, String? selectedGoal) {
     if (selectedGoal == null) return [];
     return tasks
         .where((task) => task.category == selectedGoal)
@@ -66,7 +67,7 @@ class _GoalsPageState extends State<GoalsPage> {
       body: Container(
         color: const Color(0xFFFFECDB),
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<ServerTask>>(
+        child: FutureBuilder<List<MainTask>>(
             future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -146,55 +147,75 @@ class _GoalsPageState extends State<GoalsPage> {
 }
 
 class GoalTask extends StatelessWidget {
-  final ServerTask task;
+  final MainTask task;
   const GoalTask({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+
     return Container(
       width: MediaQuery.of(context).size.width * 0.93,
       color: const Color.fromARGB(255, 251, 197, 255),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TaskDetailPage(task: task),
-                  ),
-                );
-              },
-              child: Row(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    task.name,
-                    style: const TextStyle(fontSize: 22),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TaskDetailPage(maintask: task),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Text(
+                          task.name,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    width: 20,
+                  Text(
+                    '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ],
               ),
-            ),
-            Text(
-              '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+              SizedBox(
+                height: screenHeight * 0.07,
+                child: CircularPercentIndicator(
+                  radius: screenWidth * 0.07,
+                  lineWidth: screenWidth * 0.014,
+                  percent: task.percentProgress / 100,
+                  center: Text('${task.percentProgress.toString()}%'),
+                  progressColor: const Color.fromARGB(255, 92, 216, 97),
+                  backgroundColor: const Color.fromARGB(82, 0, 0, 0),
+                ),
+              )
+            ],
+          )),
     );
   }
 }
 
 class GoalSection extends StatelessWidget {
   final String goal;
-  final List<ServerTask> tasks;
-  final List<ServerTask> filteredTasks;
+  final List<MainTask> tasks;
+  final List<MainTask> filteredTasks;
   final bool conditionToShowButton;
 
   const GoalSection({
@@ -204,25 +225,6 @@ class GoalSection extends StatelessWidget {
     required this.filteredTasks,
     this.conditionToShowButton = true,
   });
-
-  void showGoalAddBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      builder: (BuildContext context) {
-        return const FractionallySizedBox(
-          heightFactor: 0.8,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: GoaladdPage(),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -254,15 +256,13 @@ class GoalSection extends StatelessWidget {
         ),
         // ปุ่มที่ถูกจัดตำแหน่ง
         if (conditionToShowButton)
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: FixedBottomButton(
-                onPressed: () {
-                  AddFromGoal(context: context, goal: goal).show();
-                },
-              ),
+          Positioned(
+            bottom: 25,
+            right: 10,
+            child: FixedBottomButton(
+              onPressed: () {
+                AddFromGoal(context: context, goal: goal).show();
+              },
             ),
           ),
       ],

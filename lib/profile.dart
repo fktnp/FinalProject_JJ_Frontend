@@ -34,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<User> fetchUserData() async {
     try {
-      Response response = await _dio.get('http://192.168.1.44:8080/v1/user');
+      Response response = await _dio.get('http://192.168.1.38:8080/v1/user');
       if (response.statusCode == 200) {
         if (response.data is List) {
           return User.fromJson(response.data[0]);

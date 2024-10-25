@@ -29,7 +29,7 @@ class LoginScreen extends StatelessWidget {
 
         // ทำ POST request
         Response response =
-            await dio.post('http://192.168.1.44:8080/v1/user/login', data: {
+            await dio.post('http://192.168.1.38:8080/v1/user/login', data: {
           "email": username,
           "password": password,
         });
@@ -149,7 +149,7 @@ class LoginScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(10),
                   ),
                   onPressed: () {
-                    _googleAuthService.signInWithGoogle(context);
+                    _googleAuthService.signInWithGoogle(context);  //google login
                   },
                 ),
                 const SizedBox(height: 40),
