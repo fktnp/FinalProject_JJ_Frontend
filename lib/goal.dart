@@ -208,13 +208,13 @@ class GoalSection extends StatelessWidget {
   void showGoalAddBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // ให้ pop-up สามารถขยายได้ตามเนื้อหา
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
       builder: (BuildContext context) {
         return const FractionallySizedBox(
-          heightFactor: 0.8, // กำหนดความสูงเป็น 80% ของหน้าจอ
+          heightFactor: 0.8,
           child: Padding(
             padding: EdgeInsets.all(16.0),
             child: GoaladdPage(),
@@ -234,8 +234,9 @@ class GoalSection extends StatelessWidget {
               color: const Color(0xFFFFDCBC),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20)),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: ListTile(
                 contentPadding:
@@ -246,24 +247,26 @@ class GoalSection extends StatelessWidget {
                 ),
               ),
             ),
+            // แสดง filtered tasks
             if (filteredTasks.isNotEmpty)
-              ...filteredTasks.map((task) => GoalTask(task: task)),
+              ...filteredTasks.map((task) => GoalTask(task: task)).toList(),
           ],
         ),
+        // ปุ่มที่ถูกจัดตำแหน่ง
         if (conditionToShowButton)
-          Positioned(
-            bottom: 25,
-            right: 10,
-            child: FixedBottomButton(
-              onPressed: () {
-                AddFromGoal(context: context, goal: goal).show();
-                //showGoalAddBottomSheet(context)ของเพิ่มย่อย
-                // AddFromGoal(context: context, goal: goal).show(); ของอันหลัก
-                // เรียกใช้ฟังก์ชัน showOverlay
-              },
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: FixedBottomButton(
+                onPressed: () {
+                  AddFromGoal(context: context, goal: goal).show();
+                },
+              ),
             ),
           ),
       ],
     );
   }
 }
+
