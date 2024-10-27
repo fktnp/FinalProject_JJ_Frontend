@@ -1,103 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
+import 'components/theme.dart';
 import 'register_screen.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'google_auth_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({
+    super.key,
+  });
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Dio dio = Dio();
-
-  LoginScreen({super.key});
+  // final GoogleAuthService _googleAuthService = GoogleAuthService();
+  String? _passwordError;
 
   Future<void> login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       try {
-        dio.options.headers['Content-Type'] =
-            'application/json'; // ตั้งค่า Header สำหรับ JSON
+        dio.options.headers['Content-Type'] = 'application/json';
+        dio.options.validateStatus = (status) => status! < 500;
 
-        // นำค่าจาก TextEditingController มาใช้ในการส่งข้อมูล
-        String username = _userNameController.text; // ใช้ email แทน username
+        String username = _userNameController.text;
         String password = _passwordController.text;
 
-        // ทำ POST request
-        Response response =
-            await dio.post('http://10.0.2.2:8080/v1/user/login', data: {
-          "user_id": "ffa2d7fd-bdbe-48da-9874-eed74a585ec3",
-          "email": username,
-          "password": password,
-        });
-        // ตรวจสอบ response
+        Response response = await dio.post(
+          'http://10.0.2.2:8080/v1/user/login',
+          data: {
+            "email": username,
+            "password": password,
+          },
+        );
+
         if (response.statusCode == 200) {
           print('Login successful: ${response.data}');
+
+          // เก็บ token และข้อมูลผู้ใช้ใน SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', response.data['token'] ?? '');
+          await prefs.setString('user_id', response.data['user_id'] ?? '');
+          await prefs.setString('user_name', response.data['name'] ?? '');
+          await prefs.setString('user_email', response.data['email'] ?? '');
+          await prefs.setString(
+              'user_phone', response.data['phone_number'] ?? '');
+
+          setState(() {
+            _passwordError = null; // Clear any previous error
+          });
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-                builder: (context) => const MyHomePage()), // ไปยังหน้า home
+            MaterialPageRoute(builder: (context) => const MyHomePage()),
           );
         } else {
-          print('Login failed: ${response.data}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Login failed: ${response.data['message']}')),
-          );
+          setState(() {
+            _passwordError = 'Login failed. Please try again.';
+          });
         }
       } on DioException catch (e) {
         print('Dio error: ${e.response?.statusCode} - ${e.message}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error occurred: ${e.message}')),
-        );
+        setState(() {
+          _passwordError = 'Server error. Please try again later.';
+        });
+      } catch (e) {
+        print('Unexpected error: $e');
+        setState(() {
+          _passwordError = 'An unexpected error occurred. Please try again.';
+        });
       }
     }
   }
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  Future<void> checkToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+    print('Token: $token');
+  }
 
-  Future<void> _loginWithGoogle(BuildContext context) async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return; // If the user cancels the sign-in
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? token = googleAuth.idToken;
-      print("token google $token");
-      if (token != null) {
-        // Send the token to your Go server
-        // final response = await dio.post(
-        //   'http://10.0.2.2:8080/v1/user/google-login',
-        //   data: {'token': token},
-        // );
-
-        // if (response.statusCode == 200) {
-        //   print('Login successful: ${response.data}');
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => const MyHomePage()),
-        //   );
-        // } else {
-        //   print('Login failed: ${response.data}');
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(content: Text('Login failed: ${response.data['message']}')),
-        //   );
-        // }
-      }
-    } catch (e) {
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred: $e')),
-      );
-    }
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(255, 220, 188, 1),
+      backgroundColor: pastel.pastel1,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
@@ -123,10 +124,9 @@ class LoginScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Email',
                     filled: true,
-                    fillColor: const Color(0xFFFFECDB),
+                    fillColor: pastel.pastel2,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFFFECDB)),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0,
@@ -148,10 +148,10 @@ class LoginScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
-                    fillColor: const Color(0xFFFFECDB),
+                    fillColor: pastel.pastel2,
+                    errorText: _passwordError, // Display error message here
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFFFECDB)),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0,
@@ -159,7 +159,20 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 90),
+                const SizedBox(height: 20),
+                IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.google,
+                      size: 30, color: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: pastel.pastel2,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  onPressed: () {
+                    // _googleAuthService.signInWithGoogle(context);
+                  },
+                ),
+                const SizedBox(height: 40),
                 CustomButton(
                   text: 'No account? Register',
                   onPressed: () {
@@ -169,36 +182,18 @@ class LoginScreen extends StatelessWidget {
                     );
                   },
                 ),
-                ElevatedButton.icon(
-                  icon: Image.asset(
-                    'lib/Pic/googleLogo.png', // อย่าลืมเติมตรงนี้
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: const Text('Sign in with Google'),
-                  onPressed: () => _loginWithGoogle(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                  ),
-                ),
                 const SizedBox(height: 30),
                 IconButton(
                   icon: const Icon(Icons.arrow_forward),
                   iconSize: 50,
                   color: Colors.black,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFECDB),
+                    backgroundColor: pastel.pastel2,
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(10),
                   ),
                   onPressed: () {
-                    // login(context);  // เรียกใช้ฟังก์ชัน login
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MyHomePage()),
-                    );
+                    login(context);
                   },
                 ),
               ],

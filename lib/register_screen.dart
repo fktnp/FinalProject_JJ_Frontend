@@ -11,18 +11,22 @@ class RegisterScreen extends StatelessWidget {
   final TextEditingController _telController = TextEditingController();
   final Dio dio = Dio(); // สร้าง instance ของ Dio
 
-  RegisterScreen({super.key});
-
+  RegisterScreen({
+    super.key,
+  });
   // ฟังก์ชันสำหรับเรียก API
   Future<void> _registerUser(BuildContext context) async {
-    try { dio.options.headers['Content-Type'] = 'application/json'; // ตั้งค่า Header สำหรับ JSON
+    try {
+      dio.options.headers['Content-Type'] =
+          'application/json'; // ตั้งค่า Header สำหรับ JSON
       // นำค่าจาก TextEditingController มาใช้ในการส่งข้อมูล
       String email = _emailController.text;
       String password = _passwordController.text;
       String username = _userNameController.text;
       String phoneNumber = _telController.text;
 
-      var response = await dio.post('http://10.0.2.2:8080/v1/user/register', data: {
+      var response =
+          await dio.post('http://10.0.2.2:8080/v1/user/register', data: {
         "email": email,
         "password": password,
         "name": username,
@@ -33,7 +37,7 @@ class RegisterScreen extends StatelessWidget {
         print('Registration successful');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       } else {
         print('Registration failed: ${response.data}');
@@ -179,7 +183,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                          _registerUser(context); 
+                    _registerUser(context);
                   }
                 },
               ),

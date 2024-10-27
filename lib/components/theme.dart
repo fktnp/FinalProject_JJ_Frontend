@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 class Pastel extends ThemeExtension<Pastel> {
   const Pastel({
@@ -64,99 +63,43 @@ class Dark extends ThemeExtension<Dark> {
       dark2: Color.lerp(dark2, other.dark2, t),
     );
   }
-
-  // Optional
-  // @override
-  // String toString() => 'Pastel(brandColor: $pastel1, danger: $dark2)';
 }
 
-void main() {
-  // Slow down time to see lerping.
-  timeDilation = 5.0;
-  runApp(const ThemeExtensionExampleApp());
-}
-
-class ThemeExtensionExampleApp extends StatefulWidget {
-  const ThemeExtensionExampleApp({super.key});
-
-  @override
-  State<ThemeExtensionExampleApp> createState() =>
-      _ThemeExtensionExampleAppState();
-}
-
-class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
+class ThemeNotifier with ChangeNotifier {
   bool isLightTheme = true;
 
   void toggleTheme() {
-    setState(() => isLightTheme = !isLightTheme);
+    isLightTheme = !isLightTheme;
+    notifyListeners();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light().copyWith(
-        extensions: <ThemeExtension<dynamic>>[
-          const Pastel(
-            pastel1: Color(0xFFFFDCBC),
-            pastel2: Color(0xFFFFECDB),
-          ),
-          const Dark(
-            dark1: Color(0xFFE53935),
-            dark2: Color.fromARGB(255, 223, 97, 95),
-          ),
-        ],
-      ),
-      darkTheme: ThemeData.dark().copyWith(
-        extensions: <ThemeExtension<dynamic>>[
-          const Pastel(
-            pastel1: Color(0xFF90CAF9),
-            pastel2: Color.fromARGB(255, 181, 212, 236),
-          ),
-          const Dark(
-            dark1: Color(0xFFEF9A9A),
-            dark2: Color.fromARGB(255, 243, 199, 199),
-          ),
-        ],
-      ),
-      themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
-      home: Home(
-        isLightTheme: isLightTheme,
-        toggleTheme: toggleTheme,
-      ),
-    );
+  ThemeData get themeData {
+    return isLightTheme ? _lightTheme : _darkTheme;
   }
-}
 
-class Home extends StatelessWidget {
-  const Home({
-    super.key,
-    required this.isLightTheme,
-    required this.toggleTheme,
-  });
-
-  final bool isLightTheme;
-  final void Function() toggleTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
-    final Dark dark = Theme.of(context).extension<Dark>()!;
-    return Material(
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(width: 100, height: 100, color: pastel.pastel1),
-            const SizedBox(width: 10),
-            Container(width: 100, height: 100, color: pastel.pastel2),
-            const SizedBox(width: 50),
-            IconButton(
-              icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),
-              onPressed: toggleTheme,
-            ),
-          ],
-        ),
+  static final ThemeData _lightTheme = ThemeData.light().copyWith(
+    extensions: <ThemeExtension<dynamic>>[
+      const Pastel(
+        pastel1: Color(0xFFFFDCBC),
+        pastel2: Color(0xFFFFECDB),
       ),
-    );
-  }
+      const Dark(
+        dark1: Color(0xFFE53935),
+        dark2: Color.fromARGB(255, 223, 97, 95),
+      ),
+    ],
+  );
+
+  static final ThemeData _darkTheme = ThemeData.dark().copyWith(
+    extensions: <ThemeExtension<dynamic>>[
+      const Pastel(
+        pastel1: Color(0xFF90CAF9),
+        pastel2: Color.fromARGB(255, 181, 212, 236),
+      ),
+      const Dark(
+        dark1: Color(0xFFEF9A9A),
+        dark2: Color.fromARGB(255, 243, 199, 199),
+      ),
+    ],
+  );
 }

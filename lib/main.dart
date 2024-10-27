@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/task.dart';
+import 'package:provider/provider.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
+import 'components/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeNotifier(),
+    child: const MyApps(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApps extends StatelessWidget {
+  const MyApps({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: LoginScreen(),
+    return Consumer<ThemeNotifier>(
+      builder: (context, themeNotifier, child) {
+        return MaterialApp(
+            title: 'My App',
+            theme: themeNotifier.themeData,
+            home: const LoginScreen());
+      },
     );
   }
 }
