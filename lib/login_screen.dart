@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
         String password = _passwordController.text;
 
         Response response = await dio.post(
-          'http://192.168.1.38:8080/v1/user/login',
+          'http://192.168.1.35:8080/v1/user/login',
           data: {
             "email": username,
             "password": password,
@@ -47,7 +47,8 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString('user_id', response.data['user_id'] ?? '');
           await prefs.setString('user_name', response.data['name'] ?? '');
           await prefs.setString('user_email', response.data['email'] ?? '');
-          await prefs.setString('user_phone', response.data['phone_number'] ?? '');
+          await prefs.setString(
+              'user_phone', response.data['phone_number'] ?? '');
 
           setState(() {
             _passwordError = null; // Clear any previous error
@@ -76,11 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> checkToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('auth_token');
-  print('Token: $token'); 
-}
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+    print('Token: $token');
+  }
 
   @override
   void dispose() {
@@ -165,7 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(10),
                   ),
                   onPressed: () {
-                    _googleAuthService.signInWithGoogle(context);
+                    _googleAuthService.signInWithGoogle(
+                        context); // เรียกฟังก์ชัน signInWithGoogle
                   },
                 ),
                 const SizedBox(height: 40),

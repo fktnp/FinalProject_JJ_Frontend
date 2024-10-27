@@ -3,21 +3,27 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
+  final String userId;
   final String name;
   final String email;
   final String phoneNumber;
+  final String profileImageUrl;
 
   User({
+    required this.userId,
     required this.name,
     required this.email,
     required this.phoneNumber,
+    required this.profileImageUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
+      userId: json['user_id'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       phoneNumber: json['phone_number'] ?? '',
+      profileImageUrl: json['profile_image_url'] ?? '',
     );
   }
 }
@@ -32,6 +38,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final Dio _dio = Dio();
   late Future<User> _userFuture;
+  String? _selectedImagePath;
+
+  final List<String> _sampleImages = [
+    'assets/images/image1.png',
+    'assets/images/image2.png',
+    'assets/images/image3.png',
+  ];
 
   Future<User> fetchUserData() async {
     try {
@@ -44,30 +57,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       _dio.options.headers["Authorization"] = "Bearer $token";
 
-      Response response = await _dio.get('http://192.168.1.38:8080/v1/user');
+      Response response = await _dio.get('http://192.168.1.35:8080/v1/user');
 
       if (response.statusCode == 200) {
-        print('Response data: ${response.data}');
+        if (response.data is List && response.data.isNotEmpty) {
+          String? currentUserId = prefs.getString('user_id');
+          var currentUserData = response.data.firstWhere(
+              (user) => user['user_id'] == currentUserId,
+              orElse: () => null);
 
-        if (response.data is List) {
-          if (response.data.isNotEmpty) {
-            String? currentUserId = prefs.getString('user_id');
-            var currentUserData = response.data.firstWhere(
-                (user) => user['user_id'] == currentUserId, orElse: () => null);
-
-            if (currentUserData != null) {
-              return User.fromJson(currentUserData);
-            } else {
-              throw Exception('No matching user found for the current session');
-            }
+          if (currentUserData != null) {
+            return User.fromJson(currentUserData);
           } else {
-            throw Exception('Received an empty list from the API');
+            throw Exception('No matching user found for the current session');
           }
         } else {
-          throw Exception('Expected a list but got ${response.data.runtimeType}');
+          throw Exception('Unexpected data format');
         }
       } else {
-        throw Exception('Failed to load user data: ${response.statusCode} ${response.statusMessage}');
+        throw Exception(
+            'Failed to load user data: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
       throw Exception('Error fetching user data: $e');
@@ -78,6 +87,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _userFuture = fetchUserData();
+    _userFuture.then((user) {
+      _loadSelectedImagePath(user.userId); // Load the image specific to the current user
+    });
+  }
+
+  Future<void> _loadSelectedImagePath(String userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedImagePath = prefs.getString('profile_image_path_$userId') ?? _sampleImages[0];
+    });
+  }
+
+  Future<void> changeProfileImage(String imagePath, String userId) async {
+    setState(() {
+      _selectedImagePath = imagePath;
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path_$userId', imagePath); // Save image path specific to the user
   }
 
   @override
@@ -91,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: const Color(0xFFFFDCBC),
       ),
       body: Container(
-        color: const Color(0xFFFFECDB), // Background color
+        color: const Color(0xFFFFECDB),
         child: FutureBuilder<User>(
           future: _userFuture,
           builder: (context, snapshot) {
@@ -107,26 +135,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: const Color.fromARGB(255, 211, 154, 154),
-                        child: const Icon(Icons.person, size: 50, color: Colors.black54),
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Select Profile Image'),
+                              content: SizedBox(
+                                height: 200,
+                                width: double.maxFinite,
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1,
+                                  ),
+                                  itemCount: _sampleImages.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        changeProfileImage(_sampleImages[index], user.userId);
+                                        Navigator.of(context).pop(); // Close dialog after selecting image
+                                      },
+                                      child: Image.asset(
+                                        _sampleImages[index],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close dialog
+                                  },
+                                  child: const Text('Close'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: _selectedImagePath != null
+                              ? AssetImage(_selectedImagePath!)
+                              : (user.profileImageUrl.isNotEmpty
+                                  ? NetworkImage(user.profileImageUrl) as ImageProvider
+                                  : const AssetImage('assets/default_avatar.png')),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     Center(
-                      child: Text(user.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      child: Text(user.name,
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 20),
-
-                    const Text('Contact', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('Contact',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
                     const Divider(thickness: 1.5, color: Colors.grey),
                     const SizedBox(height: 10),
-
-                    Text('Email: ${user.email}', style: const TextStyle(fontSize: 20)),
+                    Text('Email: ${user.email}',
+                        style: const TextStyle(fontSize: 20)),
                     const SizedBox(height: 10),
-                    Text('Phone: ${user.phoneNumber}', style: const TextStyle(fontSize: 20)),
+                    Text('Phone: ${user.phoneNumber}',
+                        style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               );

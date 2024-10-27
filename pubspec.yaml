@@ -42,6 +42,7 @@ dependencies:
   dio: ^5.0.0
   flutter_datetime_picker: ^1.5.1
   shared_preferences: ^2.3.2
+  image_picker: ^0.8.5+3
 
 dev_dependencies:
   flutter_test:
@@ -53,3 +54,7 @@ flutter:
   assets:
     - lib/Pic/
     - lib/components/trytask.json
+    - assets/images/image1.png
+    - assets/images/image2.png
+    - assets/images/image3.png
+    - assets/default_avatar.png
