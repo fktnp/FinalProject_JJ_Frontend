@@ -41,6 +41,12 @@ class ToDoListState extends State<ToDoList> {
     }
   }
 
+  bool isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
   Future<void> _fetchTasks() async {
     try {
       List<CalendarModel> calendars = await fetchCalendars();
@@ -151,11 +157,12 @@ class ToDoListState extends State<ToDoList> {
           ),
           child: Column(
             children: [
+              Text(currentDateTime.day.toString()),
               const HeadToDo(),
               CurrentDayDateRow(
                 title: "try",
                 onDateChanged: _onDateChanged, // ส่ง callback ไป
-                tragetDateShow: DateTime.now(),
+                tragetDateShow: currentDateTime,
               ),
               ShowListTask(
                 currentDate: currentDateTime,

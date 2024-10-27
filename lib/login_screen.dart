@@ -4,6 +4,7 @@ import 'package:flutter_application_1/main.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
 import 'register_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -51,6 +52,45 @@ class LoginScreen extends StatelessWidget {
           SnackBar(content: Text('Error occurred: ${e.message}')),
         );
       }
+    }
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<void> _loginWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return; // If the user cancels the sign-in
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? token = googleAuth.idToken;
+      print("token google $token");
+      if (token != null) {
+        // Send the token to your Go server
+        // final response = await dio.post(
+        //   'http://10.0.2.2:8080/v1/user/google-login',
+        //   data: {'token': token},
+        // );
+
+        // if (response.statusCode == 200) {
+        //   print('Login successful: ${response.data}');
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const MyHomePage()),
+        //   );
+        // } else {
+        //   print('Login failed: ${response.data}');
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text('Login failed: ${response.data['message']}')),
+        //   );
+        // }
+      }
+    } catch (e) {
+      print('Google Sign-In Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error occurred: $e')),
+      );
     }
   }
 
@@ -129,6 +169,19 @@ class LoginScreen extends StatelessWidget {
                     );
                   },
                 ),
+                ElevatedButton.icon(
+                  icon: Image.asset(
+                    'lib/Pic/googleLogo.png', // อย่าลืมเติมตรงนี้
+                    height: 24,
+                    width: 24,
+                  ),
+                  label: const Text('Sign in with Google'),
+                  onPressed: () => _loginWithGoogle(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                  ),
+                ),
                 const SizedBox(height: 30),
                 IconButton(
                   icon: const Icon(Icons.arrow_forward),
@@ -140,12 +193,12 @@ class LoginScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(10),
                   ),
                   onPressed: () {
+                    // login(context);  // เรียกใช้ฟังก์ชัน login
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const MyHomePage()),
                     );
-                    // login(context); // เรียกใช้ฟังก์ชัน login
                   },
                 ),
               ],

@@ -4,7 +4,7 @@ class CalendarModel {
   final DateTime datePass;
   final bool statusSubJob;
   final String userID;
-  final DateTime DateCalendar;
+  final DateTime dateCalendar;
 
   CalendarModel({
     required this.id,
@@ -12,7 +12,7 @@ class CalendarModel {
     required this.datePass,
     required this.statusSubJob,
     required this.userID,
-    required this.DateCalendar,
+    required this.dateCalendar,
   });
 
   // ฟังก์ชันสำหรับแปลง JSON เป็น CalendarModel
@@ -25,7 +25,7 @@ class CalendarModel {
       statusSubJob: json['StatusSubJob'] ??
           false, // ใช้ 'StatusSubJob' แทน 'statusSubJob'
       userID: json['UserID'] ?? '', // ใช้ 'UserID' แทน 'userID'
-      DateCalendar:
+      dateCalendar:
           DateTime.parse(json['DateCalendar'] ?? '1970-01-01T00:00:00Z'),
     );
   }

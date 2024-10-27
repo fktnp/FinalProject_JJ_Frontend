@@ -69,17 +69,17 @@ class CalendarViewState extends State<MyCalendarView> {
         print("subJobs $subJob");
 
         DateTime current_startTime = DateTime(
-          calendar.DateCalendar.year, // เอาปีจาก calendar
-          calendar.DateCalendar.month, // เอาเดือนจาก calendar
-          calendar.DateCalendar.day, // เอาวันจาก calendar
+          calendar.dateCalendar.year, // เอาปีจาก calendar
+          calendar.dateCalendar.month, // เอาเดือนจาก calendar
+          calendar.dateCalendar.day, // เอาวันจาก calendar
           subJob.startTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
           subJob.startTimeGoal.minute, // เอาเวลานาทีจาก subJob
         );
 
         DateTime current_endTime = DateTime(
-          calendar.DateCalendar.year, // เอาปีจาก calendar
-          calendar.DateCalendar.month, // เอาเดือนจาก calendar
-          calendar.DateCalendar.day, // เอาวันจาก calendar
+          calendar.dateCalendar.year, // เอาปีจาก calendar
+          calendar.dateCalendar.month, // เอาเดือนจาก calendar
+          calendar.dateCalendar.day, // เอาวันจาก calendar
           subJob.lastTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
           subJob.lastTimeGoal.minute, // เอาเวลานาทีจาก subJob
         );
@@ -89,8 +89,8 @@ class CalendarViewState extends State<MyCalendarView> {
           endTime: current_endTime, // ใช้ lastTimeGoal จาก SubJob
           subject: subJob.name, // ใช้ชื่อของ SubJob
           color: subJob.status == 'completed'
-              ? Colors.green
-              : Colors.red, // ใช้สีตามสถานะ
+              ? const Color.fromARGB(255, 190, 255, 201)
+              : const Color.fromARGB(255, 190, 223, 255), // ใช้สีตามสถานะ
           isAllDay: false,
         ));
       }
@@ -176,44 +176,73 @@ class CalendarViewState extends State<MyCalendarView> {
                             onDateChanged: _onDateChanged,
                           ),
                 Expanded(
-                  child: SfCalendar(
-                    timeSlotViewSettings: const TimeSlotViewSettings(
-                      timeTextStyle: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      timeFormat: 'HH:mm',
-                    ),
-                    controller: _calendarController,
-                    view: _currentView == 'day'
-                        ? CalendarView.day
-                        : _currentView == 'month'
-                            ? CalendarView.month
-                            : CalendarView.schedule,
-                    initialDisplayDate: currentDateTime,
-                    headerHeight: 0, // Hide header
-                    onTap: (CalendarTapDetails details) {
-                      if (details.targetElement ==
-                              CalendarElement.calendarCell ||
-                          details.targetElement ==
-                              CalendarElement.appointment) {
-                        // Set the selected date in the controller
-                        _calendarController.displayDate = details.date!;
-                        // _calendarController.selectedDate = DateTime.now();
-                        // Change the view to day
-                        _onViewChanged('day');
-                        // Update the current date
-                        _onDateChanged(details.date!);
-                      }
-                    },
-                    dataSource: _calendarDataSource, // Set the data source here
-                    scheduleViewSettings: const ScheduleViewSettings(
-                      monthHeaderSettings: MonthHeaderSettings(
-                        backgroundColor: Colors.black,
-                        //ไว้แต่งหน้าไอแถบ ดำๆ หน้า  year เพิ่มนะ
-                      ),
-                    ),
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 10),
+                    decoration: const BoxDecoration(
+                        color: Color(0xFFFFECDB),
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20))),
+                    child: SfCalendar(
+                        timeSlotViewSettings: const TimeSlotViewSettings(
+                          timeTextStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          timeFormat: 'HH:mm',
+                        ),
+                        controller: _calendarController,
+                        view: _currentView == 'day'
+                            ? CalendarView.day
+                            : _currentView == 'month'
+                                ? CalendarView.month
+                                : CalendarView.schedule,
+                        initialDisplayDate: currentDateTime,
+                        headerHeight: 0, // Hide header
+                        onTap: (CalendarTapDetails details) {
+                          if (details.targetElement ==
+                                  CalendarElement.calendarCell ||
+                              details.targetElement ==
+                                  CalendarElement.appointment) {
+                            // Set the selected date in the controller
+                            _calendarController.displayDate = details.date!;
+                            // _calendarController.selectedDate = DateTime.now();
+                            // Change the view to day
+                            _onViewChanged('day');
+                            // Update the current date
+                            _onDateChanged(details.date!);
+                          }
+                        },
+                        dataSource:
+                            _calendarDataSource, // Set the data source here
+                        scheduleViewSettings: const ScheduleViewSettings(
+                            appointmentTextStyle: TextStyle(
+                                color: Color.fromARGB(255, 41, 41, 41),
+                                fontWeight: FontWeight.bold),
+                            monthHeaderSettings: MonthHeaderSettings(
+                                backgroundColor: Color(0xFFFFDCBC),
+                                height: 60,
+                                textAlign: TextAlign.center,
+                                monthTextStyle: TextStyle(
+                                  color: Color.fromARGB(255, 41, 41, 41),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                )
+                                //ไว้แต่งหน้าไอแถบ ดำๆ หน้า  year เพิ่มนะ
+                                ),
+                            weekHeaderSettings: WeekHeaderSettings(
+                              weekTextStyle: TextStyle(
+                                  color: Color.fromARGB(255, 41, 41, 41),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            dayHeaderSettings: DayHeaderSettings(
+                                dayTextStyle: TextStyle(
+                                    color: Color.fromARGB(255, 41, 41, 41),
+                                    fontWeight: FontWeight.bold),
+                                dateTextStyle: TextStyle(
+                                    color: Color.fromARGB(255, 41, 41, 41),
+                                    fontWeight: FontWeight.bold)))),
                   ),
                 ),
               ],

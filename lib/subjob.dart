@@ -69,12 +69,12 @@ class AddSubTaskForm {
       "start_date": startDateGoal,
       "last_date": endDateGoal,
       "frequency": selectedFrequency,
-      "frequency_day": selectedFrequency == 'Day'
+      "frequency_day": selectedFrequency == 'daily'
           ? int.parse(frequencyDayController.text)
           : 0,
       "frequency_week":
-          selectedFrequency == 'Week' ? selectedWeekDays.join(",") : '',
-      "frequency_Month": selectedFrequency == 'Month' ? selectedMonthDay : 0,
+          selectedFrequency == 'weekly' ? selectedWeekDays.join(",") : '',
+      "frequency_Month": selectedFrequency == 'monthly' ? selectedMonthDay : 0,
       "head_sub_job_id": "head_sub_job_id", // Ensure this has a valid value
     };
 
