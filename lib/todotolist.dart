@@ -19,7 +19,7 @@ class ToDoListState extends State<ToDoList> {
   Future<List<CalendarModel>> fetchCalendars() async {
     final Dio dio = Dio();
     final response = await dio.get(
-        'http://192.168.1.38:8080/v1/calendar/user/59ae0cbd-c715-4f1a-92cc-f9f192dc2837'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://192.168.1.35:8080/v1/calendar/user/59ae0cbd-c715-4f1a-92cc-f9f192dc2837'); // เปลี่ยน URL ตามที่คุณใช้
     // print(response.statusCode);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -32,7 +32,7 @@ class ToDoListState extends State<ToDoList> {
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
     final response = await dio.get(
-        'http://10.0.2.2:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://192.168.1.35:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);
@@ -87,7 +87,7 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _completeTask(String taskId) async {
     try {
       final response = await _dio.get(
-          'http://192.168.1.38:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
+          'http://192.168.1.35:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
 
       if (response.statusCode == 200) {
         // อัพเดทสถานะของ Task ในตัวแปร tasks

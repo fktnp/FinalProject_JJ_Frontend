@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'login_screen.dart';
-import 'profile.dart'; // เพิ่มการนำเข้า ProfileScreen
+import 'profile.dart'; 
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -11,7 +10,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Dio _dio = Dio();
 
   @override
   Widget build(BuildContext context) {

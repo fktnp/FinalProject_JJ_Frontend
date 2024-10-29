@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<MainTask>> fetchMainTasks() async {
-  final response = await http.get(Uri.parse('http://192.168.1.38:8080/v1/job'));
+  final response = await http.get(Uri.parse('http://192.168.1.35:8080/v1/job'));
 
   if (response.statusCode == 200) {
     final List<dynamic> taskListJson = jsonDecode(response.body);

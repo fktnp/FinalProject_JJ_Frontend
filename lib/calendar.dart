@@ -35,7 +35,7 @@ class CalendarViewState extends State<MyCalendarView> {
     final Dio dio = Dio();
     String uerid = "59ae0cbd-c715-4f1a-92cc-f9f192dc2837";
     final response = await dio.get(
-        'http://192.168.1.38:8080/v1/calendar/user/$uerid'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://192.168.1.35:8080/v1/calendar/user/$uerid'); // เปลี่ยน URL ตามที่คุณใช้
     // print(response.statusCode);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -48,7 +48,7 @@ class CalendarViewState extends State<MyCalendarView> {
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
     final response = await dio.get(
-        'http://192.168.1.38:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://192.168.1.35:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);

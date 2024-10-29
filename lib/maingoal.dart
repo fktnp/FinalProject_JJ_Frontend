@@ -71,7 +71,7 @@ class AddFromGoal {
     // Make the API call to save the task
     try {
       var response = await Dio().post(
-        'http://192.168.1.38:8080/v1/job',
+        'http://192.168.1.35:8080/v1/job',
         data: data,
       );
       print(response.data);
