@@ -1,26 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class User {
-  final String name;
-  final String email;
-  final String phoneNumber;
-
-  User({
-    required this.name,
-    required this.email,
-    required this.phoneNumber,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phoneNumber: json['phone_number'] ?? '',
-    );
-  }
-}
+import 'model/theme.dart';
+import 'model/usermodel.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -55,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             var currentUserData = response.data.firstWhere(
                 (user) => user['user_id'] == currentUserId,
                 orElse: () => null);
+            print(currentUserId);
 
             if (currentUserData != null) {
               return User.fromJson(currentUserData);
@@ -85,16 +68,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
         title: const Align(
           alignment: Alignment.centerRight,
           child: Text('Profile'),
         ),
-        backgroundColor: const Color(0xFFFFDCBC),
+        backgroundColor: pastel.pastel1,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB), // Background color
+        color: pastel.pastel2, // Background color
         child: FutureBuilder<User>(
           future: _userFuture,
           builder: (context, snapshot) {
@@ -112,10 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Center(
                       child: CircleAvatar(
                         radius: 40,
-                        backgroundColor:
-                            Color.fromARGB(255, 211, 154, 154),
-                        child: Icon(Icons.person,
-                            size: 50, color: Colors.black54),
+                        backgroundColor: Color.fromARGB(255, 211, 154, 154),
+                        child:
+                            Icon(Icons.person, size: 50, color: Colors.black54),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -125,16 +108,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               fontSize: 24, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Contact',
+                    Text('Contact',
                         style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: pastel.pastelFont)),
                     const Divider(thickness: 1.5, color: Colors.grey),
                     const SizedBox(height: 10),
                     Text('Email: ${user.email}',
-                        style: const TextStyle(fontSize: 20)),
+                        style:
+                            TextStyle(fontSize: 20, color: pastel.pastelFont)),
                     const SizedBox(height: 10),
                     Text('Phone: ${user.phoneNumber}',
-                        style: const TextStyle(fontSize: 20)),
+                        style:
+                            TextStyle(fontSize: 20, color: pastel.pastelFont)),
                   ],
                 ),
               );

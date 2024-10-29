@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'model/theme.dart';
+
 class AddSubTaskForm {
   final BuildContext context;
   final String jobId;
@@ -39,43 +41,58 @@ class AddSubTaskForm {
       return; // Handle the case where fields are empty
     }
 
-    DateTime startDateWithTime = DateTime(
-      selectedStartDate!.year,
-      selectedStartDate!.month,
-      selectedStartDate!.day,
-      selectedStartTime?.hour ?? 8,
-      selectedStartTime?.minute ?? 0,
-    ).toLocal();
-
-    DateTime endDateWithTime = DateTime(
-      selectedEndDate!.year,
-      selectedEndDate!.month,
-      selectedEndDate!.day,
-      selectedEndTime?.hour ?? 8,
-      selectedEndTime?.minute ?? 0,
-    ).toLocal();
-
-    String startDateGoal = _convertToISO8601WithOffset(startDateWithTime);
-    String endDateGoal = _convertToISO8601WithOffset(endDateWithTime);
-
     Map<String, dynamic> data = {
       "job_id": jobId,
       "user_id": userId,
       "name": taskNameController.text,
       "status": "Pending",
       "details": "",
-      "start_time_goal": startDateGoal,
-      "last_time_goal": endDateGoal,
-      "start_date": startDateGoal,
-      "last_date": endDateGoal,
+
+      // ส่ง start_time_goal และ last_time_goal เป็น map ที่มี hour และ minute
+      "start_time_goal": {
+        "hour": selectedStartTime?.hour ?? 8,
+        "minute": selectedStartTime?.minute ?? 0,
+      },
+      "last_time_goal": {
+        "hour": selectedEndTime?.hour ?? 8,
+        "minute": selectedEndTime?.minute ?? 0,
+      },
+
+      // ส่ง start_date และ last_date เป็น map ที่มี day, month, year
+      "start_date": {
+        "day": selectedStartDate!.day,
+        "month": selectedStartDate!.month,
+        "year": selectedStartDate!.year,
+      },
+      "last_date": {
+        "day": selectedEndDate!.day,
+        "month": selectedEndDate!.month,
+        "year": selectedEndDate!.year,
+      },
+
       "frequency": selectedFrequency,
       "frequency_day": selectedFrequency == 'daily'
           ? int.parse(frequencyDayController.text)
           : 0,
-      "frequency_week":
-          selectedFrequency == 'weekly' ? selectedWeekDays.join(",") : '',
-      "frequency_Month": selectedFrequency == 'monthly' ? selectedMonthDay : 0,
-      "head_sub_job_id": "head_sub_job_id", // Ensure this has a valid value
+
+      // เปลี่ยน frequency_week และ frequency_Month ให้เป็นลิสต์
+      "frequency_week": selectedFrequency == 'weekly'
+          ? selectedWeekDays
+              .map((index) => [
+                    'Sunday',
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday'
+                  ][index])
+              .toList()
+          : [],
+      "frequency_Month":
+          selectedFrequency == 'monthly' ? [selectedMonthDay] : [],
+
+      "head_sub_job_id": "headSub123", // Ensure this has a valid value
     };
 
     try {
@@ -84,6 +101,7 @@ class AddSubTaskForm {
         data: data,
       );
       print(response.data);
+      print(data);
     } on DioException catch (e) {
       if (e.response != null) {
         print('Error status code: ${e.response?.statusCode}');
@@ -101,6 +119,7 @@ class AddSubTaskForm {
   }
 
   void show() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -116,9 +135,9 @@ class AddSubTaskForm {
                       bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFECDB),
-                        borderRadius: BorderRadius.only(
+                      decoration: BoxDecoration(
+                        color: pastel.pastel2,
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
                         ),
@@ -220,23 +239,24 @@ class AddSubTaskForm {
   }
 
   Widget _buildHeader() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(15),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFDCBC),
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: pastel.pastel1,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           'Add Sub Goal',
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: pastel.pastelFont),
         ),
       ),
     );

@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
-import 'sub_components_calendar/DayDateRow.dart';
+import 'model/theme.dart';
+import 'sub_components_calendar/daydaterow.dart';
 
 class ToDoList extends StatefulWidget {
   const ToDoList({super.key});
@@ -139,18 +140,19 @@ class ToDoListState extends State<ToDoList> {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Container(
-      color: const Color(0xFFFFECDB),
+      color: pastel.pastel2,
       child: Padding(
         padding: EdgeInsets.only(top: screenHeight * 0.05),
         child: Container(
           width: screenWidth,
           height: screenHeight * 0.95,
           alignment: AlignmentDirectional.topCenter,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFFDCBC),
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: pastel.pastel1,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(30),
               topRight: Radius.circular(30),
             ),
@@ -188,20 +190,20 @@ class HeadToDo extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: EdgeInsets.only(top: screenHeight * 0.01),
       padding: EdgeInsets.fromLTRB(screenWidth * 0.08, screenHeight * 0.01,
           screenWidth * 0.08, screenHeight * 0.01),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         "Task For A Day",
         style: TextStyle(
           fontSize: screenHeight * 0.03,
-          color: const Color.fromARGB(255, 26, 26, 26),
+          color: pastel.pastelFont,
           decoration: TextDecoration.none,
         ),
       ),
@@ -230,12 +232,12 @@ class ShowListTask extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Expanded(
         child: Container(
       width: screenWidth,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(screenWidth * 0.06),
           topRight: Radius.circular(screenWidth * 0.06),

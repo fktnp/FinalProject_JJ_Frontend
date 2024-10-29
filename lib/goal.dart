@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
+import 'model/theme.dart';
 import 'taskdetail.dart';
-import 'task.dart';
+import 'model/mainjobmodel.dart';
 
 class GoalsPage extends StatefulWidget {
   const GoalsPage({super.key});
@@ -24,16 +27,53 @@ class _GoalsPageState extends State<GoalsPage> {
   ];
 
   String? selectedGoal;
+  String? userId;
 
-  late Future<List<MainTask>> futureTasks;
+  late Future<List<MainJobModel>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchMainTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+    _readUserIdFromSharedPrefs().then((id) {
+      if (id != null) {
+        print(id);
+        userId = id;
+        futureTasks = fetchMainJobModels(); // Call after userId is available
+      } else {
+        // Handle case where user_id is not found
+        print('Error: user_id not found in SharedPreferences');
+      }
+    });
   }
 
-  List<MainTask> filterTasks(List<MainTask> tasks, String? selectedGoal) {
+  Future<List<MainJobModel>> fetchMainJobModels() async {
+    if (userId == null) {
+      // Handle case where user_id is not available
+      throw Exception('user_id is not available');
+    }
+
+    final Dio dio = Dio();
+    final String url = 'http://10.0.2.2:8080/v1/job/user/$userId';
+    final response = await dio.get(url);
+    if (userId == null) {
+      // Handle case where user_id is not found
+      throw Exception('user_id is not available');
+    } else if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      print('this is from server : $taskListJson');
+      return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
+
+  Future<String?> _readUserIdFromSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_id');
+  }
+
+  List<MainJobModel> filterTasks(
+      List<MainJobModel> tasks, String? selectedGoal) {
     if (selectedGoal == null) return [];
     return tasks
         .where((task) => task.category == selectedGoal)
@@ -42,14 +82,15 @@ class _GoalsPageState extends State<GoalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFDCBC),
+        backgroundColor: pastel.pastel1,
         title: Align(
           alignment: Alignment.centerRight,
           child: Text(
             selectedGoal == null ? 'Goals' : selectedGoal!,
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: pastel.pastelFont),
           ),
         ),
         automaticallyImplyLeading: selectedGoal != null,
@@ -65,9 +106,9 @@ class _GoalsPageState extends State<GoalsPage> {
             : null,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<MainTask>>(
+        child: FutureBuilder<List<MainJobModel>>(
             future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -105,12 +146,12 @@ class _GoalsPageState extends State<GoalsPage> {
                                   },
                                   child: Text(
                                     '$goal Planning',
-                                    style: const TextStyle(fontSize: 18),
+                                    style: TextStyle(
+                                        fontSize: 18, color: pastel.pastelFont),
                                   ),
                                 ),
-                                backgroundColor: const Color(0xFFFFDCBC),
-                                collapsedBackgroundColor:
-                                    const Color(0xFFFFDCBC),
+                                backgroundColor: pastel.pastel1,
+                                collapsedBackgroundColor: pastel.pastel1,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
@@ -147,7 +188,7 @@ class _GoalsPageState extends State<GoalsPage> {
 }
 
 class GoalTask extends StatelessWidget {
-  final MainTask task;
+  final MainJobModel task;
   const GoalTask({super.key, required this.task});
 
   @override
@@ -155,10 +196,10 @@ class GoalTask extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       width: MediaQuery.of(context).size.width * 0.93,
-      color: const Color.fromARGB(255, 251, 197, 255),
+      color: pastel.pastel2,
       child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
@@ -173,7 +214,8 @@ class GoalTask extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TaskDetailPage(maintask: task),
+                          builder: (context) =>
+                              TaskDetailPage(mainJobModel: task),
                         ),
                       );
                     },
@@ -181,7 +223,8 @@ class GoalTask extends StatelessWidget {
                       children: [
                         Text(
                           task.name,
-                          style: const TextStyle(fontSize: 22),
+                          style:
+                              TextStyle(fontSize: 22, color: pastel.pastelFont),
                         ),
                         const SizedBox(
                           width: 20,
@@ -191,7 +234,7 @@ class GoalTask extends StatelessWidget {
                   ),
                   Text(
                     '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: pastel.pastelFont),
                   ),
                 ],
               ),
@@ -202,7 +245,7 @@ class GoalTask extends StatelessWidget {
                   lineWidth: screenWidth * 0.014,
                   percent: task.percentProgress / 100,
                   center: Text('${task.percentProgress.toString()}%'),
-                  progressColor: const Color.fromARGB(255, 92, 216, 97),
+                  progressColor: pastel.pastelProgress,
                   backgroundColor: const Color.fromARGB(82, 0, 0, 0),
                 ),
               )
@@ -214,8 +257,8 @@ class GoalTask extends StatelessWidget {
 
 class GoalSection extends StatelessWidget {
   final String goal;
-  final List<MainTask> tasks;
-  final List<MainTask> filteredTasks;
+  final List<MainJobModel> tasks;
+  final List<MainJobModel> filteredTasks;
   final bool conditionToShowButton;
 
   const GoalSection({
@@ -228,12 +271,13 @@ class GoalSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Stack(
       children: [
         Column(
           children: [
             Card(
-              color: const Color(0xFFFFDCBC),
+              color: pastel.pastel1,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
@@ -244,7 +288,7 @@ class GoalSection extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
                 title: Text(
                   '$goal Planning',
-                  style: const TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 18, color: pastel.pastelFont),
                 ),
               ),
             ),

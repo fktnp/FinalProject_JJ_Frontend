@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-// import 'login_screen.dart';
+import 'model/theme.dart';
 import 'main.dart';
 import 'profile.dart';
 import 'themepage.dart'; // เพิ่มการนำเข้า ProfileScreen
@@ -14,32 +13,31 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Dio _dio = Dio();
-
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFDCBC),
-        title: const Align(
+        backgroundColor: pastel.pastel1,
+        title: Align(
           alignment: Alignment.centerRight,
           child: Text(
             'Settings',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: pastel.pastelFont),
             textAlign: TextAlign.right,
           ),
         ),
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         child: Column(
           children: [
             ListTile(
               leading: const Icon(Icons.person, size: 50),
-              title: const Text(
+              title: Text(
                 'Profile',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
               ),
               onTap: () {
                 Navigator.push(
@@ -52,9 +50,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 30),
             ListTile(
               leading: const Icon(Icons.palette, size: 50),
-              title: const Text(
+              title: Text(
                 'Theme',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
               ),
               onTap: () {
                 Navigator.push(context,
@@ -64,9 +62,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const Spacer(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, size: 50),
-              title: const Text(
+              title: Text(
                 'Sign out',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
               ),
               onTap: () {
                 showDialog(

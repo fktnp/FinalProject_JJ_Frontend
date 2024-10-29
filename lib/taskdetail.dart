@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'components/custom_button.dart';
+import 'model/theme.dart';
+import 'model/subjobmodel.dart';
 import 'subjob.dart';
-import 'task.dart';
+import 'model/mainjobmodel.dart';
 
 class TaskDetailPage extends StatelessWidget {
-  final MainTask maintask;
+  final MainJobModel mainJobModel;
 
-  const TaskDetailPage({super.key, required this.maintask});
+  const TaskDetailPage({super.key, required this.mainJobModel});
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
-      backgroundColor: const Color(0xFFFFECDB),
+      backgroundColor: pastel.pastel2,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFDCBC),
-        title: const Align(
+        backgroundColor: pastel.pastel1,
+        title: Align(
           alignment: Alignment.centerRight,
           child: Text(
             'Goal',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: pastel.pastelFont),
           ),
         ),
         automaticallyImplyLeading: false,
@@ -43,14 +45,16 @@ class TaskDetailPage extends StatelessWidget {
             children: [
               // แสดงชื่อของเป้าหมาย
               Text(
-                maintask.name,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                mainJobModel.name,
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: pastel.pastelFont),
               ),
               const SizedBox(height: 10),
               Text(
-                'Date : ${maintask.startTimeGoal.day.toString()}/${maintask.startTimeGoal.month.toString()}/${maintask.startTimeGoal.year.toString()} - ${maintask.lastTimeGoal.day.toString()}/${maintask.lastTimeGoal.month.toString()}/${maintask.lastTimeGoal.year.toString()}',
-                style: const TextStyle(fontSize: 16),
+                'Date : ${mainJobModel.startTimeGoal.day.toString()}/${mainJobModel.startTimeGoal.month.toString()}/${mainJobModel.startTimeGoal.year.toString()} - ${mainJobModel.lastTimeGoal.day.toString()}/${mainJobModel.lastTimeGoal.month.toString()}/${mainJobModel.lastTimeGoal.year.toString()}',
+                style: TextStyle(fontSize: 16, color: pastel.pastelFont),
               ),
               const SizedBox(height: 10),
 
@@ -103,7 +107,9 @@ class TaskDetailPage extends StatelessWidget {
                                     // แสดงชั่วโมง
                                     Text(
                                       '${index.toString().padLeft(2, '0')}.00',
-                                      style: const TextStyle(fontSize: 16),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: pastel.pastelFont),
                                     ),
                                     // เส้นขีด
                                     Expanded(
@@ -126,27 +132,20 @@ class TaskDetailPage extends StatelessWidget {
                         Container(
                           // padding: const EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFDCBC), // สีพื้นหลัง
+                            color: pastel.pastel1, // สีพื้นหลัง
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: FutureBuilder<List<SubJob>>(
+                          child: FutureBuilder<List<SubJobModel>>(
                             future: fetchSubTasks(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return const Center(
                                     child: CircularProgressIndicator());
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('Error: ${snapshot.error}'));
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Center(
-                                    child: Text('No tasks found'));
                               } else {
-                                final subtask = snapshot.data!.where(
-                                    (subtask) =>
-                                        (subtask.jobId == maintask.jobId));
+                                final tasks = snapshot.data ?? [];
+                                final subtask = tasks.where((subtask) =>
+                                    (subtask.jobId == mainJobModel.jobId));
 
                                 return Padding(
                                   padding: EdgeInsets.fromLTRB(
@@ -182,8 +181,8 @@ class TaskDetailPage extends StatelessWidget {
                         onPressed: () {
                           AddSubTaskForm(
                                   context: context,
-                                  jobId: maintask.jobId,
-                                  userId: maintask.userId)
+                                  jobId: mainJobModel.jobId,
+                                  userId: mainJobModel.userId)
                               .show();
                         },
                       ),
@@ -200,7 +199,7 @@ class TaskDetailPage extends StatelessWidget {
 }
 
 class SubTaskBox extends StatelessWidget {
-  final SubJob subtask;
+  final SubJobModel subtask;
 
   const SubTaskBox({
     super.key,
@@ -212,7 +211,7 @@ class SubTaskBox extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
         width: screenWidth * 0.98,
         height: screenHeight * 0.11,
@@ -234,13 +233,15 @@ class SubTaskBox extends StatelessWidget {
               children: [
                 Text(
                   subtask.name,
-                  style: TextStyle(fontSize: screenWidth * 0.065),
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.065, color: pastel.pastelFont),
                 ),
                 const SizedBox(height: 5),
                 // Show the start and end date in one line
                 Text(
                   '${subtask.startDate.day}/${subtask.startDate.month}/${subtask.startDate.year} - ${subtask.lastDate.day}/${subtask.lastDate.month}/${subtask.lastDate.year}',
-                  style: TextStyle(fontSize: screenWidth * 0.035),
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.035, color: pastel.pastelFont),
                 ),
               ],
             ),
@@ -249,7 +250,7 @@ class SubTaskBox extends StatelessWidget {
               lineWidth: screenWidth * 0.014,
               percent: subtask.percentProgress / 100,
               center: Text('${subtask.percentProgress.toString()}%'),
-              progressColor: const Color.fromARGB(255, 92, 216, 97),
+              progressColor: pastel.pastelProgress,
               backgroundColor: const Color.fromARGB(82, 0, 0, 0),
             ),
           ],

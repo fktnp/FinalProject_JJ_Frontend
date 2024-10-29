@@ -4,7 +4,7 @@ import 'package:flutter_application_1/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
-import 'components/theme.dart';
+import 'model/theme.dart';
 import 'register_screen.dart';
 // import 'google_auth_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
