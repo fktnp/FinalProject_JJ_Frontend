@@ -5,8 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
 import 'register_screen.dart';
-import 'google_auth_service.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -18,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Dio dio = Dio();
-  final GoogleAuthService _googleAuthService = GoogleAuthService();
   String? _passwordError;
 
   Future<void> login(BuildContext context) async {
@@ -154,20 +151,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       horizontal: 15.0,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.google,
-                      size: 30, color: Colors.black),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFECDB),
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  onPressed: () {
-                    _googleAuthService.signInWithGoogle(
-                        context); // เรียกฟังก์ชัน signInWithGoogle
-                  },
                 ),
                 const SizedBox(height: 40),
                 CustomButton(
