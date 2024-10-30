@@ -1,17 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-Future<List<SubJobModel>> fetchSubTasks() async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:8080/v1/subjob'));
-
-  if (response.statusCode == 200) {
-    final List<dynamic> taskListJson = jsonDecode(response.body);
-    return taskListJson.map((json) => SubJobModel.fromJson(json)).toList();
-  } else {
-    throw Exception('Failed to load tasks');
-  }
-}
-
 class SubJobModel {
   final String jobId;
   final String userId;

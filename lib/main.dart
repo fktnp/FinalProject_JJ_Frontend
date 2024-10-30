@@ -32,7 +32,12 @@ class MyApps extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final String userId; // เพิ่ม userId parameter
+
+  const MyHomePage({
+    super.key,
+    required this.userId, // รับ userId จาก constructor
+  });
 
   @override
   MyHomePageState createState() => MyHomePageState();
@@ -49,19 +54,10 @@ class MyHomePageState extends State<MyHomePage> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          SettingsPage(),
-          MyCalendarView(),
-          ToDoList(),
-          GoalsPage(),
-          TaskListPage(),
-        ],
-      ),
+      body: _getPage(_currentIndex), // ใช้ฟังก์ชันแยกหน้าแทน IndexedStack
       bottomNavigationBar: SafeArea(
         child: SizedBox(
-          height: screenHeight * 0.08, // ความสูงลดลงให้พอดี
+          height: screenHeight * 0.08,
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: _currentIndex,
@@ -179,5 +175,22 @@ class MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return SettingsPage(userId: widget.userId);
+      case 1:
+        return MyCalendarView(userId: widget.userId);
+      case 2:
+        return ToDoList(userId: widget.userId);
+      case 3:
+        return GoalsPage(userId: widget.userId);
+      case 4:
+        return const TaskListPage();
+      default:
+        return const TaskListPage();
+    }
   }
 }

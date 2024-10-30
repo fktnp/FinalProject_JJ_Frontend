@@ -5,8 +5,9 @@ import 'profile.dart';
 import 'themepage.dart'; // เพิ่มการนำเข้า ProfileScreen
 
 class SettingsPage extends StatefulWidget {
+  final String userId;
   const SettingsPage({
-    super.key,
+    super.key, required this.userId,
   });
   @override
   _SettingsPageState createState() => _SettingsPageState();

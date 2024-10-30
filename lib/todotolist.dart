@@ -6,7 +6,8 @@ import 'model/theme.dart';
 import 'sub_components_calendar/daydaterow.dart';
 
 class ToDoList extends StatefulWidget {
-  const ToDoList({super.key});
+  final String userId;
+  const ToDoList({super.key, required this.userId});
 
   @override
   ToDoListState createState() => ToDoListState();
@@ -19,9 +20,9 @@ class ToDoListState extends State<ToDoList> {
 
   Future<List<CalendarModel>> fetchCalendars() async {
     final Dio dio = Dio();
-    final response = await dio.get(
-        'http://10.0.2.2:8080/v1/calendar/user/59ae0cbd-c715-4f1a-92cc-f9f192dc2837'); // เปลี่ยน URL ตามที่คุณใช้
-    // print(response.statusCode);
+    final String url =
+        'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}'; // เปลี่ยน URL ตามที่คุณใช้
+    final response = await dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
       return data.map((item) => CalendarModel.fromJson(item)).toList();

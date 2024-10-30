@@ -2,14 +2,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'model/theme.dart';
 import 'taskdetail.dart';
 import 'model/mainjobmodel.dart';
 
 class GoalsPage extends StatefulWidget {
-  const GoalsPage({super.key});
+  final String userId; // เพิ่ม userId parameter
+
+  const GoalsPage({
+    super.key,
+    required this.userId, // รับ userId จาก constructor
+  });
 
   @override
   State<GoalsPage> createState() => _GoalsPageState();
@@ -27,49 +31,27 @@ class _GoalsPageState extends State<GoalsPage> {
   ];
 
   String? selectedGoal;
-  String? userId;
-
   late Future<List<MainJobModel>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    _readUserIdFromSharedPrefs().then((id) {
-      if (id != null) {
-        print(id);
-        userId = id;
-        futureTasks = fetchMainJobModels(); // Call after userId is available
-      } else {
-        // Handle case where user_id is not found
-        print('Error: user_id not found in SharedPreferences');
-      }
-    });
+    // ใช้ widget.userId โดยตรงในการ fetch ข้อมูล
+    futureTasks = fetchMainJobModels();
   }
 
   Future<List<MainJobModel>> fetchMainJobModels() async {
-    if (userId == null) {
-      // Handle case where user_id is not available
-      throw Exception('user_id is not available');
-    }
-
     final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/job/user/$userId';
+    final String url = 'http://10.0.2.2:8080/v1/job/user/${widget.userId}';
     final response = await dio.get(url);
-    if (userId == null) {
-      // Handle case where user_id is not found
-      throw Exception('user_id is not available');
-    } else if (response.statusCode == 200) {
+
+    if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
       print('this is from server : $taskListJson');
       return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load tasks');
     }
-  }
-
-  Future<String?> _readUserIdFromSharedPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('user_id');
   }
 
   List<MainJobModel> filterTasks(
@@ -162,7 +144,7 @@ class _GoalsPageState extends State<GoalsPage> {
                                 ),
                                 children: showTask.isNotEmpty
                                     ? showTask
-                                        .map((task) => GoalTask(task: task))
+                                        .map((task) => GoalTask(task: task, loginuserid: widget.userId,))
                                         .toList()
                                     : [
                                         const Padding(
@@ -177,6 +159,7 @@ class _GoalsPageState extends State<GoalsPage> {
                       )
                     : GoalSection(
                         goal: selectedGoal!,
+                        loginuserid: widget.userId,
                         tasks: tasks,
                         filteredTasks: filteredTasks,
                       );
@@ -188,8 +171,9 @@ class _GoalsPageState extends State<GoalsPage> {
 }
 
 class GoalTask extends StatelessWidget {
+  final String loginuserid;
   final MainJobModel task;
-  const GoalTask({super.key, required this.task});
+  const GoalTask({super.key, required this.task,required this.loginuserid});
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +199,7 @@ class GoalTask extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TaskDetailPage(mainJobModel: task),
+                              TaskDetailPage(mainJobModel: task ,loginuserid : loginuserid),
                         ),
                       );
                     },
@@ -257,6 +241,7 @@ class GoalTask extends StatelessWidget {
 
 class GoalSection extends StatelessWidget {
   final String goal;
+  final String loginuserid;
   final List<MainJobModel> tasks;
   final List<MainJobModel> filteredTasks;
   final bool conditionToShowButton;
@@ -264,6 +249,7 @@ class GoalSection extends StatelessWidget {
   const GoalSection({
     super.key,
     required this.goal,
+    required this.loginuserid,
     required this.tasks,
     required this.filteredTasks,
     this.conditionToShowButton = true,
@@ -293,7 +279,7 @@ class GoalSection extends StatelessWidget {
               ),
             ),
             if (filteredTasks.isNotEmpty)
-              ...filteredTasks.map((task) => GoalTask(task: task)),
+              ...filteredTasks.map((task) => GoalTask(task: task,loginuserid:loginuserid)),
           ],
         ),
         if (conditionToShowButton)
@@ -302,7 +288,9 @@ class GoalSection extends StatelessWidget {
             right: 10,
             child: FixedBottomButton(
               onPressed: () {
-                AddFromGoal(context: context, goal: goal).show();
+                AddFromGoal(
+                        context: context, goal: goal, loginuserid: loginuserid)
+                    .show();
               },
             ),
           ),

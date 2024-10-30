@@ -6,11 +6,12 @@ import 'model/theme.dart';
 
 class AddFromGoal {
   final BuildContext context;
+  final String loginuserid;
   final String goal;
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController detailController = TextEditingController();
 
-  AddFromGoal({required this.context, required this.goal});
+  AddFromGoal({required this.context, required this.goal,required this.loginuserid});
 
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
@@ -28,8 +29,7 @@ class AddFromGoal {
     }
 
     // Gather the necessary information
-    String userId =
-        "59ae0cbd-c715-4f1a-92cc-f9f192dc2837"; // Replace with actual user ID
+    String userId = loginuserid;
     String taskName =
         taskNameController.text; // Get task name from the input field
     String status = "Pending"; // Default status
@@ -100,6 +100,7 @@ class AddFromGoal {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Header
+                      Text(loginuserid),
                       _buildHeader(),
                       const SizedBox(height: 20),
                       Padding(

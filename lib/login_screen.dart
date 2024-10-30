@@ -45,22 +45,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (response.statusCode == 200) {
           print('Login successful: ${response.data}');
+          String userId = response.data['user_id'];
 
-          // เก็บ token และข้อมูลผู้ใช้ใน SharedPreferences
+          // เก็บข้อมูลใน SharedPreferences เหมือนเดิม
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', response.data['token'] ?? '');
-          await prefs.setString('user_id', response.data['user_id'] ?? '');
+          await prefs.setString('user_id', userId);
           await prefs.setString('user_name', response.data['name'] ?? '');
           await prefs.setString('user_email', response.data['email'] ?? '');
           await prefs.setString(
               'user_phone', response.data['phone_number'] ?? '');
 
           setState(() {
-            _passwordError = null; // Clear any previous error
+            _passwordError = null;
           });
+
+          // ส่ง userId ไปยัง MyHomePage
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MyHomePage()),
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(userId: userId),
+            ),
           );
         } else {
           setState(() {

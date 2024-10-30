@@ -14,6 +14,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final Dio _dio = Dio();
   late Future<User> _userFuture;
+  String? _selectedImagePath;
+
+  final List<String> _sampleImages = [
+    'assets/images/image1.png',
+    'assets/images/image2.png',
+    'assets/images/image3.png',
+  ];
 
   Future<User> fetchUserData() async {
     try {
@@ -26,30 +33,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       _dio.options.headers["Authorization"] = "Bearer $token";
 
-      Response response = await _dio.get('http://10.0.2.2:8080/v1/user');
+      Response response = await _dio.get('http://192.168.1.35:8080/v1/user');
 
       if (response.statusCode == 200) {
-        print('Response data: ${response.data}');
+        if (response.data is List && response.data.isNotEmpty) {
+          String? currentUserId = prefs.getString('user_id');
+          var currentUserData = response.data.firstWhere(
+              (user) => user['user_id'] == currentUserId,
+              orElse: () => null);
 
-        if (response.data is List) {
-          if (response.data.isNotEmpty) {
-            String? currentUserId = prefs.getString('user_id');
-            var currentUserData = response.data.firstWhere(
-                (user) => user['user_id'] == currentUserId,
-                orElse: () => null);
-            print(currentUserId);
-
-            if (currentUserData != null) {
-              return User.fromJson(currentUserData);
-            } else {
-              throw Exception('No matching user found for the current session');
-            }
+          if (currentUserData != null) {
+            return User.fromJson(currentUserData);
           } else {
-            throw Exception('Received an empty list from the API');
+            throw Exception('No matching user found for the current session');
           }
         } else {
-          throw Exception(
-              'Expected a list but got ${response.data.runtimeType}');
+          throw Exception('Unexpected data format');
         }
       } else {
         throw Exception(
@@ -64,6 +63,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _userFuture = fetchUserData();
+    _userFuture.then((user) {
+      _loadSelectedImagePath(
+          user.userId); // Load the image specific to the current user
+    });
+  }
+
+  Future<void> _loadSelectedImagePath(String userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedImagePath =
+          prefs.getString('profile_image_path_$userId') ?? _sampleImages[0];
+    });
+  }
+
+  Future<void> changeProfileImage(String imagePath, String userId) async {
+    setState(() {
+      _selectedImagePath = imagePath;
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path_$userId',
+        imagePath); // Save image path specific to the user
   }
 
   @override
@@ -78,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: pastel.pastel1,
       ),
       body: Container(
-        color: pastel.pastel2, // Background color
+        color: pastel.pastel2,
         child: FutureBuilder<User>(
           future: _userFuture,
           builder: (context, snapshot) {
@@ -93,19 +114,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Color.fromARGB(255, 211, 154, 154),
-                        child:
-                            Icon(Icons.person, size: 50, color: Colors.black54),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Select Profile Image'),
+                              content: SizedBox(
+                                height: 200,
+                                width: double.maxFinite,
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1,
+                                  ),
+                                  itemCount: _sampleImages.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        changeProfileImage(
+                                            _sampleImages[index], user.userId);
+                                        Navigator.of(context)
+                                            .pop(); // Close dialog after selecting image
+                                      },
+                                      child: Image.asset(
+                                        _sampleImages[index],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close dialog
+                                  },
+                                  child: const Text('Close'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: _selectedImagePath != null
+                              ? AssetImage(_selectedImagePath!)
+                              : (user.profileImageUrl.isNotEmpty
+                                  ? NetworkImage(user.profileImageUrl)
+                                      as ImageProvider
+                                  : const AssetImage(
+                                      'assets/default_avatar.png')),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(user.name,
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: pastel.pastelFont)),
                     ),
                     const SizedBox(height: 20),
                     Text('Contact',

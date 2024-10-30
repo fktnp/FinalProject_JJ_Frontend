@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'components/custom_button.dart';
@@ -8,8 +9,22 @@ import 'model/mainjobmodel.dart';
 
 class TaskDetailPage extends StatelessWidget {
   final MainJobModel mainJobModel;
+  final String loginuserid;
 
-  const TaskDetailPage({super.key, required this.mainJobModel});
+  const TaskDetailPage(
+      {super.key, required this.mainJobModel, required this.loginuserid});
+
+  Future<List<SubJobModel>> fetchSubTasks() async {
+    final Dio dio = Dio();
+    final String url = 'http://10.0.2.2:8080/v1/subjob/user/$loginuserid';
+    final response = await dio.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      return taskListJson.map((json) => SubJobModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

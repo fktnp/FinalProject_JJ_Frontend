@@ -5,13 +5,12 @@ import 'package:flutter_application_1/model/subJobModel.dart';
 import 'package:flutter_application_1/sub_components_calendar/daydaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/monthdaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/yeardaterow.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
 import 'model/theme.dart';
 
 class MyCalendarView extends StatefulWidget {
-  const MyCalendarView({super.key});
+  final String userId;
+  const MyCalendarView({super.key, required this.userId});
 
   @override
   CalendarViewState createState() => CalendarViewState();
@@ -19,44 +18,23 @@ class MyCalendarView extends StatefulWidget {
 
 class CalendarViewState extends State<MyCalendarView> {
   String _currentView = 'day';
-  String? userId;
   late DateTime currentDateTime;
   late CalendarController _calendarController;
-  late CalendarDataSource _calendarDataSource; // Declare a CalendarDataSource
+  late CalendarDataSource _calendarDataSource;
+  Future<void>? _initializationFuture;
 
   @override
   void initState() {
     super.initState();
     currentDateTime = DateTime.now();
     _calendarController = CalendarController();
-    _calendarDataSource =
-        AppointmentDataSource([]); // Initialize with empty data
-    _readUserIdFromSharedPrefs();
-    _generateSampleTasks(); // Create sample tasks
-  }
-
-  Future<void> _readUserIdFromSharedPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('user_id');
-
-    if (userId == null) {
-      // Handle case where user_id is not found
-      print('Error: user_id not found in SharedPreferences');
-    } else {
-      // userId is available, proceed with API call
-      print('user_id: $userId');
-    }
+    _calendarDataSource = AppointmentDataSource([]);
+    _initializationFuture = _generateSampleTasks();
   }
 
   Future<List<CalendarModel>> fetchCalendarData() async {
     final Dio dio = Dio();
-    final String url =
-        'http://10.0.2.2:8080/v1/calendar/user/$userId'; // แทนที่ด้วย URL จริง
-
-    if (userId == null) {
-      // Handle case where user_id is not found
-      throw Exception('user_id is not available');
-    }
+    final String url = 'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}';
 
     final response = await dio.get(url);
     if (response.statusCode == 200) {
@@ -69,8 +47,7 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
-    final response = await dio.get(
-        'http://10.0.2.2:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+    final response = await dio.get('http://10.0.2.2:8080/v1/subjob/$subJobID');
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);
@@ -79,49 +56,77 @@ class CalendarViewState extends State<MyCalendarView> {
     }
   }
 
-  void _generateSampleTasks() async {
+  String _getRecurrenceRule(SubJobModel subJob) {
+    if (subJob.frequency == 'daily') {
+      return 'FREQ=DAILY;INTERVAL=${subJob.frequencyDay};UNTIL=${subJob.lastDate.toIso8601String()}';
+    } else if (subJob.frequency == 'weekly') {
+      String daysOfWeek = subJob.frequencyWeek.map((day) {
+        switch (day) {
+          case 'Sunday':
+            return 'SU';
+          case 'Monday':
+            return 'MO';
+          case 'Tuesday':
+            return 'TU';
+          case 'Wednesday':
+            return 'WE';
+          case 'Thursday':
+            return 'TH';
+          case 'Friday':
+            return 'FR';
+          case 'Saturday':
+            return 'SA';
+          default:
+            return '';
+        }
+      }).join(',');
+
+      return 'FREQ=WEEKLY;BYDAY=$daysOfWeek;UNTIL=${subJob.lastDate.toIso8601String()}';
+    } else if (subJob.frequency == 'monthly') {
+      return 'FREQ=MONTHLY;BYMONTHDAY=${subJob.frequencyMonth.join(',')};UNTIL=${subJob.lastDate.toIso8601String()}';
+    } else {
+      return '';
+    }
+  }
+
+  Future<void> _generateSampleTasks() async {
     try {
-      List<CalendarModel> calendars =
-          await fetchCalendarData(); // ดึงข้อมูลจาก API
+      List<CalendarModel> calendars = await fetchCalendarData();
       List<Appointment> appointments = [];
-      print("calendar $calendars");
+
       for (var calendar in calendars) {
-        SubJobModel subJob = await fetchSubJob(
-            calendar.subJobID); // ดึงข้อมูล SubJob ตาม subJobID
-        print("subJobs $subJob");
+        SubJobModel subJob = await fetchSubJob(calendar.subJobID);
 
         DateTime currentstartTime = DateTime(
-          calendar.dateCalendar.year, // เอาปีจาก calendar
-          calendar.dateCalendar.month, // เอาเดือนจาก calendar
-          calendar.dateCalendar.day, // เอาวันจาก calendar
-          subJob.startTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
-          subJob.startTimeGoal.minute, // เอาเวลานาทีจาก subJob
+          calendar.dateCalendar.year,
+          calendar.dateCalendar.month,
+          calendar.dateCalendar.day,
+          subJob.startTimeGoal.hour,
+          subJob.startTimeGoal.minute,
         );
 
         DateTime currentendTime = DateTime(
-          calendar.dateCalendar.year, // เอาปีจาก calendar
-          calendar.dateCalendar.month, // เอาเดือนจาก calendar
-          calendar.dateCalendar.day, // เอาวันจาก calendar
-          subJob.lastTimeGoal.hour, // เอาเวลาชั่วโมงจาก subJob
-          subJob.lastTimeGoal.minute, // เอาเวลานาทีจาก subJob
+          calendar.dateCalendar.year,
+          calendar.dateCalendar.month,
+          calendar.dateCalendar.day,
+          subJob.lastTimeGoal.hour,
+          subJob.lastTimeGoal.minute,
         );
 
         appointments.add(Appointment(
-          startTime: currentstartTime, // ใช้ startTimeGoal จาก SubJob
-          endTime: currentendTime, // ใช้ lastTimeGoal จาก SubJob
-          subject: subJob.name, // ใช้ชื่อของ SubJob
+          startTime: currentstartTime,
+          endTime: currentendTime,
+          subject: subJob.name,
+          recurrenceRule: _getRecurrenceRule(subJob),
           color: subJob.status == 'completed'
-              ? const Color.fromARGB(255, 190, 255, 201)
-              : const Color.fromARGB(255, 190, 223, 255), // ใช้สีตามสถานะ
+              ? const Color.fromARGB(255, 155, 255, 172)
+              : const Color.fromARGB(255, 168, 212, 255),
           isAllDay: false,
         ));
       }
 
-      _calendarDataSource =
-          AppointmentDataSource(appointments); // สร้าง CalendarDataSource
-      setState(() {}); // อัปเดต UI
+      _calendarDataSource = AppointmentDataSource(appointments);
     } catch (e) {
-      print("log Error");
       print('Error: $e');
     }
   }
@@ -158,121 +163,98 @@ class CalendarViewState extends State<MyCalendarView> {
     final screenHeight = mediaQuery.size.height;
 
     return Scaffold(
-      body: Container(
-        color: pastel.pastel2,
-        child: Padding(
-          padding: EdgeInsets.only(top: screenHeight * 0.05),
-          child: Container(
-            width: screenWidth,
-            height: screenHeight * 0.95,
-            decoration: BoxDecoration(
-              color: pastel.pastel1,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildToggleButton('Day', 'day', screenWidth, screenHeight),
-                    _buildToggleButton(
-                        'Month', 'month', screenWidth, screenHeight),
-                    _buildToggleButton(
-                        'Year', 'year', screenWidth, screenHeight),
-                  ],
-                ),
-                _currentView == 'day'
-                    ? CurrentDayDateRow(
-                        title: 'try',
-                        onDateChanged: _onDateChanged,
-                        tragetDateShow: currentDateTime,
-                      )
-                    : _currentView == 'month'
-                        ? CurrentMonthRow(
-                            onDateChanged: _onDateChanged,
-                          )
-                        : CurrentYearRow(
-                            onDateChanged: _onDateChanged,
-                          ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.only(top: 10),
-                    decoration: BoxDecoration(
-                        color: pastel.pastel2,
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20))),
-                    child: SfCalendar(
-                        timeSlotViewSettings: TimeSlotViewSettings(
-                          timeTextStyle: TextStyle(
-                            fontSize: 14,
-                            color: pastel.pastelFont,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          timeFormat: 'HH:mm',
-                        ),
-                        controller: _calendarController,
-                        view: _currentView == 'day'
-                            ? CalendarView.day
-                            : _currentView == 'month'
-                                ? CalendarView.month
-                                : CalendarView.schedule,
-                        initialDisplayDate: currentDateTime,
-                        headerHeight: 0, // Hide header
-                        onTap: (CalendarTapDetails details) {
-                          if (details.targetElement ==
-                                  CalendarElement.calendarCell ||
-                              details.targetElement ==
-                                  CalendarElement.appointment) {
-                            // Set the selected date in the controller
-                            _calendarController.displayDate = details.date!;
-                            // _calendarController.selectedDate = DateTime.now();
-                            // Change the view to day
-                            _onViewChanged('day');
-                            // Update the current date
-                            _onDateChanged(details.date!);
-                          }
-                        },
-                        dataSource:
-                            _calendarDataSource, // Set the data source here
-                        scheduleViewSettings: ScheduleViewSettings(
-                            appointmentTextStyle: TextStyle(
-                                color: pastel.pastelFont,
-                                fontWeight: FontWeight.bold),
-                            monthHeaderSettings: MonthHeaderSettings(
-                                backgroundColor: pastel.pastel1 ??
-                                    const Color.fromARGB(255, 41, 41, 41),
-                                height: 60,
-                                textAlign: TextAlign.center,
-                                monthTextStyle: TextStyle(
-                                  color: pastel.pastelFont,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                )
-                                //ไว้แต่งหน้าไอแถบ ดำๆ หน้า  year เพิ่มนะ
-                                ),
-                            weekHeaderSettings: WeekHeaderSettings(
-                              weekTextStyle: TextStyle(
-                                  color: pastel.pastelFont,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            dayHeaderSettings: DayHeaderSettings(
-                                dayTextStyle: TextStyle(
-                                  color: pastel.pastelFont,
-                                ),
-                                dateTextStyle: TextStyle(
-                                    color: pastel.pastelFont,
-                                    fontWeight: FontWeight.bold)))),
+      body: FutureBuilder<void>(
+        future: _initializationFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          return Container(
+            color: pastel.pastel2,
+            child: Padding(
+              padding: EdgeInsets.only(top: screenHeight * 0.05),
+              child: Container(
+                width: screenWidth,
+                height: screenHeight * 0.95,
+                decoration: BoxDecoration(
+                  color: pastel.pastel1,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
                   ),
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildToggleButton(
+                            'Day', 'day', screenWidth, screenHeight),
+                        _buildToggleButton(
+                            'Month', 'month', screenWidth, screenHeight),
+                        _buildToggleButton(
+                            'Year', 'year', screenWidth, screenHeight),
+                      ],
+                    ),
+                    _currentView == 'day'
+                        ? CurrentDayDateRow(
+                            title: 'try',
+                            onDateChanged: _onDateChanged,
+                            tragetDateShow: currentDateTime,
+                          )
+                        : _currentView == 'month'
+                            ? CurrentMonthRow(onDateChanged: _onDateChanged)
+                            : CurrentYearRow(onDateChanged: _onDateChanged),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.only(top: 10),
+                        decoration: BoxDecoration(
+                          color: pastel.pastel2,
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20)),
+                        ),
+                        child: SfCalendar(
+                          timeSlotViewSettings: TimeSlotViewSettings(
+                            timeTextStyle: TextStyle(
+                              fontSize: 14,
+                              color: pastel.pastelFont,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            timeFormat: 'HH:mm',
+                          ),
+                          controller: _calendarController,
+                          view: _currentView == 'day'
+                              ? CalendarView.day
+                              : _currentView == 'month'
+                                  ? CalendarView.month
+                                  : CalendarView.schedule,
+                          initialDisplayDate: currentDateTime,
+                          headerHeight: 0,
+                          onTap: (CalendarTapDetails details) {
+                            if (details.targetElement ==
+                                    CalendarElement.calendarCell ||
+                                details.targetElement ==
+                                    CalendarElement.appointment) {
+                              _calendarController.displayDate = details.date!;
+                              _onViewChanged('day');
+                              _onDateChanged(details.date!);
+                            }
+                          },
+                          dataSource: _calendarDataSource,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -311,7 +293,6 @@ class CalendarViewState extends State<MyCalendarView> {
   }
 }
 
-// Custom CalendarDataSource class to hold appointments
 class AppointmentDataSource extends CalendarDataSource {
   AppointmentDataSource(List<Appointment> source) {
     appointments = source;

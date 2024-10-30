@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'subjobmodel.dart';
 
@@ -60,6 +61,18 @@ class _TaskListPageState extends State<TaskListPage> {
   void initState() {
     super.initState();
     futureTasks = fetchSubTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+  }
+
+  Future<List<SubJobModel>> fetchSubTasks() async {
+    final Dio dio = Dio();
+    const String url = 'http://10.0.2.2:8080/v1/subjob';
+    final response = await dio.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      return taskListJson.map((json) => SubJobModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
   }
 
   @override
