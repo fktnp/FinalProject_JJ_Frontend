@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
-import 'sub_components_calendar/DayDateRow.dart';
+import 'model/theme.dart';
+import 'sub_components_calendar/daydaterow.dart';
 
 class ToDoList extends StatefulWidget {
-  const ToDoList({super.key});
+  final String userId;
+  const ToDoList({super.key, required this.userId});
 
   @override
   ToDoListState createState() => ToDoListState();
@@ -18,9 +20,9 @@ class ToDoListState extends State<ToDoList> {
 
   Future<List<CalendarModel>> fetchCalendars() async {
     final Dio dio = Dio();
-    final response = await dio.get(
-        'http://192.168.1.38:8080/v1/calendar/user/59ae0cbd-c715-4f1a-92cc-f9f192dc2837'); // เปลี่ยน URL ตามที่คุณใช้
-    // print(response.statusCode);
+    final String url =
+        'http://192.168.1.35:8080/v1/calendar/user/${widget.userId}'; // เปลี่ยน URL ตามที่คุณใช้
+    final response = await dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
       return data.map((item) => CalendarModel.fromJson(item)).toList();
@@ -32,13 +34,19 @@ class ToDoListState extends State<ToDoList> {
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
     final response = await dio.get(
-        'http://10.0.2.2:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://192.168.1.35:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);
     } else {
       throw Exception('Failed to load subjob');
     }
+  }
+
+  bool isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   Future<void> _fetchTasks() async {
@@ -87,7 +95,7 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _completeTask(String taskId) async {
     try {
       final response = await _dio.get(
-          'http://192.168.1.38:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
+          'http://192.168.1.35:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
 
       if (response.statusCode == 200) {
         // อัพเดทสถานะของ Task ในตัวแปร tasks
@@ -109,7 +117,7 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _uncompleteTask(String taskId) async {
     try {
       final response = await _dio.get(
-          'http://192.168.1.38:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
+          'http://192.168.1.35:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
 
       if (response.statusCode == 200) {
         // อัพเดทสถานะของ Task ในตัวแปร tasks
@@ -133,29 +141,31 @@ class ToDoListState extends State<ToDoList> {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Container(
-      color: const Color(0xFFFFECDB),
+      color: pastel.pastel2,
       child: Padding(
         padding: EdgeInsets.only(top: screenHeight * 0.05),
         child: Container(
           width: screenWidth,
           height: screenHeight * 0.95,
           alignment: AlignmentDirectional.topCenter,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFFDCBC),
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: pastel.pastel1,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(30),
               topRight: Radius.circular(30),
             ),
           ),
           child: Column(
             children: [
+              Text(currentDateTime.day.toString()),
               const HeadToDo(),
               CurrentDayDateRow(
                 title: "try",
                 onDateChanged: _onDateChanged, // ส่ง callback ไป
-                tragetDateShow: DateTime.now(),
+                tragetDateShow: currentDateTime,
               ),
               ShowListTask(
                 currentDate: currentDateTime,
@@ -181,20 +191,20 @@ class HeadToDo extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: EdgeInsets.only(top: screenHeight * 0.01),
       padding: EdgeInsets.fromLTRB(screenWidth * 0.08, screenHeight * 0.01,
           screenWidth * 0.08, screenHeight * 0.01),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         "Task For A Day",
         style: TextStyle(
           fontSize: screenHeight * 0.03,
-          color: const Color.fromARGB(255, 26, 26, 26),
+          color: pastel.pastelFont,
           decoration: TextDecoration.none,
         ),
       ),
@@ -223,12 +233,12 @@ class ShowListTask extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Expanded(
         child: Container(
       width: screenWidth,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(screenWidth * 0.06),
           topRight: Radius.circular(screenWidth * 0.06),

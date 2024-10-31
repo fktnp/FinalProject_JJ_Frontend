@@ -1,32 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class User {
-  final String userId;
-  final String name;
-  final String email;
-  final String phoneNumber;
-  final String profileImageUrl;
-
-  User({
-    required this.userId,
-    required this.name,
-    required this.email,
-    required this.phoneNumber,
-    required this.profileImageUrl,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      userId: json['user_id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phoneNumber: json['phone_number'] ?? '',
-      profileImageUrl: json['profile_image_url'] ?? '',
-    );
-  }
-}
+import 'model/theme.dart';
+import 'model/usermodel.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -88,14 +64,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _userFuture = fetchUserData();
     _userFuture.then((user) {
-      _loadSelectedImagePath(user.userId); // Load the image specific to the current user
+      _loadSelectedImagePath(
+          user.userId); // Load the image specific to the current user
     });
   }
 
   Future<void> _loadSelectedImagePath(String userId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _selectedImagePath = prefs.getString('profile_image_path_$userId') ?? _sampleImages[0];
+      _selectedImagePath =
+          prefs.getString('profile_image_path_$userId') ?? _sampleImages[0];
     });
   }
 
@@ -105,21 +83,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profile_image_path_$userId', imagePath); // Save image path specific to the user
+    await prefs.setString('profile_image_path_$userId',
+        imagePath); // Save image path specific to the user
   }
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
         title: const Align(
           alignment: Alignment.centerRight,
           child: Text('Profile'),
         ),
-        backgroundColor: const Color(0xFFFFDCBC),
+        backgroundColor: pastel.pastel1,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         child: FutureBuilder<User>(
           future: _userFuture,
           builder: (context, snapshot) {
@@ -154,8 +134,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
                                       onTap: () {
-                                        changeProfileImage(_sampleImages[index], user.userId);
-                                        Navigator.of(context).pop(); // Close dialog after selecting image
+                                        changeProfileImage(
+                                            _sampleImages[index], user.userId);
+                                        Navigator.of(context)
+                                            .pop(); // Close dialog after selecting image
                                       },
                                       child: Image.asset(
                                         _sampleImages[index],
@@ -181,28 +163,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundImage: _selectedImagePath != null
                               ? AssetImage(_selectedImagePath!)
                               : (user.profileImageUrl.isNotEmpty
-                                  ? NetworkImage(user.profileImageUrl) as ImageProvider
-                                  : const AssetImage('assets/default_avatar.png')),
+                                  ? NetworkImage(user.profileImageUrl)
+                                      as ImageProvider
+                                  : const AssetImage(
+                                      'assets/default_avatar.png')),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(user.name,
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: pastel.pastelFont)),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Contact',
+                    Text('Contact',
                         style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: pastel.pastelFont)),
                     const Divider(thickness: 1.5, color: Colors.grey),
                     const SizedBox(height: 10),
                     Text('Email: ${user.email}',
-                        style: const TextStyle(fontSize: 20)),
+                        style:
+                            TextStyle(fontSize: 20, color: pastel.pastelFont)),
                     const SizedBox(height: 10),
                     Text('Phone: ${user.phoneNumber}',
-                        style: const TextStyle(fontSize: 20)),
+                        style:
+                            TextStyle(fontSize: 20, color: pastel.pastelFont)),
                   ],
                 ),
               );

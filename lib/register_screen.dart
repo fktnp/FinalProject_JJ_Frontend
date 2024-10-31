@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'components/custom_textfield.dart';
+import 'model/theme.dart';
 
 class RegisterScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -11,18 +12,22 @@ class RegisterScreen extends StatelessWidget {
   final TextEditingController _telController = TextEditingController();
   final Dio dio = Dio(); // สร้าง instance ของ Dio
 
-  RegisterScreen({super.key});
-
+  RegisterScreen({
+    super.key,
+  });
   // ฟังก์ชันสำหรับเรียก API
   Future<void> _registerUser(BuildContext context) async {
-    try { dio.options.headers['Content-Type'] = 'application/json'; // ตั้งค่า Header สำหรับ JSON
+    try {
+      dio.options.headers['Content-Type'] =
+          'application/json'; // ตั้งค่า Header สำหรับ JSON
       // นำค่าจาก TextEditingController มาใช้ในการส่งข้อมูล
       String email = _emailController.text;
       String password = _passwordController.text;
       String username = _userNameController.text;
       String phoneNumber = _telController.text;
 
-      var response = await dio.post('http://192.168.1.38:8080/v1/user/register', data: {
+      var response =
+          await dio.post('http://192.168.1.35:8080/v1/user/register', data: {
         "email": email,
         "password": password,
         "name": username,
@@ -33,7 +38,7 @@ class RegisterScreen extends StatelessWidget {
         print('Registration successful');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       } else {
         print('Registration failed: ${response.data}');
@@ -45,6 +50,7 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       backgroundColor: const Color.fromRGBO(255, 220, 188, 1),
       appBar: AppBar(
@@ -81,10 +87,10 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Username',
                   filled: true,
-                  fillColor: const Color(0xFFFFECDB),
+                  fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFFFECDB)),
+                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -107,10 +113,10 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Email',
                   filled: true,
-                  fillColor: const Color(0xFFFFECDB),
+                  fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFFFECDB)),
+                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -132,10 +138,10 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Password',
                   filled: true,
-                  fillColor: const Color(0xFFFFECDB),
+                  fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFFFECDB)),
+                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -156,10 +162,10 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Tel.',
                   filled: true,
-                  fillColor: const Color(0xFFFFECDB),
+                  fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFFFECDB)),
+                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -173,13 +179,13 @@ class RegisterScreen extends StatelessWidget {
                 iconSize: 50,
                 color: Colors.black,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFECDB),
+                  backgroundColor: pastel.pastel2,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(10),
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                          _registerUser(context); 
+                    _registerUser(context);
                   }
                 },
               ),

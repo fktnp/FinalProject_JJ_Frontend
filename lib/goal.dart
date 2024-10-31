@@ -1,12 +1,19 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'components/custom_button.dart';
+import 'model/theme.dart';
 import 'taskdetail.dart';
-import 'task.dart';
+import 'model/mainjobmodel.dart';
 
 class GoalsPage extends StatefulWidget {
-  const GoalsPage({super.key});
+  final String userId; // เพิ่ม userId parameter
+
+  const GoalsPage({
+    super.key,
+    required this.userId, // รับ userId จาก constructor
+  });
 
   @override
   State<GoalsPage> createState() => _GoalsPageState();
@@ -24,16 +31,31 @@ class _GoalsPageState extends State<GoalsPage> {
   ];
 
   String? selectedGoal;
-
-  late Future<List<MainTask>> futureTasks;
+  late Future<List<MainJobModel>> futureTasks;
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchMainTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+    // ใช้ widget.userId โดยตรงในการ fetch ข้อมูล
+    futureTasks = fetchMainJobModels();
   }
 
-  List<MainTask> filterTasks(List<MainTask> tasks, String? selectedGoal) {
+  Future<List<MainJobModel>> fetchMainJobModels() async {
+    final Dio dio = Dio();
+    final String url = 'http://192.168.1.35:8080/v1/job/user/${widget.userId}';
+    final response = await dio.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      print('this is from server : $taskListJson');
+      return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
+
+  List<MainJobModel> filterTasks(
+      List<MainJobModel> tasks, String? selectedGoal) {
     if (selectedGoal == null) return [];
     return tasks
         .where((task) => task.category == selectedGoal)
@@ -42,14 +64,15 @@ class _GoalsPageState extends State<GoalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFDCBC),
+        backgroundColor: pastel.pastel1,
         title: Align(
           alignment: Alignment.centerRight,
           child: Text(
             selectedGoal == null ? 'Goals' : selectedGoal!,
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: pastel.pastelFont),
           ),
         ),
         automaticallyImplyLeading: selectedGoal != null,
@@ -65,19 +88,19 @@ class _GoalsPageState extends State<GoalsPage> {
             : null,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<MainTask>>(
+        child: FutureBuilder<List<MainJobModel>>(
             future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No tasks found'));
+                // } else if (snapshot.hasError) {
+                //   return Center(child: Text('Error: ${snapshot.error}'));
+                // } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                // return const Center(child: Text('No tasks found'));
               } else {
-                final tasks = snapshot.data!;
+                final tasks = snapshot.data ?? [];
                 final filteredTasks = filterTasks(tasks, selectedGoal);
 
                 return selectedGoal == null
@@ -105,12 +128,12 @@ class _GoalsPageState extends State<GoalsPage> {
                                   },
                                   child: Text(
                                     '$goal Planning',
-                                    style: const TextStyle(fontSize: 18),
+                                    style: TextStyle(
+                                        fontSize: 18, color: pastel.pastelFont),
                                   ),
                                 ),
-                                backgroundColor: const Color(0xFFFFDCBC),
-                                collapsedBackgroundColor:
-                                    const Color(0xFFFFDCBC),
+                                backgroundColor: pastel.pastel1,
+                                collapsedBackgroundColor: pastel.pastel1,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
@@ -121,7 +144,7 @@ class _GoalsPageState extends State<GoalsPage> {
                                 ),
                                 children: showTask.isNotEmpty
                                     ? showTask
-                                        .map((task) => GoalTask(task: task))
+                                        .map((task) => GoalTask(task: task, loginuserid: widget.userId,))
                                         .toList()
                                     : [
                                         const Padding(
@@ -136,6 +159,7 @@ class _GoalsPageState extends State<GoalsPage> {
                       )
                     : GoalSection(
                         goal: selectedGoal!,
+                        loginuserid: widget.userId,
                         tasks: tasks,
                         filteredTasks: filteredTasks,
                       );
@@ -147,18 +171,19 @@ class _GoalsPageState extends State<GoalsPage> {
 }
 
 class GoalTask extends StatelessWidget {
-  final MainTask task;
-  const GoalTask({super.key, required this.task});
+  final String loginuserid;
+  final MainJobModel task;
+  const GoalTask({super.key, required this.task,required this.loginuserid});
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       width: MediaQuery.of(context).size.width * 0.93,
-      color: const Color.fromARGB(255, 251, 197, 255),
+      color: pastel.pastel2,
       child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
@@ -173,7 +198,8 @@ class GoalTask extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TaskDetailPage(maintask: task),
+                          builder: (context) =>
+                              TaskDetailPage(mainJobModel: task ,loginuserid : loginuserid),
                         ),
                       );
                     },
@@ -181,7 +207,8 @@ class GoalTask extends StatelessWidget {
                       children: [
                         Text(
                           task.name,
-                          style: const TextStyle(fontSize: 22),
+                          style:
+                              TextStyle(fontSize: 22, color: pastel.pastelFont),
                         ),
                         const SizedBox(
                           width: 20,
@@ -191,7 +218,7 @@ class GoalTask extends StatelessWidget {
                   ),
                   Text(
                     '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: pastel.pastelFont),
                   ),
                 ],
               ),
@@ -202,7 +229,7 @@ class GoalTask extends StatelessWidget {
                   lineWidth: screenWidth * 0.014,
                   percent: task.percentProgress / 100,
                   center: Text('${task.percentProgress.toString()}%'),
-                  progressColor: const Color.fromARGB(255, 92, 216, 97),
+                  progressColor: pastel.pastelProgress,
                   backgroundColor: const Color.fromARGB(82, 0, 0, 0),
                 ),
               )
@@ -214,13 +241,15 @@ class GoalTask extends StatelessWidget {
 
 class GoalSection extends StatelessWidget {
   final String goal;
-  final List<MainTask> tasks;
-  final List<MainTask> filteredTasks;
+  final String loginuserid;
+  final List<MainJobModel> tasks;
+  final List<MainJobModel> filteredTasks;
   final bool conditionToShowButton;
 
   const GoalSection({
     super.key,
     required this.goal,
+    required this.loginuserid,
     required this.tasks,
     required this.filteredTasks,
     this.conditionToShowButton = true,
@@ -228,12 +257,13 @@ class GoalSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Stack(
       children: [
         Column(
           children: [
             Card(
-              color: const Color(0xFFFFDCBC),
+              color: pastel.pastel1,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
@@ -245,13 +275,13 @@ class GoalSection extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
                 title: Text(
                   '$goal Planning',
-                  style: const TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 18, color: pastel.pastelFont),
                 ),
               ),
             ),
             // แสดง filtered tasks
             if (filteredTasks.isNotEmpty)
-              ...filteredTasks.map((task) => GoalTask(task: task)).toList(),
+              ...filteredTasks.map((task) => GoalTask(task: task,loginuserid:loginuserid)),
           ],
         ),
         // ปุ่มที่ถูกจัดตำแหน่ง
@@ -261,7 +291,9 @@ class GoalSection extends StatelessWidget {
             right: 10,
             child: FixedBottomButton(
               onPressed: () {
-                AddFromGoal(context: context, goal: goal).show();
+                AddFromGoal(
+                        context: context, goal: goal, loginuserid: loginuserid)
+                    .show();
               },
             ),
           ),

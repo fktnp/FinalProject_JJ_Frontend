@@ -4,9 +4,15 @@ import 'package:flutter_application_1/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
+import 'model/theme.dart';
 import 'register_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({
+    super.key,
+  });
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -16,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Dio dio = Dio();
+  // final GoogleAuthService _googleAuthService = GoogleAuthService();
   String? _passwordError;
 
   Future<void> login(BuildContext context) async {
@@ -37,22 +44,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (response.statusCode == 200) {
           print('Login successful: ${response.data}');
+          String userId = response.data['user_id'];
 
-          // เก็บ token และข้อมูลผู้ใช้ใน SharedPreferences
+          // เก็บข้อมูลใน SharedPreferences เหมือนเดิม
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', response.data['token'] ?? '');
-          await prefs.setString('user_id', response.data['user_id'] ?? '');
+          await prefs.setString('user_id', userId);
           await prefs.setString('user_name', response.data['name'] ?? '');
           await prefs.setString('user_email', response.data['email'] ?? '');
           await prefs.setString(
               'user_phone', response.data['phone_number'] ?? '');
 
           setState(() {
-            _passwordError = null; // Clear any previous error
+            _passwordError = null;
           });
+
+          // ส่ง userId ไปยัง MyHomePage
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MyHomePage()),
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(userId: userId),
+            ),
           );
         } else {
           setState(() {
@@ -88,8 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(255, 220, 188, 1),
+      backgroundColor: pastel.pastel1,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
@@ -115,10 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     hintText: 'Email',
                     filled: true,
-                    fillColor: const Color(0xFFFFECDB),
+                    fillColor: pastel.pastel2,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFFFECDB)),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0,
@@ -140,17 +152,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
-                    fillColor: const Color(0xFFFFECDB),
+                    fillColor: pastel.pastel2,
                     errorText: _passwordError, // Display error message here
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFFFECDB)),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0,
                       horizontal: 15.0,
                     ),
                   ),
+                ),
+                const SizedBox(height: 20),
+                IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.google,
+                      size: 30, color: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: pastel.pastel2,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  onPressed: () {
+                    // _googleAuthService.signInWithGoogle(context);
+                  },
                 ),
                 const SizedBox(height: 40),
                 CustomButton(
@@ -168,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   iconSize: 50,
                   color: Colors.black,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFECDB),
+                    backgroundColor: pastel.pastel2,
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(10),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
+
+import '../model/theme.dart';
 
 class CurrentDayDateRow extends StatefulWidget {
   final String title;
@@ -74,13 +75,14 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
   }
 
   Widget titleView() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Text(
         DateFormat('dd MMMM yyyy')
             .format(currentDateTime), // ใช้ DateFormat จาก intl
-        style: const TextStyle(
-          color: Color.fromARGB(255, 26, 26, 26),
+        style: TextStyle(
+          color: pastel.pastelFont,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -125,6 +127,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
   }
 
   Widget capsuleView(int index) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: GestureDetector(
@@ -139,7 +142,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
               decoration: BoxDecoration(
                 color: (multiMonthList[index].day == currentDateTime.day &&
                         multiMonthList[index].month == currentDateTime.month)
-                    ? const Color(0xFFFFECDB)
+                    ? pastel.pastel2
                     : Colors.white.withOpacity(0.0),
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -154,8 +157,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                         fontWeight: FontWeight.bold,
                         color:
                             (multiMonthList[index].day != currentDateTime.day)
-                                ? const Color.fromARGB(255, 26, 26, 26)
-                                : const Color.fromARGB(255, 26, 26, 26),
+                                ? pastel.pastelFont2
+                                : pastel.pastelFont,
                       ),
                     ),
                     Text(
@@ -165,8 +168,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                         fontWeight: FontWeight.bold,
                         color:
                             (multiMonthList[index].day != currentDateTime.day)
-                                ? const Color.fromARGB(255, 26, 26, 26)
-                                : const Color.fromARGB(255, 26, 26, 26),
+                                ? pastel.pastelFont2
+                                : pastel.pastelFont,
                       ),
                     ),
                     Text(
@@ -176,8 +179,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                         fontWeight: FontWeight.bold,
                         color:
                             (multiMonthList[index].day != currentDateTime.day)
-                                ? const Color.fromARGB(255, 26, 26, 26)
-                                : const Color.fromARGB(255, 26, 26, 26),
+                                ? pastel.pastelFont2
+                                : pastel.pastelFont,
                       ),
                     ),
                   ],
