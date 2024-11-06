@@ -1,6 +1,6 @@
 class SubJobModel {
   final String jobId;
-  final String subJobId;
+  final String userId;
   final String name;
   final String status;
   final String details;
@@ -10,17 +10,15 @@ class SubJobModel {
   final DateTime lastDate;
   final String frequency;
   final int frequencyDay;
-  final String frequencyWeek;
-  final int frequencyMonth;
+  final List<String> frequencyWeek;
+  final List<int> frequencyMonth;
   final String headSubJobId;
-  final String userId;
-  final DateTime lastDateShow;
   final int percentProgress;
   final int totalDayPass;
 
   SubJobModel({
     required this.jobId,
-    required this.subJobId,
+    required this.userId,
     required this.name,
     required this.status,
     required this.details,
@@ -33,32 +31,37 @@ class SubJobModel {
     required this.frequencyWeek,
     required this.frequencyMonth,
     required this.headSubJobId,
-    required this.userId,
-    required this.lastDateShow,
     required this.percentProgress,
     required this.totalDayPass,
   });
 
   factory SubJobModel.fromJson(Map<String, dynamic> json) {
+    final startDateJson = json['StartDate'];
+    final lastDateJson = json['LastDate'];
+
     return SubJobModel(
-      jobId: json['JobID'] ?? '', // ใช้ 'JobID' แทน 'job_id'
-      subJobId: json['SubJobID'] ?? '', // ใช้ 'SubJobID' แทน 'sub_job_id'
-      name: json['Name'] ?? '', // ใช้ 'Name' แทน 'name'
-      status: json['Status'] ?? '', // ใช้ 'Status' แทน 'status'
-      details: json['Details'] ?? '', // ใช้ 'Details' แทน 'details'
-      startTimeGoal: DateTime.parse(json['StartTimeGoal'] ?? '1970-01-01T00:00:00Z'), // ใช้ 'StartTimeGoal' แทน 'start_time_goal'
-      lastTimeGoal: DateTime.parse(json['LastTimeGoal'] ?? '1970-01-01T00:00:00Z'), // ใช้ 'LastTimeGoal' แทน 'last_time_goal'
-      startDate: DateTime.parse(json['StartDate'] ?? '1970-01-01T00:00:00Z'), // ใช้ 'StartDate' แทน 'start_date'
-      lastDate: DateTime.parse(json['LastDate'] ?? '1970-01-01T00:00:00Z'), // ใช้ 'LastDate' แทน 'last_date'
-      frequency: json['Frequency'] ?? '', // ใช้ 'Frequency' แทน 'frequency'
-      frequencyDay: json['FrequencyDay'] ?? 0, // ใช้ 'FrequencyDay' แทน 'frequency_day'
-      frequencyWeek: json['FrequencyWeek'] ?? '', // ใช้ 'FrequencyWeek' แทน 'frequency_week'
-      frequencyMonth: json['FrequencyMonth'] ?? 0, // ใช้ 'FrequencyMonth' แทน 'frequency_month'
-      headSubJobId: json['HeadSubJobID'] ?? '', // ใช้ 'HeadSubJobID' แทน 'head_sub_job_id'
-      userId: json['UserID'] ?? '', // ใช้ 'UserID' แทน 'user_id'
-      lastDateShow: DateTime.parse(json['LastDateShow'] ?? '1970-01-01T00:00:00Z'), // ใช้ 'LastDateShow' แทน 'last_date_show'
-      percentProgress: json['PercentProgress'] ?? 0, // ใช้ 'PercentProgress' แทน 'percent_progress'
-      totalDayPass: json['TotalDayPass'] ?? 0, // ใช้ 'TotalDayPass' แทน 'total_day_pass'
+      jobId: json['JobID'],
+      userId: json['UserID'],
+      name: json['Name'],
+      status: json['Status'],
+      details: json['Details'],
+      startTimeGoal: DateTime(0, 1, 1, json['StartTimeGoal']['hour'] ?? 0,
+          json['StartTimeGoal']['minute'] ?? 0),
+      lastTimeGoal: DateTime(0, 1, 1, json['LastTimeGoal']['hour'] ?? 0,
+          json['LastTimeGoal']['minute'] ?? 0),
+      startDate: DateTime.parse(
+        '${startDateJson['year']}-${startDateJson['month'].toString().padLeft(2, '0')}-${startDateJson['day'].toString().padLeft(2, '0')}',
+      ),
+      lastDate: DateTime.parse(
+        '${lastDateJson['year']}-${lastDateJson['month'].toString().padLeft(2, '0')}-${lastDateJson['day'].toString().padLeft(2, '0')}',
+      ),
+      frequency: json['Frequency'],
+      frequencyDay: json['FrequencyDay'],
+      frequencyWeek: List<String>.from(json['FrequencyWeek']),
+      frequencyMonth: List<int>.from(json['FrequencyMonth']),
+      headSubJobId: json['HeadSubJobID'],
+      percentProgress: json['PercentProgress'],
+      totalDayPass: json['TotalDayPass'],
     );
   }
 }

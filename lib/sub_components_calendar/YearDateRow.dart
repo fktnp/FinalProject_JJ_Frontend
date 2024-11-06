@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../model/theme.dart';
 
 class CurrentYearRow extends StatefulWidget {
   final Function(DateTime) onDateChanged;
@@ -27,18 +28,20 @@ class CurrentYearRowState extends State<CurrentYearRow> {
 
   List<DateTime> _generateYears(int baseYear) {
     return List.generate(12, (index) {
-      return DateTime(baseYear - 6 + index, 1, 1); // สร้างวันที่ 1 มกราคม ของแต่ละปี โดยเริ่มจากปีปัจจุบัน - 3 ถึง ปีปัจจุบัน + 3
+      return DateTime(baseYear - 6 + index, 1,
+          1); // สร้างวันที่ 1 มกราคม ของแต่ละปี โดยเริ่มจากปีปัจจุบัน - 3 ถึง ปีปัจจุบัน + 3
     });
   }
 
-
   Widget titleView() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Text(
         DateFormat('yyyy').format(currentDateTime),
-        style: const TextStyle(
-          color: Color.fromARGB(255, 26, 26, 26),
+        style: TextStyle(
+          color: pastel.pastelFont,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -61,6 +64,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
   }
 
   Widget yearCapsuleView(int index) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -72,7 +76,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
         decoration: BoxDecoration(
           color: (yearsInRange[index].year == currentDateTime.year)
-              ? const Color(0xFFFFECDB) // สีสำหรับปีปัจจุบัน
+              ? pastel.pastel2 // สีสำหรับปีปัจจุบัน
               : Colors.white.withOpacity(0.0),
           borderRadius: BorderRadius.circular(15),
         ),
@@ -86,8 +90,8 @@ class CurrentYearRowState extends State<CurrentYearRow> {
                   fontSize: height * 0.025,
                   fontWeight: FontWeight.bold,
                   color: (yearsInRange[index].year == currentDateTime.year)
-                      ? const Color.fromARGB(255, 26, 26, 26)
-                      : const Color.fromARGB(255, 150, 150, 150),
+                      ? pastel.pastelFont
+                      : pastel.pastelFont2,
                 ),
               ),
             ],

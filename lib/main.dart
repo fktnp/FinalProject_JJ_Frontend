@@ -1,32 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/task.dart';
+import 'package:flutter_application_1/model/mainjobmodel.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'goal.dart';
 import 'login_screen.dart';
+import 'model/theme.dart';
 import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
+import 'coop.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeNotifier(),
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<bool> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false; 
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: LoginScreen(),
+    return Consumer<ThemeNotifier>(
+      builder: (context, themeNotifier, child) {
+        return MaterialApp(
+          title: 'My App',
+          theme: themeNotifier.themeData,
+          home: FutureBuilder<bool>(
+            future: checkLoginStatus(), 
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator()); 
+              } else {
+                if (snapshot.data == true) {
+                  return FutureBuilder<String?>(
+                    future: _getUserId(),
+                    builder: (context, userIdSnapshot) {
+                      if (userIdSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator()); 
+                      } else {
+                        return MyHomePage(userId: userIdSnapshot.data ?? ''); 
+                      }
+                    },
+                  );
+                } else {
+                  return const LoginScreen(); 
+                }
+              }
+            },
+          ),
+        );
+      },
     );
+  }
+
+  Future<String?> _getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_id'); 
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final String userId; 
+
+  const MyHomePage({
+    super.key,
+    required this.userId,
+  });
 
   @override
   MyHomePageState createState() => MyHomePageState();
@@ -40,18 +86,10 @@ class MyHomePageState extends State<MyHomePage> {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          SettingsPage(),
-          MyCalendarView(),
-          ToDoList(),
-          GoalsPage(),
-          TaskListPage(),
-        ],
-      ),
+      body: _getPage(_currentIndex), 
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: screenHeight * 0.08,
@@ -63,7 +101,7 @@ class MyHomePageState extends State<MyHomePage> {
                 _currentIndex = index;
               });
             },
-            backgroundColor: const Color(0xFFFFDCBC),
+            backgroundColor: pastel.pastel1,
             selectedItemColor: const Color.fromARGB(255, 26, 26, 26),
             unselectedItemColor: const Color.fromARGB(255, 255, 123, 0),
             selectedFontSize: 0,
@@ -73,62 +111,72 @@ class MyHomePageState extends State<MyHomePage> {
             iconSize: screenWidth * 0.10,
             items: [
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'lib/Pic/settings.png',
-                  width: _currentIndex == 0
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
-                  height: _currentIndex == 0
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    pastel.pastelFont ?? Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'lib/Pic/settings.png',
+                    width: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    height: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'lib/Pic/calendar.png',
-                  width: _currentIndex == 1
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
-                  height: _currentIndex == 1
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'lib/Pic/calendar.png',
+                    width: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    height: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'lib/Pic/Task.png',
-                  width: _currentIndex == 2
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
-                  height: _currentIndex == 2
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    pastel.pastelFont ?? Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'lib/Pic/Task.png',
+                    width: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    height: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'lib/Pic/goal.png',
-                  width: _currentIndex == 3
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
-                  height: _currentIndex == 3
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'lib/Pic/goal.png',
+                    width: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    height: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'lib/Pic/Co-op.png',
-                  width: _currentIndex == 4
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
-                  height: _currentIndex == 4
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.10,
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'lib/Pic/Co-op.png',
+                    width: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    height: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10,
+                  ),
                 ),
                 label: '',
               ),
@@ -137,5 +185,22 @@ class MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return SettingsPage(userId: widget.userId);
+      case 1:
+        return MyCalendarView(userId: widget.userId);
+      case 2:
+        return ToDoList(userId: widget.userId);
+      case 3:
+        return GoalsPage(userId: widget.userId);
+      case 4:
+        return CoopPage();
+      default:
+        return const TaskListPage();
+    }
   }
 }

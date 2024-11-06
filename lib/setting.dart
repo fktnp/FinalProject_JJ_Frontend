@@ -1,67 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'login_screen.dart';
-import 'profile.dart'; // เพิ่มการนำเข้า ProfileScreen
+import 'package:flutter_application_1/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';  
+import 'model/theme.dart';
+import 'profile.dart';
+import 'themepage.dart'; 
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
-
+  final String userId;
+  const SettingsPage({
+    super.key, required this.userId,
+  });
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Dio _dio = Dio();
-
   @override
   Widget build(BuildContext context) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFDCBC),
-        title: const Align(
+        backgroundColor: pastel.pastel1,
+        title: Align(
           alignment: Alignment.centerRight,
           child: Text(
             'Settings',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: pastel.pastelFont),
             textAlign: TextAlign.right,
           ),
         ),
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        color: const Color(0xFFFFECDB),
+        color: pastel.pastel2,
         child: Column(
           children: [
             ListTile(
               leading: const Icon(Icons.person, size: 50),
-              title: const Text(
+              title: Text(
                 'Profile',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileScreen()),
                 );
               },
             ),
             const SizedBox(height: 30),
             ListTile(
               leading: const Icon(Icons.palette, size: 50),
-              title: const Text(
+              title: Text(
                 'Theme',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Themepage()));
+              },
             ),
             const Spacer(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, size: 50),
-              title: const Text(
+              title: Text(
                 'Sign out',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
-              onTap: () {
+              onTap: () async {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -77,19 +84,29 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         TextButton(
                           child: const Text('Yes'),
-                          onPressed: () {
+                          onPressed: () async {
+                            // ลบข้อมูลที่เกี่ยวข้องกับการล็อกอิน
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('isLoggedIn');
+                            await prefs.remove('user_id');
+                            
+                            // นำผู้ใช้กลับไปที่หน้า LoginScreen
                             Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
                               PageRouteBuilder(
                                 transitionDuration: const Duration(seconds: 1),
-                                pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        const LoginScreen(),  // ไปที่หน้า LoginScreen
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
                                   var begin = const Offset(1.0, 0.0);
                                   var end = Offset.zero;
                                   var curve = Curves.easeInOut;
 
-                                  var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                  var tween = Tween(begin: begin, end: end)
+                                      .chain(CurveTween(curve: curve));
                                   var offsetAnimation = animation.drive(tween);
 
                                   return SlideTransition(

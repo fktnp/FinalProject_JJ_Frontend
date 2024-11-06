@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../model/theme.dart';
+
 class CurrentMonthRow extends StatefulWidget {
   final Function(DateTime) onDateChanged;
 
@@ -28,28 +30,32 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
     yearsInRange = _generateYears(currentDateTime.year);
 
     // สร้าง PageController ด้วย initialPage เป็นเดือนปัจจุบัน
-    pageController = PageController(initialPage: currentDateTime.month - 1, viewportFraction: 1);
+    pageController = PageController(
+        initialPage: currentDateTime.month - 1, viewportFraction: 1);
   }
 
   List<DateTime> _generateMonths(DateTime baseDate) {
     return List.generate(12, (index) {
-      return DateTime(baseDate.year, index + 1, 1); // สร้างวันที่ 1 ของแต่ละเดือน
+      return DateTime(
+          baseDate.year, index + 1, 1); // สร้างวันที่ 1 ของแต่ละเดือน
     });
   }
 
   List<DateTime> _generateYears(int baseYear) {
     return List.generate(12, (index) {
-      return DateTime(baseYear - 6 + index, 1, 1); // สร้างวันที่ 1 มกราคม ของแต่ละปี โดยเริ่มจากปีปัจจุบัน - 3 ถึง ปีปัจจุบัน + 3
+      return DateTime(baseYear - 6 + index, 1,
+          1); // สร้างวันที่ 1 มกราคม ของแต่ละปี โดยเริ่มจากปีปัจจุบัน - 3 ถึง ปีปัจจุบัน + 3
     });
   }
 
   Widget titleView() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Text(
         DateFormat('MMMM yyyy').format(currentDateTime),
-        style: const TextStyle(
-          color: Color.fromARGB(255, 26, 26, 26),
+        style: TextStyle(
+          color: pastel.pastelFont,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -85,7 +91,9 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
       ),
     );
   }
+
   Widget monthCapsuleView(int index) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -97,7 +105,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
         decoration: BoxDecoration(
           color: (monthsInYear[index].month == currentDateTime.month)
-              ? const Color(0xFFFFECDB) // สีน้ำเงินสำหรับเดือนปัจจุบัน
+              ? pastel.pastel2 // สีน้ำเงินสำหรับเดือนปัจจุบัน
               : Colors.white.withOpacity(0.0),
           borderRadius: BorderRadius.circular(15),
         ),
@@ -111,8 +119,8 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
                   fontSize: height * 0.025,
                   fontWeight: FontWeight.bold,
                   color: (monthsInYear[index].month == currentDateTime.month)
-                      ? const Color.fromARGB(255, 26, 26, 26)
-                      : const Color.fromARGB(255, 150, 150, 150),
+                      ? pastel.pastelFont
+                      : pastel.pastelFont2,
                 ),
               ),
             ],
@@ -121,12 +129,14 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
       ),
     );
   }
-    Widget yearCapsuleView(int index) {
+
+  Widget yearCapsuleView(int index) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return GestureDetector(
       onTap: () {
         setState(() {
           currentDateTime = yearsInRange[index];
-          
+
           // อัปเดต monthsInYear เป็นเดือนในปีที่เลือก
           monthsInYear = _generateMonths(currentDateTime);
         });
@@ -136,7 +146,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
         decoration: BoxDecoration(
           color: (yearsInRange[index].year == currentDateTime.year)
-              ? const Color(0xFFFFECDB) // สีสำหรับปีปัจจุบัน
+              ? pastel.pastel2 // สีสำหรับปีปัจจุบัน
               : Colors.white.withOpacity(0.0),
           borderRadius: BorderRadius.circular(15),
         ),
@@ -150,8 +160,8 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
                   fontSize: height * 0.025,
                   fontWeight: FontWeight.bold,
                   color: (yearsInRange[index].year == currentDateTime.year)
-                      ? const Color.fromARGB(255, 26, 26, 26)
-                      : const Color.fromARGB(255, 150, 150, 150),
+                      ? pastel.pastelFont
+                      : pastel.pastelFont2,
                 ),
               ),
             ],
@@ -160,7 +170,6 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
       ),
     );
   }
-
 
   Widget topView() {
     return SizedBox(
@@ -173,7 +182,6 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
           titleView(),
           sortTwelveYears(),
           sortTwelveMonths(),
-
         ],
       ),
     );
@@ -193,4 +201,3 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
     super.dispose();
   }
 }
-
