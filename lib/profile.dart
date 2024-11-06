@@ -33,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       _dio.options.headers["Authorization"] = "Bearer $token";
 
-      Response response = await _dio.get('http://192.168.1.35:8080/v1/user');
+      Response response = await _dio.get('http://10.0.2.2:8080/v1/user');
 
       if (response.statusCode == 200) {
         if (response.data is List && response.data.isNotEmpty) {

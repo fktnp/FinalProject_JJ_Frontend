@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/mainjobmodel.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +46,22 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 1;
+  @override
+  void initState() {
+    super.initState();
+    _triggerServerCreation(widget.userId); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
+  }
+
+  Future<void> _triggerServerCreation(String userid) async {
+    final Dio dio = Dio();
+    final String url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userid}';
+    final response = await dio.get(url);
+    if (response.statusCode == 200) {
+      print('Server triggered successfully');
+    } else {
+      print('Failed to trigger server: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,9 +205,9 @@ class MyHomePageState extends State<MyHomePage> {
       case 3:
         return GoalsPage(userId: widget.userId);
       case 4:
-        return const TaskListPage();
+        return TaskListView(userId: widget.userId);
       default:
-        return const TaskListPage();
+        return TaskListView(userId: widget.userId);
     }
   }
 }

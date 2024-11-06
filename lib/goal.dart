@@ -42,7 +42,7 @@ class _GoalsPageState extends State<GoalsPage> {
 
   Future<List<MainJobModel>> fetchMainJobModels() async {
     final Dio dio = Dio();
-    final String url = 'http://192.168.1.35:8080/v1/job/user/${widget.userId}';
+    final String url = 'http://10.0.2.2:8080/v1/job/user/${widget.userId}';
     final response = await dio.get(url);
 
     if (response.statusCode == 200) {

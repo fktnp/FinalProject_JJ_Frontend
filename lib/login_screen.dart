@@ -6,7 +6,7 @@ import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
 import 'model/theme.dart';
 import 'register_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
         String password = _passwordController.text;
 
         Response response = await dio.post(
-          'http://192.168.1.35:8080/v1/user/login',
+          'http://10.0.2.2:8080/v1/user/login',
           data: {
             "email": username,
             "password": password,
@@ -71,10 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordError = 'Login failed. Please try again.';
           });
         }
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         print('Dio error: ${e.response?.statusCode} - ${e.message}');
         setState(() {
-          _passwordError = 'Server error. Please try again later.';
+          _passwordError = 'Please try again later.';
         });
       } catch (e) {
         print('Unexpected error: $e');
@@ -164,18 +164,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.google,
-                      size: 30, color: Colors.black),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: pastel.pastel2,
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  onPressed: () {
-                    // _googleAuthService.signInWithGoogle(context);
-                  },
-                ),
+                // IconButton(
+                //   icon: const FaIcon(FontAwesomeIcons.google,
+                //       size: 30, color: Colors.black),
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: pastel.pastel2,
+                //     shape: const CircleBorder(),
+                //     padding: const EdgeInsets.all(10),
+                //   ),
+                //   onPressed: () {
+                //     // _googleAuthService.signInWithGoogle(context);
+                //   },
+                // ),
                 const SizedBox(height: 40),
                 CustomButton(
                   text: 'No account? Register',

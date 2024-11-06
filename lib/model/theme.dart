@@ -8,6 +8,7 @@ class Pastel extends ThemeExtension<Pastel> {
     required this.pastelFont2,
     required this.pastelProgress,
     required this.pastelIcon,
+    required this.pastelBlock,
   });
 
   final Color? pastel1;
@@ -16,6 +17,7 @@ class Pastel extends ThemeExtension<Pastel> {
   final Color? pastelFont2;
   final Color? pastelProgress;
   final Color? pastelIcon;
+  final Color? pastelBlock;
 
   @override
   Pastel copyWith({
@@ -25,6 +27,7 @@ class Pastel extends ThemeExtension<Pastel> {
     Color? pastelFont2,
     Color? pastelProgress,
     Color? pastelIcon,
+    Color? pastelBlock,
   }) {
     return Pastel(
       pastel1: pastel1 ?? this.pastel1,
@@ -33,6 +36,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelFont2: pastelFont2 ?? this.pastelFont2,
       pastelProgress: pastelProgress ?? this.pastelProgress,
       pastelIcon: pastelIcon ?? this.pastelIcon,
+      pastelBlock: pastelBlock ?? this.pastelBlock,
     );
   }
 
@@ -48,6 +52,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelFont2: Color.lerp(pastelFont2, other.pastelFont2, t),
       pastelProgress: Color.lerp(pastelProgress, other.pastelProgress, t),
       pastelIcon: Color.lerp(pastelIcon, other.pastelIcon, t),
+      pastelBlock: Color.lerp(pastelBlock, other.pastelBlock, t),
     );
   }
 
@@ -104,8 +109,9 @@ class ThemeNotifier with ChangeNotifier {
         pastel2: Color(0xFFFFECDB),
         pastelFont: Color.fromARGB(255, 41, 41, 41),
         pastelFont2: Color.fromARGB(255, 150, 150, 150),
-        pastelProgress: Color.fromARGB(255, 92, 216, 97),
+        pastelProgress: Color.fromARGB(255, 155, 255, 172),
         pastelIcon: Colors.black,
+        pastelBlock: Color.fromARGB(255, 190, 223, 255),
       ),
       const Dark(
         dark1: Color(0xFFE53935),
@@ -123,6 +129,7 @@ class ThemeNotifier with ChangeNotifier {
         pastelFont2: Color.fromARGB(255, 165, 157, 144),
         pastelProgress: Color(0xFFECDFCC),
         pastelIcon: Colors.white,
+        pastelBlock: Color.fromARGB(255, 90, 90, 90),
       ),
       const Dark(
         dark1: Color(0xFFEF9A9A),

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../todotolist.dart';
+import 'calendarmodel.dart';
 import 'subjobmodel.dart';
 
 class MainJobModel {
@@ -47,31 +49,66 @@ class MainJobModel {
   }
 }
 
-class TaskListPage extends StatefulWidget {
-  const TaskListPage({super.key});
+class TaskListView extends StatefulWidget {
+  final String userId;
+  const TaskListView({super.key, required this.userId});
 
   @override
-  State<TaskListPage> createState() => _TaskListPageState();
+  State<TaskListView> createState() => _TaskListViewState();
 }
 
-class _TaskListPageState extends State<TaskListPage> {
-  late Future<List<SubJobModel>> futureTasks;
+class _TaskListViewState extends State<TaskListView> {
+  late Future<List<Task>> futureTasks;
+  final Dio _dio = Dio();
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchSubTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
+    futureTasks = _fetchTasks(); // Load tasks on page load
   }
 
-  Future<List<SubJobModel>> fetchSubTasks() async {
-    final Dio dio = Dio();
-    const String url = 'http://10.0.2.2:8080/v1/subjob';
-    final response = await dio.get(url);
+  Future<List<Task>> _fetchTasks() async {
+    List<CalendarModel> calendars = await fetchCalendars();
+    List<Task> fetchedTasks = [];
+
+    for (var calendar in calendars) {
+      SubJobModel subJob = await fetchSubJob(calendar.subJobID);
+      // Create a Task from the SubJobModel
+      fetchedTasks.add(Task(
+        id: calendar.id,
+        title: subJob.name,
+        details: subJob.details,
+        isCompleted: calendar.statusSubJob,
+        startDate: subJob.startDate,
+        lastDate: subJob.lastDate,
+        percentProgress: subJob.percentProgress,
+        dateCarendar: calendar.dateCalendar,
+        startTimeGoal: subJob.startTimeGoal,
+        lastTimeGoal: subJob.lastTimeGoal,
+      ));
+    }
+    return fetchedTasks;
+  }
+
+  Future<List<CalendarModel>> fetchCalendars() async {
+    final String url = 'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}';
+    final response = await _dio.get(url);
+
     if (response.statusCode == 200) {
-      final List<dynamic> taskListJson = response.data;
-      return taskListJson.map((json) => SubJobModel.fromJson(json)).toList();
+      List<dynamic> data = response.data;
+      return data.map((item) => CalendarModel.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load tasks');
+      throw Exception('Failed to load calendar data');
+    }
+  }
+
+  Future<SubJobModel> fetchSubJob(String subJobID) async {
+    final response = await _dio.get('http://10.0.2.2:8080/v1/subjob/$subJobID');
+
+    if (response.statusCode == 200) {
+      return SubJobModel.fromJson(response.data);
+    } else {
+      throw Exception('Failed to load subjob');
     }
   }
 
@@ -79,9 +116,9 @@ class _TaskListPageState extends State<TaskListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task List'),
+        title: const Text('Task List View'),
       ),
-      body: FutureBuilder<List<SubJobModel>>(
+      body: FutureBuilder<List<Task>>(
         future: futureTasks,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -92,16 +129,19 @@ class _TaskListPageState extends State<TaskListPage> {
             return const Center(child: Text('No tasks available'));
           } else {
             final tasks = snapshot.data!;
-
             return ListView.builder(
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 final task = tasks[index];
                 return Card(
                   child: ListTile(
-                    title: Text(task.name),
+                    title: Text(task.title),
                     subtitle: Text(
-                        'Start: ${task.startTimeGoal} \nEnd: ${task.lastTimeGoal}'),
+                      'Details: ${task.details}\n'
+                      'Start: ${task.startDate.toLocal().toString().split(' ')[0]}\n'
+                      'End: ${task.lastDate.toLocal().toString().split(' ')[0]}\n'
+                      'CalendarDate: ${task.dateCarendar.toLocal().toString().split(' ')[0]}',
+                    ),
                     trailing: Text('${task.percentProgress}%'),
                   ),
                 );
@@ -113,3 +153,63 @@ class _TaskListPageState extends State<TaskListPage> {
     );
   }
 }
+
+// class Trytodo extends StatefulWidget {
+//   final String userId;
+
+//   Trytodo({required this.userId});
+
+//   @override
+//   _TrytodoState createState() => _TrytodoState();
+// }
+
+// class _TrytodoState extends State<Trytodo> {
+//   // ตัวแปรสำหรับเก็บข้อมูลที่ได้จาก API
+//   var subJobData;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _fetchSubJobData(); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
+//   }
+
+//   // ฟังก์ชันสำหรับเรียก API
+//   Future<void> _fetchSubJobData() async {
+//     final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}';
+    
+//     try {
+//       final response = await http.get(Uri.parse(url));
+      
+//       if (response.statusCode == 200) {
+//         // แปลงข้อมูลที่ได้จาก API เป็น JSON และเก็บไว้ในตัวแปร
+//         setState(() {
+//           subJobData = json.decode(response.body);
+//         });
+//       } else {
+//         // แสดงข้อความเมื่อการเรียก API ไม่สำเร็จ
+//         print('Failed to load data: ${response.statusCode}');
+//       }
+//     } catch (error) {
+//       // จัดการกับข้อผิดพลาด
+//       print('Error fetching data: $error');
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text("Home Page")),
+//       body: subJobData == null
+//           ? const Center(child: CircularProgressIndicator()) // แสดง loading ระหว่างรอข้อมูล
+//           : ListView.builder(
+//               itemCount: subJobData.length,
+//               itemBuilder: (context, index) {
+//                 return ListTile(
+//                   title: Text(subJobData[index]['name']),
+//                   subtitle: Text("Start: ${subJobData[index]['start_time']}"),
+//                 );
+//               },
+//             ),
+//     );
+//   }
+// }

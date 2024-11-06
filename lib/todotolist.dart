@@ -21,7 +21,7 @@ class ToDoListState extends State<ToDoList> {
   Future<List<CalendarModel>> fetchCalendars() async {
     final Dio dio = Dio();
     final String url =
-        'http://192.168.1.35:8080/v1/calendar/user/${widget.userId}'; // เปลี่ยน URL ตามที่คุณใช้
+        'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}'; // เปลี่ยน URL ตามที่คุณใช้
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -34,7 +34,7 @@ class ToDoListState extends State<ToDoList> {
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
     final response = await dio.get(
-        'http://192.168.1.35:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
+        'http://10.0.2.2:8080/v1/subjob/$subJobID'); // เปลี่ยน URL ตามที่คุณใช้
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);
@@ -66,6 +66,9 @@ class ToDoListState extends State<ToDoList> {
           startDate: subJob.startDate,
           lastDate: subJob.lastDate,
           percentProgress: subJob.percentProgress,
+          dateCarendar: calendar.dateCalendar,
+          startTimeGoal: subJob.startTimeGoal,
+          lastTimeGoal: subJob.lastTimeGoal,
         ));
       }
 
@@ -95,7 +98,7 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _completeTask(String taskId) async {
     try {
       final response = await _dio.get(
-          'http://192.168.1.35:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
+          'http://10.0.2.2:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
 
       if (response.statusCode == 200) {
         // อัพเดทสถานะของ Task ในตัวแปร tasks
@@ -117,7 +120,7 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _uncompleteTask(String taskId) async {
     try {
       final response = await _dio.get(
-          'http://192.168.1.35:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
+          'http://10.0.2.2:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
 
       if (response.statusCode == 200) {
         // อัพเดทสถานะของ Task ในตัวแปร tasks
@@ -142,6 +145,9 @@ class ToDoListState extends State<ToDoList> {
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+
+    // กรอง task ที่ตรงกับ currentDateTime
+    final filteredTasks = filterTasks(tasks);
 
     return Container(
       color: pastel.pastel2,
@@ -169,17 +175,22 @@ class ToDoListState extends State<ToDoList> {
               ),
               ShowListTask(
                 currentDate: currentDateTime,
-                tasks: tasks, // ส่ง tasks ไปที่ ShowListTask
-                onTaskCompleted:
-                    _completeTask, // ส่ง callback สำหรับ task ที่เสร็จแล้ว
-                onTaskUncompleted:
-                    _uncompleteTask, // ส่ง callback สำหรับ task ที่ไม่สำเร็จ
+                tasks: filteredTasks, // แสดงเฉพาะ task ที่ตรงกับวันที่
+                onTaskCompleted: _completeTask,
+                onTaskUncompleted: _uncompleteTask,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+// เพิ่มฟังก์ชัน filterTasks เพื่อกรอง tasks ที่ตรงกับวันที่
+  List<Task> filterTasks(List<Task> tasks) {
+    return tasks
+        .where((task) => isSameDate(task.dateCarendar, currentDateTime))
+        .toList();
   }
 }
 
@@ -368,7 +379,8 @@ class ShowListTask extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'Start: ${task.startDate.toLocal().toString().split(' ')[0]}',
+                          'Start: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} :'
+                          ' ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             color:
                                 task.isCompleted ? Colors.grey : Colors.black54,
@@ -379,7 +391,8 @@ class ShowListTask extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'End: ${task.lastDate.toLocal().toString().split(' ')[0]}',
+                          'End: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} :'
+                          ' ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             color:
                                 task.isCompleted ? Colors.grey : Colors.black54,
@@ -407,6 +420,9 @@ class Task {
   final DateTime startDate; // Added to hold the start date
   final DateTime lastDate; // Added to hold the last date
   final int percentProgress; // Added for progress
+  final DateTime dateCarendar;
+  final DateTime startTimeGoal;
+  final DateTime lastTimeGoal;
 
   Task({
     required this.id,
@@ -416,5 +432,8 @@ class Task {
     required this.startDate,
     required this.lastDate,
     required this.percentProgress,
+    required this.dateCarendar,
+    required this.startTimeGoal,
+    required this.lastTimeGoal,
   });
 }

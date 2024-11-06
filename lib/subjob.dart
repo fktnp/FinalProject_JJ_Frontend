@@ -88,7 +88,7 @@ class AddSubTaskForm {
 
     try {
       var response = await Dio().post(
-        'http://192.168.1.35:8080/v1/subjob',
+        'http://10.0.2.2:8080/v1/subjob',
         data: data,
       );
       print(response.data);
@@ -191,10 +191,10 @@ class AddSubTaskForm {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  shape: CircleBorder(),
+                                  shape: const CircleBorder(),
                                   backgroundColor:
                                       const Color.fromARGB(255, 255, 220, 188),
-                                  padding: EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
                                 ),
                                 child: const Icon(
                                   Icons.add,
@@ -304,7 +304,7 @@ class AddSubTaskForm {
   Widget _buildDailyFrequencyInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
+      child: SizedBox(
         width: 60, // กำหนดความกว้าง
         child: TextField(
           controller: frequencyDayController,
@@ -329,12 +329,12 @@ class AddSubTaskForm {
       child: GridView.count(
         crossAxisCount: 4, // เพิ่มเป็น 4 คอลัมน์
         shrinkWrap: true, // ย่อขนาดให้พอดีกับเนื้อหา
-        physics: NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+        physics: const NeverScrollableScrollPhysics(), // ปิดการเลื่อน
         children: List.generate(7, (index) {
           String day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index];
           return Card(
             elevation: 1, // เพิ่มเงาให้การ์ด
-            margin: EdgeInsets.all(8), // เพิ่มระยะห่างรอบการ์ด
+            margin: const EdgeInsets.all(8), // เพิ่มระยะห่างรอบการ์ด
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10), // มุมมน
             ),
@@ -349,7 +349,7 @@ class AddSubTaskForm {
                 });
               },
               child: Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: selectedWeekDays.contains(index)
                       ? const Color.fromARGB(255, 255, 220, 188)
@@ -386,7 +386,7 @@ Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
   return Container(
     margin: const EdgeInsets.all(4.0),
     padding: const EdgeInsets.symmetric(horizontal: 5),
-    constraints: BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
+    constraints: const BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),

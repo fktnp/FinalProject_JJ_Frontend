@@ -16,7 +16,7 @@ class TaskDetailPage extends StatelessWidget {
 
   Future<List<SubJobModel>> fetchSubTasks() async {
     final Dio dio = Dio();
-    final String url = 'http://192.168.1.35:8080/v1/subjob/user/$loginuserid';
+    final String url = 'http://10.0.2.2:8080/v1/subjob/user/$loginuserid';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
@@ -88,8 +88,8 @@ class TaskDetailPage extends StatelessWidget {
                 labelColor: Colors.black,
                 unselectedLabelColor: Colors.black,
                 indicator: BoxDecoration(
-                  color: const Color(
-                      0xFFFFDCBC), // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
+                  color:
+                      pastel.pastel1, // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
                   borderRadius: BorderRadius.circular(20), // ขอบมนของแท็บ
                 ),
               ),
@@ -106,8 +106,8 @@ class TaskDetailPage extends StatelessWidget {
                           width: MediaQuery.of(context).size.width -
                               32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
                           padding: const EdgeInsets.all(16.0),
-                          color: const Color(
-                              0xFFFFDCBC), // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
+                          color: pastel
+                              .pastel2, // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
                           child: ListView.builder(
                             itemCount: 24, // จำนวนชั่วโมง (0-23)
                             itemBuilder: (context, index) {
@@ -133,7 +133,8 @@ class TaskDetailPage extends StatelessWidget {
                                             horizontal: 8.0),
                                         height:
                                             1, // ความสูงของเส้นขีด (ปรับให้บางลง)
-                                        color: Colors.black, // สีของเส้นขีด
+                                        color:
+                                            pastel.pastelFont, // สีของเส้นขีด
                                       ),
                                     ),
                                   ],
@@ -234,7 +235,7 @@ class SubTaskBox extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
         decoration: BoxDecoration(
           color: subtask.percentProgress < 100
-              ? const Color.fromARGB(255, 190, 223, 255)
+              ? pastel.pastelBlock
               : const Color.fromARGB(255, 190, 255, 201),
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
         ),
