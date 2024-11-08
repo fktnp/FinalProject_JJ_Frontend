@@ -26,8 +26,7 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
 
   Future<void> _updateParticipantsInTeamJob(String userId) async {
     final data = {
-      "work_by_user_id":
-          widget.currentParticipants, // สมมติว่าส่งรายชื่อทั้งหมดไปอัปเดต
+      "work_by_user_id": widget.currentParticipants, // สมมติว่าส่งรายชื่อทั้งหมดไปอัปเดต
     };
 
     try {

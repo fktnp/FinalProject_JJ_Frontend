@@ -113,8 +113,8 @@ class _CoopPageState extends State<CoopPage> {
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
-      print(taskListJson);
-      print(url);
+      // print(taskListJson);
+      // print(url);
       return taskListJson.map((json) => Teamjobmodel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load tasks');
@@ -469,6 +469,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
     super.initState();
     participatingUsers = [];
     fetchParticipatingUsers();
+    print('in the Team Task box now');
   }
 
   Future<void> fetchParticipatingUsers() async {
