@@ -6,7 +6,6 @@ import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
 import 'model/theme.dart';
 import 'register_screen.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -22,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Dio dio = Dio();
-  // final GoogleAuthService _googleAuthService = GoogleAuthService();
   String? _passwordError;
 
   Future<void> login(BuildContext context) async {
@@ -41,12 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
             "password": password,
           },
         );
-
         if (response.statusCode == 200) {
           print('Login successful: ${response.data}');
           String userId = response.data['user_id'];
 
-          // เก็บข้อมูลใน SharedPreferences เหมือนเดิม
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', response.data['token'] ?? '');
           await prefs.setString('user_id', userId);
@@ -54,12 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString('user_email', response.data['email'] ?? '');
           await prefs.setString(
               'user_phone', response.data['phone_number'] ?? '');
+          await prefs.setBool('isLoggedIn', true);
 
           setState(() {
             _passwordError = null;
           });
 
-          // ส่ง userId ไปยัง MyHomePage
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -74,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } on DioException catch (e) {
         print('Dio error: ${e.response?.statusCode} - ${e.message}');
         setState(() {
-          _passwordError = 'Please try again later.';
+          _passwordError = 'Server error. Please try again later.';
         });
       } catch (e) {
         print('Unexpected error: $e');
@@ -85,10 +81,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> checkToken() async {
+  Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-    print('Token: $token');
+    await prefs.clear(); // ลบข้อมูลการเข้าสู่ระบบทั้งหมด
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -164,18 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // IconButton(
-                //   icon: const FaIcon(FontAwesomeIcons.google,
-                //       size: 30, color: Colors.black),
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: pastel.pastel2,
-                //     shape: const CircleBorder(),
-                //     padding: const EdgeInsets.all(10),
-                //   ),
-                //   onPressed: () {
-                //     // _googleAuthService.signInWithGoogle(context);
-                //   },
-                // ),
                 const SizedBox(height: 40),
                 CustomButton(
                   text: 'No account? Register',

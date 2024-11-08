@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';  
 import 'model/theme.dart';
-import 'main.dart';
 import 'profile.dart';
-import 'themepage.dart'; // เพิ่มการนำเข้า ProfileScreen
+import 'themepage.dart'; 
 
 class SettingsPage extends StatefulWidget {
   final String userId;
@@ -38,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: const Icon(Icons.person, size: 50),
               title: Text(
                 'Profile',
-                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () {
                 Navigator.push(
@@ -53,7 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: const Icon(Icons.palette, size: 50),
               title: Text(
                 'Theme',
-                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () {
                 Navigator.push(context,
@@ -65,9 +66,9 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: const Icon(Icons.exit_to_app, size: 50),
               title: Text(
                 'Sign out',
-                style: TextStyle(fontSize: 24,color: pastel.pastelFont),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
-              onTap: () {
+              onTap: () async {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -83,7 +84,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         TextButton(
                           child: const Text('Yes'),
-                          onPressed: () {
+                          onPressed: () async {
+                            // ลบข้อมูลที่เกี่ยวข้องกับการล็อกอิน
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('isLoggedIn');
+                            await prefs.remove('user_id');
+                            
+                            // นำผู้ใช้กลับไปที่หน้า LoginScreen
                             Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
@@ -91,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 transitionDuration: const Duration(seconds: 1),
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        const MyApps(),
+                                        const LoginScreen(),  // ไปที่หน้า LoginScreen
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   var begin = const Offset(1.0, 0.0);

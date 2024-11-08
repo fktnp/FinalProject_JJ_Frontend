@@ -4,7 +4,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'components/custom_button.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
-import 'subjob.dart';
+import 'components/subjobform.dart';
 import 'model/mainjobmodel.dart';
 
 class TaskDetailPage extends StatelessWidget {
@@ -160,6 +160,7 @@ class TaskDetailPage extends StatelessWidget {
                                     child: CircularProgressIndicator());
                               } else {
                                 final tasks = snapshot.data ?? [];
+                                print(tasks);
                                 final subtask = tasks.where((subtask) =>
                                     (subtask.jobId == mainJobModel.jobId));
 

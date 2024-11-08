@@ -1,43 +1,77 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/model/mainjobmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'coop.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'model/theme.dart';
 import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(ChangeNotifierProvider(
     create: (context) => ThemeNotifier(),
-    child: const MyApps(),
+    child: const MyApp(),
   ));
 }
 
-class MyApps extends StatelessWidget {
-  const MyApps({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  Future<bool> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         return MaterialApp(
-            title: 'My App',
-            theme: themeNotifier.themeData,
-            home: const LoginScreen());
+          title: 'My App',
+          theme: themeNotifier.themeData,
+          home: FutureBuilder<bool>(
+            future: checkLoginStatus(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                if (snapshot.data == true) {
+                  return FutureBuilder<String?>(
+                    future: _getUserId(),
+                    builder: (context, userIdSnapshot) {
+                      if (userIdSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else {
+                        return MyHomePage(userId: userIdSnapshot.data ?? '');
+                      }
+                    },
+                  );
+                } else {
+                  return const LoginScreen();
+                }
+              }
+            },
+          ),
+        );
       },
     );
+  }
+
+  Future<String?> _getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_id');
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final String userId; // เพิ่ม userId parameter
+  final String userId;
 
   const MyHomePage({
     super.key,
-    required this.userId, // รับ userId จาก constructor
+    required this.userId,
   });
 
   @override
@@ -49,17 +83,23 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _triggerServerCreation(widget.userId); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
+    _triggerServerCreation(); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
   }
 
-  Future<void> _triggerServerCreation(String userid) async {
-    final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userid}';
-    final response = await dio.get(url);
-    if (response.statusCode == 200) {
-      print('Server triggered successfully');
-    } else {
-      print('Failed to trigger server: ${response.statusCode}');
+  Future<void> _triggerServerCreation() async {
+    final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}';
+
+    try {
+      final response =
+          await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
+      if (response.statusCode == 200) {
+        print('Server triggered successfully');
+        print('http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}');
+      } else {
+        print('Failed to trigger server: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error triggering server: $error');
     }
   }
 
@@ -71,7 +111,7 @@ class MyHomePageState extends State<MyHomePage> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      body: _getPage(_currentIndex), // ใช้ฟังก์ชันแยกหน้าแทน IndexedStack
+      body: _getPage(_currentIndex),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: screenHeight * 0.08,
@@ -95,95 +135,90 @@ class MyHomePageState extends State<MyHomePage> {
               BottomNavigationBarItem(
                 icon: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    pastel.pastelFont ??
-                        Colors.white, // สีขาวที่ต้องการเปลี่ยนเป็น
-                    BlendMode.srcIn, // โหมดการผสมสีที่จะเปลี่ยนสีของภาพ
+                    pastel.pastelFont ?? Colors.white,
+                    BlendMode.srcIn,
                   ),
                   child: Image.asset(
                     'lib/Pic/settings.png',
                     width: _currentIndex == 0
                         ? screenWidth * 0.08
-                        : screenWidth * 0.10, // ยุบลงถ้าเลือก
+                        : screenWidth * 0.10,
                     height: _currentIndex == 0
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
-                  ), // รูปภาพที่ต้องการเปลี่ยนสี
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    pastel.pastelFont ??
-                        Colors.black, // สีขาวที่ต้องการเปลี่ยนเป็น
-                    BlendMode.srcIn, // โหมดการผสมสีที่จะเปลี่ยนสีของภาพ
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
                   ),
                   child: Image.asset(
                     'lib/Pic/calendar.png',
                     width: _currentIndex == 1
                         ? screenWidth * 0.08
-                        : screenWidth * 0.10, // ยุบลงถ้าเลือก
+                        : screenWidth * 0.10,
                     height: _currentIndex == 1
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
-                  ), // รูปภาพที่ต้องการเปลี่ยนสี
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    pastel.pastelFont ??
-                        Colors.white, // สีขาวที่ต้องการเปลี่ยนเป็น
-                    BlendMode.srcIn, // โหมดการผสมสีที่จะเปลี่ยนสีของภาพ
+                    pastel.pastelFont ?? Colors.white,
+                    BlendMode.srcIn,
                   ),
                   child: Image.asset(
                     'lib/Pic/Task.png',
                     width: _currentIndex == 2
                         ? screenWidth * 0.08
-                        : screenWidth * 0.10, // ยุบลงถ้าเลือก
+                        : screenWidth * 0.10,
                     height: _currentIndex == 2
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
-                  ), // รูปภาพที่ต้องการเปลี่ยนสี
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    pastel.pastelFont ??
-                        Colors.black, // สีขาวที่ต้องการเปลี่ยนเป็น
-                    BlendMode.srcIn, // โหมดการผสมสีที่จะเปลี่ยนสีของภาพ
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
                   ),
                   child: Image.asset(
                     'lib/Pic/goal.png',
                     width: _currentIndex == 3
                         ? screenWidth * 0.08
-                        : screenWidth * 0.10, // ยุบลงถ้าเลือก
+                        : screenWidth * 0.10,
                     height: _currentIndex == 3
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
-                  ), // รูปภาพที่ต้องการเปลี่ยนสี
+                  ),
                 ),
                 label: '',
               ),
               BottomNavigationBarItem(
                 icon: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    pastel.pastelFont ??
-                        Colors.black, // สีขาวที่ต้องการเปลี่ยนเป็น
-                    BlendMode.srcIn, // โหมดการผสมสีที่จะเปลี่ยนสีของภาพ
+                    pastel.pastelFont ?? Colors.black,
+                    BlendMode.srcIn,
                   ),
                   child: Image.asset(
                     'lib/Pic/Co-op.png',
                     width: _currentIndex == 4
                         ? screenWidth * 0.08
-                        : screenWidth * 0.10, // ยุบลงถ้าเลือก
+                        : screenWidth * 0.10,
                     height: _currentIndex == 4
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
-                  ), // รูปภาพที่ต้องการเปลี่ยนสี
+                  ),
                 ),
                 label: '',
               ),
@@ -205,9 +240,9 @@ class MyHomePageState extends State<MyHomePage> {
       case 3:
         return GoalsPage(userId: widget.userId);
       case 4:
-        return TaskListView(userId: widget.userId);
+        return CoopPage(userId: widget.userId);
       default:
-        return TaskListView(userId: widget.userId);
+        return MyCalendarView(userId: widget.userId);
     }
   }
 }

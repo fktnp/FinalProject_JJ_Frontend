@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'model/theme.dart';
+import '../model/theme.dart';
 
 class AddSubTaskForm {
   final BuildContext context;
@@ -30,6 +29,23 @@ class AddSubTaskForm {
   bool isEndDateEmpty = false;
   bool isStartTimeEmpty = false;
   bool isEndTimeEmpty = false;
+
+  // Future<void> _triggerServerCreation() async {
+  //   final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userId';
+
+  //   try {
+  //     final response =
+  //         await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
+  //     if (response.statusCode == 200) {
+  //       print('Server triggered successfully');
+  //       print('http://10.0.2.2:8080/v1/calendar/subjob/user/$userId');
+  //     } else {
+  //       print('Failed to trigger server: ${response.statusCode}');
+  //     }
+  //   } catch (error) {
+  //     print('Error triggering server: $error');
+  //   }
+  // }
 
   Future<void> saveSubTask() async {
     if (jobId.isEmpty ||
@@ -92,7 +108,6 @@ class AddSubTaskForm {
         data: data,
       );
       print(response.data);
-      print(data);
     } on DioException catch (e) {
       if (e.response != null) {
         print('Error status code: ${e.response?.statusCode}');
@@ -128,16 +143,14 @@ class AddSubTaskForm {
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start, 
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeader(),
                       const SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start, 
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildTextField(
                               'Task Name',
@@ -382,35 +395,34 @@ class AddSubTaskForm {
     );
   }
 
-Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
-  return Container(
-    margin: const EdgeInsets.all(4.0),
-    padding: const EdgeInsets.symmetric(horizontal: 5),
-    constraints: const BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(
-          color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
-    ),
-    child: DropdownButton<int>(
-      value: selectedMonthDay,
-      items: List.generate(31, (index) {
-        return DropdownMenuItem<int>(
-          value: index + 1,
-          child: Text('Day ${index + 1}'),
-        );
-      }),
-      onChanged: (int? newValue) {
-        setState(() {
-          selectedMonthDay = newValue!;
-        });
-      },
-      isExpanded: true, // ให้ Dropdown ขยายเต็มพื้นที่
-    ),
-  );
-}
-
+  Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
+    return Container(
+      margin: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      constraints: const BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+            color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
+      ),
+      child: DropdownButton<int>(
+        value: selectedMonthDay,
+        items: List.generate(31, (index) {
+          return DropdownMenuItem<int>(
+            value: index + 1,
+            child: Text('Day ${index + 1}'),
+          );
+        }),
+        onChanged: (int? newValue) {
+          setState(() {
+            selectedMonthDay = newValue!;
+          });
+        },
+        isExpanded: true, // ให้ Dropdown ขยายเต็มพื้นที่
+      ),
+    );
+  }
 
   Widget _buildDatePicker(String label, DateTime? selectedDate,
       ValueChanged<DateTime> onDatePicked) {
