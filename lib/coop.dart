@@ -49,7 +49,7 @@ Future<void> createCoop({
     );
     // การส่งข้อมูล POST
     print(response.data);
-    print(data);
+    // print(data);
   } on DioException catch (e) {
     if (e.response != null) {
       print('Error status code: ${e.response?.statusCode}');
@@ -113,7 +113,7 @@ class _CoopPageState extends State<CoopPage> {
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
-      // print(taskListJson);
+      print(taskListJson);
       // print(url);
       return taskListJson.map((json) => Teamjobmodel.fromJson(json)).toList();
     } else {

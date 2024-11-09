@@ -30,23 +30,6 @@ class AddSubTaskForm {
   bool isStartTimeEmpty = false;
   bool isEndTimeEmpty = false;
 
-  // Future<void> _triggerServerCreation() async {
-  //   final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userId';
-
-  //   try {
-  //     final response =
-  //         await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
-  //     if (response.statusCode == 200) {
-  //       print('Server triggered successfully');
-  //       print('http://10.0.2.2:8080/v1/calendar/subjob/user/$userId');
-  //     } else {
-  //       print('Failed to trigger server: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     print('Error triggering server: $error');
-  //   }
-  // }
-
   Future<void> saveSubTask() async {
     if (jobId.isEmpty ||
         userId.isEmpty ||

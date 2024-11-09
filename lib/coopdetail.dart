@@ -4,6 +4,7 @@ import 'package:flutter_application_1/model/teamjobmodel.dart';
 import 'package:intl/intl.dart';
 import 'components/custom_button.dart';
 import 'components/workwithform.dart';
+import 'coopsubdetail.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -88,29 +89,6 @@ class CoopDetailPageState extends State<CoopDetailPage> {
     }
   }
 
-  // void _showAddParticipantPopup() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (_) => AddParticipantPopup(
-  //       currentParticipants: workByUserIdsToSend
-  //           .map((id) =>
-  //               participatingUsers.firstWhere((u) => u.userId == id).email)
-  //           .toList(),
-  //       onParticipantAdded: (userId) {
-  //         setState(() {
-  //           participatingUsers
-  //               .add(participatingUsers.firstWhere((u) => u.userId == userId));
-  //           workByUserIdsToSend.add(userId);
-  //           // อัพเดท workByUserIDs ที่งานหลัก
-  //           print("dai nah");
-  //           _updateParticipantsInTeamJob(userId);
-  //         });
-  //       },
-  //       pastel: Theme.of(context).extension<Pastel>()!,
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -169,7 +147,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                       return Container(
                         width: screenWidth * 0.08,
                         height: screenWidth * 0.08,
-                        margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                        margin: EdgeInsets.only(left: screenWidth * 0.03),
                         decoration: BoxDecoration(
                           color: pastel.pastelProgress,
                           shape: BoxShape.circle,
@@ -296,9 +274,6 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                   ConnectionState.waiting) {
                                 return const Center(
                                     child: CircularProgressIndicator());
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('Error: ${snapshot.error}'));
                               } else {
                                 final tasks = snapshot.data ?? [];
                                 return Padding(
@@ -316,6 +291,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                         ...tasks.map(
                                             (teamSubtask) => CoopSubTaskBox(
                                                   teamSubtask: teamSubtask,
+                                                  userId: widget.loginuserid,
                                                 )),
                                       ],
                                     ),
@@ -327,16 +303,18 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                         ),
                       ],
                     ),
-
-                    // เพิ่มปุ่มที่มุมขวาล่าง
                     Positioned(
                       bottom: 25,
                       right: 10,
-                      child: FixedBottomButton(
-                        onPressed: () {
-                          _showAddGoalCoopBottomSheet(context, pastel);
-                        },
-                      ),
+                      child: widget.teamjobmodel.headUserID ==
+                              widget.loginuserid
+                          ? FixedBottomButton(
+                              onPressed: () {
+                                _showAddGoalCoopBottomSheet(context, pastel);
+                              },
+                            )
+                          : const SizedBox
+                              .shrink(), // ถ้าไม่ตรงเงื่อนไขให้แสดง Widget ว่าง
                     ),
                   ],
                 ),
@@ -637,10 +615,12 @@ class CoopDetailPageState extends State<CoopDetailPage> {
 
 class CoopSubTaskBox extends StatefulWidget {
   final Teamsubjobmodel teamSubtask;
+  final String userId;
 
   const CoopSubTaskBox({
     super.key,
     required this.teamSubtask,
+    required this.userId,
   });
 
   @override
@@ -655,6 +635,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
     super.initState();
     participatingUsers = [];
     fetchParticipatingUsers();
+    print(widget.teamSubtask.subJobId);
   }
 
   Future<void> fetchParticipatingUsers() async {
@@ -674,64 +655,79 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
     final screenWidth = mediaQuery.size.width;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
-    return Container(
-      width: screenWidth * 0.98,
-      height: screenHeight * 0.13,
-      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
-      margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
-      decoration: BoxDecoration(
-        color: widget.teamSubtask.status != "Completed"
-            ? pastel.pastelBlock
-            : const Color.fromARGB(255, 190, 255, 201),
-        borderRadius: BorderRadius.circular(screenWidth * 0.05),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                widget.teamSubtask.name,
-                style: TextStyle(
-                    fontSize: screenWidth * 0.065, color: pastel.pastelFont),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                '${widget.teamSubtask.startDate.day}/${widget.teamSubtask.startDate.month}/${widget.teamSubtask.startDate.year} - ${widget.teamSubtask.lastDate.day}/${widget.teamSubtask.lastDate.month}/${widget.teamSubtask.lastDate.year}',
-                style: TextStyle(
-                    fontSize: screenWidth * 0.035, color: pastel.pastelFont),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: participatingUsers.map((user) {
-                  return Container(
-                    width: screenWidth * 0.08,
-                    height: screenWidth * 0.08,
-                    margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                    decoration: BoxDecoration(
-                      color: pastel.pastelProgress,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        user.name.isNotEmpty ? user.name[0].toUpperCase() : '',
-                        style: TextStyle(
-                          color: pastel.pastelFont,
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenWidth * 0.04,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CoopSubDetailPage(
+              teamsubjobmodel: widget.teamSubtask, // ส่งข้อมูล task ที่เลือกไป
+              loginuserid: widget.userId, // ส่ง userId ไปด้วย
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: screenWidth * 0.98,
+        height: screenHeight * 0.13,
+        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
+        margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
+        decoration: BoxDecoration(
+          color: widget.teamSubtask.status != "Completed"
+              ? pastel.pastelBlock
+              : const Color.fromARGB(255, 190, 255, 201),
+          borderRadius: BorderRadius.circular(screenWidth * 0.05),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.teamSubtask.name,
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.065, color: pastel.pastelFont),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '${widget.teamSubtask.startDate.day}/${widget.teamSubtask.startDate.month}/${widget.teamSubtask.startDate.year} - ${widget.teamSubtask.lastDate.day}/${widget.teamSubtask.lastDate.month}/${widget.teamSubtask.lastDate.year}',
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.035, color: pastel.pastelFont),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: participatingUsers.map((user) {
+                    return Container(
+                      width: screenWidth * 0.08,
+                      height: screenWidth * 0.08,
+                      margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                      decoration: BoxDecoration(
+                        color: pastel.pastelProgress,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          user.name.isNotEmpty
+                              ? user.name[0].toUpperCase()
+                              : '',
+                          style: TextStyle(
+                            color: pastel.pastelFont,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.04,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 5),
-            ],
-          ),
-        ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
