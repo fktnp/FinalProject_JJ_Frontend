@@ -104,7 +104,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
         ),
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: pastel.pastelFont),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -154,7 +154,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                                 ? user.name[0].toUpperCase()
                                 : '',
                             style: TextStyle(
-                              color: pastel.pastelFont,
+                              color: pastel.participant,
                               fontWeight: FontWeight.bold,
                               fontSize: screenWidth * 0.06,
                             ),
@@ -179,9 +179,9 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       backgroundColor: pastel.pastelProgress,
-                      foregroundColor: Colors.red,
+                      foregroundColor: pastel.participant,
                     ),
-                    child: const Icon(Icons.add, color: Colors.white),
+                    child: Icon(Icons.add, color: pastel.participant),
                   ),
                 ],
               ),
@@ -250,9 +250,9 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       backgroundColor: pastel.pastelProgress,
-                      foregroundColor: Colors.red,
+                      foregroundColor: pastel.participant,
                     ),
-                    child: const Icon(Icons.add, color: Colors.white),
+                    child: Icon(Icons.add, color: pastel.participant),
                   ),
                 ],
               ),
@@ -306,9 +306,9 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       backgroundColor: pastel.pastelProgress,
-                      foregroundColor: Colors.red,
+                      foregroundColor: pastel.participant,
                     ),
-                    child: const Icon(Icons.add, color: Colors.white),
+                    child: Icon(Icons.add, color: pastel.participant),
                   ),
                 ],
               )

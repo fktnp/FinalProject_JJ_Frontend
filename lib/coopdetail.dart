@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/teamjobmodel.dart';
 import 'package:intl/intl.dart';
-import 'components/custom_button.dart';
 import 'components/workwithform.dart';
 import 'coopsubdetail.dart';
 import 'model/teamsubjobmodel.dart';
@@ -108,7 +107,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
         ),
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: pastel.pastelFont),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -158,7 +157,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                 ? user.name[0].toUpperCase()
                                 : '',
                             style: TextStyle(
-                              color: pastel.pastelFont,
+                              color: pastel.participant,
                               fontWeight: FontWeight.bold,
                               fontSize: screenWidth * 0.04,
                             ),
@@ -183,138 +182,55 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       backgroundColor: pastel.pastelProgress,
-                      foregroundColor: Colors.red,
+                      foregroundColor: pastel.participant,
                     ),
-                    child: const Icon(Icons.add, color: Colors.white),
+                    child: Icon(Icons.add, color: pastel.participant),
                   ),
                 ],
               ),
-
-              // แสดงแท็บ
-              TabBar(
-                tabs: const [
-                  SizedBox(
-                    width: 120, // ปรับความกว้างของแท็บ Routine
-                    child: Tab(text: 'Routine'),
-                  ),
-                  SizedBox(
-                    width: 120, // ปรับความกว้างของแท็บ Goal
-                    child: Tab(text: 'Goal'),
-                  ),
-                ],
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.black,
-                indicator: BoxDecoration(
-                  color:
-                      pastel.pastel1, // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
-                  borderRadius: BorderRadius.circular(20), // ขอบมนของแท็บ
-                ),
+              SizedBox(
+                height: screenHeight * 0.02,
               ),
-
-              const SizedBox(height: 10),
 
               Expanded(
                 child: Stack(
                   children: [
-                    TabBarView(
-                      children: [
-                        // หน้า Routine
-                        Container(
-                          width: MediaQuery.of(context).size.width -
-                              32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
-                          padding: const EdgeInsets.all(16.0),
-                          color: pastel
-                              .pastel2, // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
-                          child: ListView.builder(
-                            itemCount: 24, // จำนวนชั่วโมง (0-23)
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical:
-                                        8.0), // เพิ่มระยะห่างระหว่างบรรทัด
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                    Container(
+                      height: screenHeight,
+                      width: screenWidth,
+                      decoration: BoxDecoration(
+                        color: pastel.pastel1,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: FutureBuilder<List<Teamsubjobmodel>>(
+                        future: futureTasks,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            final tasks = snapshot.data ?? [];
+                            return Padding(
+                              padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
+                                  screenHeight * 0.03, screenWidth * 0.05, 0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // แสดงชั่วโมง
-                                    Text(
-                                      '${index.toString().padLeft(2, '0')}.00',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: pastel.pastelFont),
-                                    ),
-                                    // เส้นขีด
-                                    Expanded(
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                        height:
-                                            1, // ความสูงของเส้นขีด (ปรับให้บางลง)
-                                        color:
-                                            pastel.pastelFont, // สีของเส้นขีด
-                                      ),
-                                    ),
+                                    // Generate task widgets only once per task
+                                    ...tasks
+                                        .map((teamSubtask) => CoopSubTaskBox(
+                                              teamSubtask: teamSubtask,
+                                              userId: widget.loginuserid,
+                                            )),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        // หน้า Goal
-                        Container(
-                          decoration: BoxDecoration(
-                            color: pastel.pastel1,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: FutureBuilder<List<Teamsubjobmodel>>(
-                            future: futureTasks,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else {
-                                final tasks = snapshot.data ?? [];
-                                return Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                      screenWidth * 0.05,
-                                      screenHeight * 0.03,
-                                      screenWidth * 0.05,
-                                      0),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Generate task widgets only once per task
-                                        ...tasks.map(
-                                            (teamSubtask) => CoopSubTaskBox(
-                                                  teamSubtask: teamSubtask,
-                                                  userId: widget.loginuserid,
-                                                )),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    Positioned(
-                      bottom: 25,
-                      right: 10,
-                      child: widget.teamjobmodel.headUserID ==
-                              widget.loginuserid
-                          ? FixedBottomButton(
-                              onPressed: () {
-                                _showAddGoalCoopBottomSheet(context, pastel);
-                              },
-                            )
-                          : const SizedBox
-                              .shrink(), // ถ้าไม่ตรงเงื่อนไขให้แสดง Widget ว่าง
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -322,6 +238,13 @@ class CoopDetailPageState extends State<CoopDetailPage> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddGoalCoopBottomSheet(context, pastel);
+        },
+        backgroundColor: pastel.pastelFont,
+        child: Icon(Icons.add, color: pastel.pastel1),
       ),
     );
   }
@@ -336,7 +259,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: const Color(0xFFFFECDB), // Peach background color
+      backgroundColor: pastel.pastel2, // Peach background color
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: Padding(
@@ -354,8 +277,8 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: pastel.pastel1,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(20),
                     ),
                   ),
                   child: Center(
@@ -504,9 +427,9 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                       );
                       Navigator.pop(context); // ปิด bottom sheet
                     },
-                    child: const Icon(
+                    child: Icon(
                       Icons.add,
-                      color: Colors.black,
+                      color: pastel.pastelProgress,
                       size: 30,
                     ),
                   ),
@@ -525,12 +448,13 @@ class CoopDetailPageState extends State<CoopDetailPage> {
     int maxLines = 1,
     TextEditingController? controller,
   }) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: pastel.pastel1,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
@@ -544,10 +468,11 @@ class CoopDetailPageState extends State<CoopDetailPage> {
   // DatePicker Widget
   Widget _buildDatePickerField(String label, DateTime? selectedDate,
       ValueChanged<DateTime> onDatePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: pastel.pastel1,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
@@ -580,11 +505,12 @@ class CoopDetailPageState extends State<CoopDetailPage> {
   // TimePicker Widget
   Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
       ValueChanged<TimeOfDay> onTimePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       // margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: pastel.pastel1,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
@@ -714,7 +640,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
                               ? user.name[0].toUpperCase()
                               : '',
                           style: TextStyle(
-                            color: pastel.pastelFont,
+                            color: pastel.participant,
                             fontWeight: FontWeight.bold,
                             fontSize: screenWidth * 0.04,
                           ),
