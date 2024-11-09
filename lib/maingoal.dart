@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'model/theme.dart';
 
 class AddFromGoal {
@@ -71,7 +70,7 @@ class AddFromGoal {
     }
   }
 
-  void show() {
+  void show(VoidCallback onTaskAdded) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -177,9 +176,11 @@ class AddFromGoal {
                                   if (!isTaskNameEmpty &&
                                       !isStartDateEmpty &&
                                       !isEndDateEmpty) {
-                                    saveTask();
-                                    Navigator.pop(context);
-                                  }
+                                saveTask().then((_) {
+                                onTaskAdded(); 
+                                Navigator.pop(context);
+                               });
+                                      }
                                 },
                                 child: const Icon(
                                   Icons.add,

@@ -31,26 +31,41 @@ class _GoalsPageState extends State<GoalsPage> {
   ];
 
   String? selectedGoal;
-  late Future<List<MainJobModel>> futureTasks;
+  Future<List<MainJobModel>> futureTasks = Future.value([]);
+
+  void _onTaskAdded() {
+    _refreshTasks();
+  }
+
+  void _refreshTasks() {
+    setState(() {
+      futureTasks = fetchMainJobModels();
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    // ใช้ widget.userId โดยตรงในการ fetch ข้อมูล
-    futureTasks = fetchMainJobModels();
+    _refreshTasks();
   }
 
   Future<List<MainJobModel>> fetchMainJobModels() async {
     final Dio dio = Dio();
     final String url = 'http://192.168.1.36:8080/v1/job/user/${widget.userId}';
-    final response = await dio.get(url);
+    try {
+      final response = await dio.get(url);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> taskListJson = response.data;
-      print('this is from server : $taskListJson');
-      return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load tasks');
+      // ตรวจสอบว่า response.data ไม่เป็น null และเป็น List
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> taskListJson = response.data;
+        print('this is from server : $taskListJson');
+        return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load tasks: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching tasks: $e');
+      rethrow;
     }
   }
 
@@ -88,84 +103,90 @@ class _GoalsPageState extends State<GoalsPage> {
             : null,
       ),
       body: Container(
-        color: pastel.pastel2,
-        padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<MainJobModel>>(
-            future: futureTasks,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-                // } else if (snapshot.hasError) {
-                //   return Center(child: Text('Error: ${snapshot.error}'));
-                // } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                // return const Center(child: Text('No tasks found'));
-              } else {
-                final tasks = snapshot.data ?? [];
-                final filteredTasks = filterTasks(tasks, selectedGoal);
-
-                return selectedGoal == null
-                    ? ListView.builder(
-                        itemCount: goals.length,
-                        itemBuilder: (context, index) {
-                          final goal = goals[index];
-                          final showTask = tasks
-                              .where((task) => task.category == goal)
-                              .toList();
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: Card(
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                              ),
-                              child: ExpansionTile(
-                                title: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedGoal = goal;
-                                    });
-                                  },
-                                  child: Text(
-                                    '$goal Planning',
-                                    style: TextStyle(
-                                        fontSize: 18, color: pastel.pastelFont),
-                                  ),
-                                ),
-                                backgroundColor: pastel.pastel1,
-                                collapsedBackgroundColor: pastel.pastel1,
+          color: pastel.pastel2,
+          padding: const EdgeInsets.all(10),
+          child: FutureBuilder<List<MainJobModel>>(
+              future: futureTasks,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text(
+                          'Error: ${snapshot.error}')); 
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Center(
+                      child: Text(
+                          'No tasks available')); 
+                } else {
+                  final tasks = snapshot.data ?? [];
+                  final filteredTasks = filterTasks(tasks, selectedGoal);
+                  return selectedGoal == null
+                      ? ListView.builder(
+                          itemCount: goals.length,
+                          itemBuilder: (context, index) {
+                            final goal = goals[index];
+                            final showTask = tasks
+                                .where((task) => task.category == goal)
+                                .toList();
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Card(
                                 shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
                                 ),
-                                collapsedShape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20)),
+                                child: ExpansionTile(
+                                  title: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedGoal = goal;
+                                      });
+                                    },
+                                    child: Text(
+                                      '$goal Planning',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: pastel.pastelFont),
+                                    ),
+                                  ),
+                                  backgroundColor: pastel.pastel1,
+                                  collapsedBackgroundColor: pastel.pastel1,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  collapsedShape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  children: showTask.isNotEmpty
+                                      ? showTask
+                                          .map((task) => GoalTask(
+                                                task: task,
+                                                loginuserid: widget.userId,
+                                              ))
+                                          .toList()
+                                      : [
+                                          const Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Text('No tasks available'),
+                                          ),
+                                        ],
                                 ),
-                                children: showTask.isNotEmpty
-                                    ? showTask
-                                        .map((task) => GoalTask(task: task, loginuserid: widget.userId,))
-                                        .toList()
-                                    : [
-                                        const Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: Text('No tasks available'),
-                                        ),
-                                      ],
                               ),
-                            ),
-                          );
-                        },
-                      )
-                    : GoalSection(
-                        goal: selectedGoal!,
-                        loginuserid: widget.userId,
-                        tasks: tasks,
-                        filteredTasks: filteredTasks,
-                      );
-              }
-            },
-          )),
+                            );
+                          },
+                        )
+                      : GoalSection(
+                          goal: selectedGoal!,
+                          loginuserid: widget.userId,
+                          tasks: tasks,
+                          filteredTasks: filteredTasks,
+                          onTaskAdded: _onTaskAdded,
+                        );
+                }
+              })),
     );
   }
 }
@@ -173,7 +194,7 @@ class _GoalsPageState extends State<GoalsPage> {
 class GoalTask extends StatelessWidget {
   final String loginuserid;
   final MainJobModel task;
-  const GoalTask({super.key, required this.task,required this.loginuserid});
+  const GoalTask({super.key, required this.task, required this.loginuserid});
 
   @override
   Widget build(BuildContext context) {
@@ -198,8 +219,8 @@ class GoalTask extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              TaskDetailPage(mainJobModel: task ,loginuserid : loginuserid),
+                          builder: (context) => TaskDetailPage(
+                              mainJobModel: task, loginuserid: loginuserid),
                         ),
                       );
                     },
@@ -239,12 +260,13 @@ class GoalTask extends StatelessWidget {
   }
 }
 
-class GoalSection extends StatelessWidget {
+class GoalSection extends StatefulWidget {
   final String goal;
   final String loginuserid;
   final List<MainJobModel> tasks;
   final List<MainJobModel> filteredTasks;
   final bool conditionToShowButton;
+  final VoidCallback onTaskAdded;
 
   const GoalSection({
     super.key,
@@ -252,9 +274,15 @@ class GoalSection extends StatelessWidget {
     required this.loginuserid,
     required this.tasks,
     required this.filteredTasks,
+    required this.onTaskAdded,
     this.conditionToShowButton = true,
   });
 
+  @override
+  State<GoalSection> createState() => _GoalSectionState();
+}
+
+class _GoalSectionState extends State<GoalSection> {
   @override
   Widget build(BuildContext context) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
@@ -274,26 +302,29 @@ class GoalSection extends StatelessWidget {
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
                 title: Text(
-                  '$goal Planning',
+                  '${widget.goal} Planning',
                   style: TextStyle(fontSize: 18, color: pastel.pastelFont),
                 ),
               ),
             ),
-            // แสดง filtered tasks
-            if (filteredTasks.isNotEmpty)
-              ...filteredTasks.map((task) => GoalTask(task: task,loginuserid:loginuserid)),
+            if (widget.filteredTasks.isNotEmpty)
+              ...widget.filteredTasks.map((task) =>
+                  GoalTask(task: task, loginuserid: widget.loginuserid)),
           ],
         ),
-        // ปุ่มที่ถูกจัดตำแหน่ง
-        if (conditionToShowButton)
+        if (widget.conditionToShowButton)
           Positioned(
             bottom: 25,
             right: 10,
             child: FixedBottomButton(
               onPressed: () {
                 AddFromGoal(
-                        context: context, goal: goal, loginuserid: loginuserid)
-                    .show();
+                  context: context,
+                  goal: widget.goal,
+                  loginuserid: widget.loginuserid,
+                ).show(() {
+                  widget.onTaskAdded();
+                });
               },
             ),
           ),
