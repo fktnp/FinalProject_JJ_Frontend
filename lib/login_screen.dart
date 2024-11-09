@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         String password = _passwordController.text;
 
         Response response = await dio.post(
-          'http://10.250.105.93:8080/v1/user/login',
+          'http://192.168.1.36:8080/v1/user/login',
           data: {
             "email": username,
             "password": password,

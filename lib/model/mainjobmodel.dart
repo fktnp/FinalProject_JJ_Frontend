@@ -65,7 +65,7 @@ class _TaskListPageState extends State<TaskListPage> {
 
   Future<List<SubJobModel>> fetchSubTasks() async {
     final Dio dio = Dio();
-    const String url = 'http://10.250.105.93:8080/v1/subjob';
+    const String url = 'http://192.168.1.36:8080/v1/subjob';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
@@ -93,7 +93,7 @@ class _TaskListPageState extends State<TaskListPage> {
           } else {
             final tasks = snapshot.data!;
 
-            return ListView.builder(
+            return ListView.builder( 
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 final task = tasks[index];

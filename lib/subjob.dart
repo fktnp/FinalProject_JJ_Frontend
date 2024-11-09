@@ -88,7 +88,7 @@ class AddSubTaskForm {
 
     try {
   var response = await Dio().post(
-    'http://10.250.105.93:8080/v1/subjob',
+    'http://192.168.1.36:8080/v1/subjob',
     data: data,
   );
   print(response.data);
@@ -219,268 +219,268 @@ class AddSubTaskForm {
     );
   }
 
-  Widget _buildHeader() {
-    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: pastel.pastel1,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    Widget _buildHeader() {
+      final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: pastel.pastel1,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
         ),
-      ),
-      child: Center(
-        child: Text(
-          'Add Sub Goal',
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: pastel.pastelFont),
+        child: Center(
+          child: Text(
+            'Add Sub Goal',
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: pastel.pastelFont),
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    String? errorText,
-  ) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        errorText: errorText,
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        border: OutlineInputBorder(
+    Widget _buildTextField(
+      String label,
+      TextEditingController controller,
+      String? errorText,
+    ) {
+      return TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          errorText: errorText,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+
+    Widget _buildFrequencyPicker(StateSetter setState) {
+      return Container(
+        margin: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
         ),
-      ),
-    );
-  }
+        child: DropdownButtonHideUnderline(
+          // ลบเส้นขีดล่าง
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // ขนาดของ Row เท่ากับเนื้อหาภายใน
+            children: [
+              DropdownButton<String>(
+                value: selectedFrequency,
+                items: ['daily', 'weekly', 'monthly'].map((String frequency) {
+                  return DropdownMenuItem<String>(
+                    value: frequency,
+                    child: Text(frequency),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedFrequency = newValue!;
+                  });
+                },
+                isExpanded: false, // ไม่ขยายให้เต็มความกว้าง
+                icon: const Icon(Icons.arrow_drop_down,
+                    color: Colors.black), // ไอคอน dropdown
+                dropdownColor: Colors.white, // สีพื้นหลังของ dropdown
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-  Widget _buildFrequencyPicker(StateSetter setState) {
+    Widget _buildDailyFrequencyInput() {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          width: 60, // กำหนดความกว้าง
+          child: TextField(
+            controller: frequencyDayController,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+        ),
+      );
+    }
+
+    Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10, right: 10),
+        child: GridView.count(
+          crossAxisCount: 4, // เพิ่มเป็น 4 คอลัมน์
+          shrinkWrap: true, // ย่อขนาดให้พอดีกับเนื้อหา
+          physics: NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+          children: List.generate(7, (index) {
+            String day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index];
+            return Card(
+              elevation: 1, // เพิ่มเงาให้การ์ด
+              margin: EdgeInsets.all(8), // เพิ่มระยะห่างรอบการ์ด
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10), // มุมมน
+              ),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    if (selectedWeekDays.contains(index)) {
+                      selectedWeekDays.remove(index);
+                    } else {
+                      selectedWeekDays.add(index);
+                    }
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: selectedWeekDays.contains(index)
+                        ? const Color.fromARGB(255, 255, 220, 188)
+                        : Colors.white, // เปลี่ยนสีพื้นหลังเมื่อเลือก
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 35, 32, 32)
+                          .withOpacity(0.5), // เส้นขอบ
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      day,
+                      maxLines: 1, // จำกัดให้แสดงได้ 1 บรรทัด
+                      overflow: TextOverflow
+                          .ellipsis, // ใช้ '...' เมื่อข้อความยาวเกินไป
+                      style: TextStyle(
+                        color: selectedWeekDays.contains(index)
+                            ? Colors.white
+                            : Colors.black, // เปลี่ยนสีข้อความตามสถานะ
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    }
+
+  Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      margin: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      constraints: BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
             color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
       ),
-      child: DropdownButtonHideUnderline(
-        // ลบเส้นขีดล่าง
+      child: DropdownButton<int>(
+        value: selectedMonthDay,
+        items: List.generate(31, (index) {
+          return DropdownMenuItem<int>(
+            value: index + 1,
+            child: Text('Day ${index + 1}'),
+          );
+        }),
+        onChanged: (int? newValue) {
+          setState(() {
+            selectedMonthDay = newValue!;
+          });
+        },
+        isExpanded: true, // ให้ Dropdown ขยายเต็มพื้นที่
+      ),
+    );
+  }
+
+
+    Widget _buildDatePicker(String label, DateTime? selectedDate,
+        ValueChanged<DateTime> onDatePicked) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
         child: Row(
-          mainAxisSize: MainAxisSize.min, // ขนาดของ Row เท่ากับเนื้อหาภายใน
+          mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
           children: [
-            DropdownButton<String>(
-              value: selectedFrequency,
-              items: ['daily', 'weekly', 'monthly'].map((String frequency) {
-                return DropdownMenuItem<String>(
-                  value: frequency,
-                  child: Text(frequency),
+            Text(label),
+            const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
+            TextButton(
+              onPressed: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
                 );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedFrequency = newValue!;
-                });
+                if (pickedDate != null) {
+                  onDatePicked(pickedDate);
+                }
               },
-              isExpanded: false, // ไม่ขยายให้เต็มความกว้าง
-              icon: const Icon(Icons.arrow_drop_down,
-                  color: Colors.black), // ไอคอน dropdown
-              dropdownColor: Colors.white, // สีพื้นหลังของ dropdown
+              child: Text(selectedDate == null
+                  ? 'Pick a date'
+                  : DateFormat('yyyy-MM-dd').format(selectedDate)),
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildDailyFrequencyInput() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: 60, // กำหนดความกว้าง
-        child: TextField(
-          controller: frequencyDayController,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          keyboardType: TextInputType.number,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10, right: 10),
-      child: GridView.count(
-        crossAxisCount: 4, // เพิ่มเป็น 4 คอลัมน์
-        shrinkWrap: true, // ย่อขนาดให้พอดีกับเนื้อหา
-        physics: NeverScrollableScrollPhysics(), // ปิดการเลื่อน
-        children: List.generate(7, (index) {
-          String day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index];
-          return Card(
-            elevation: 1, // เพิ่มเงาให้การ์ด
-            margin: EdgeInsets.all(8), // เพิ่มระยะห่างรอบการ์ด
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // มุมมน
-            ),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  if (selectedWeekDays.contains(index)) {
-                    selectedWeekDays.remove(index);
-                  } else {
-                    selectedWeekDays.add(index);
-                  }
-                });
+    Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
+        ValueChanged<TimeOfDay> onTimePicked) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
+          children: [
+            Text(label),
+            const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
+            TextButton(
+              onPressed: () async {
+                TimeOfDay? pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
+                if (pickedTime != null) {
+                  onTimePicked(pickedTime);
+                }
               },
-              child: Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: selectedWeekDays.contains(index)
-                      ? const Color.fromARGB(255, 255, 220, 188)
-                      : Colors.white, // เปลี่ยนสีพื้นหลังเมื่อเลือก
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color.fromARGB(255, 35, 32, 32)
-                        .withOpacity(0.5), // เส้นขอบ
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    day,
-                    maxLines: 1, // จำกัดให้แสดงได้ 1 บรรทัด
-                    overflow: TextOverflow
-                        .ellipsis, // ใช้ '...' เมื่อข้อความยาวเกินไป
-                    style: TextStyle(
-                      color: selectedWeekDays.contains(index)
-                          ? Colors.white
-                          : Colors.black, // เปลี่ยนสีข้อความตามสถานะ
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              child: Text(selectedTime == null
+                  ? 'Pick a time'
+                  : selectedTime.format(context)),
             ),
-          );
-        }),
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
-
-Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
-  return Container(
-    margin: const EdgeInsets.all(4.0),
-    padding: const EdgeInsets.symmetric(horizontal: 5),
-    constraints: BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(
-          color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
-    ),
-    child: DropdownButton<int>(
-      value: selectedMonthDay,
-      items: List.generate(31, (index) {
-        return DropdownMenuItem<int>(
-          value: index + 1,
-          child: Text('Day ${index + 1}'),
-        );
-      }),
-      onChanged: (int? newValue) {
-        setState(() {
-          selectedMonthDay = newValue!;
-        });
-      },
-      isExpanded: true, // ให้ Dropdown ขยายเต็มพื้นที่
-    ),
-  );
-}
-
-
-  Widget _buildDatePicker(String label, DateTime? selectedDate,
-      ValueChanged<DateTime> onDatePicked) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
-        children: [
-          Text(label),
-          const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
-          TextButton(
-            onPressed: () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2101),
-              );
-              if (pickedDate != null) {
-                onDatePicked(pickedDate);
-              }
-            },
-            child: Text(selectedDate == null
-                ? 'Pick a date'
-                : DateFormat('yyyy-MM-dd').format(selectedDate)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
-      ValueChanged<TimeOfDay> onTimePicked) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
-        children: [
-          Text(label),
-          const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
-          TextButton(
-            onPressed: () async {
-              TimeOfDay? pickedTime = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.now(),
-              );
-              if (pickedTime != null) {
-                onTimePicked(pickedTime);
-              }
-            },
-            child: Text(selectedTime == null
-                ? 'Pick a time'
-                : selectedTime.format(context)),
-          ),
-        ],
-      ),
-    );
-  }
-}

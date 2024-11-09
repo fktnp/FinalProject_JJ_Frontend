@@ -16,7 +16,7 @@ class TaskDetailPage extends StatelessWidget {
 
   Future<List<SubJobModel>> fetchSubTasks() async {
     final Dio dio = Dio();
-    final String url = 'http://10.250.105.93:8080/v1/subjob/user/$loginuserid';
+    final String url = 'http://192.168.1.36:8080/v1/subjob/user/$loginuserid';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;

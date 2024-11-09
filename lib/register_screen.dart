@@ -27,7 +27,7 @@ class RegisterScreen extends StatelessWidget {
       String phoneNumber = _telController.text;
 
       var response =
-          await dio.post('http://192.168.1.40:8080/v1/user/register', data: {
+          await dio.post('http://192.168.1.36:8080/v1/user/register', data: {
         "email": email,
         "password": password,
         "name": username,

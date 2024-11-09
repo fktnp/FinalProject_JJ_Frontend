@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Pastel extends ThemeExtension<Pastel> {
+
+  
   const Pastel({
     required this.pastel1,
     required this.pastel2,
