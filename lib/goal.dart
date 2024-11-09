@@ -40,24 +40,26 @@ class _GoalsPageState extends State<GoalsPage> {
     futureTasks = fetchMainJobModels();
   }
 
-Future<List<MainJobModel>> fetchMainJobModels() async {
-  final Dio dio = Dio();
-  final String url = 'http://192.168.1.36:8080/v1/job/user/${widget.userId}';
-  final response = await dio.get(url);
+  Future<List<MainJobModel>> fetchMainJobModels() async {
+    final Dio dio = Dio();
+    final String url = 'http://192.168.1.36:8080/v1/job/user/${widget.userId}';
+    final response = await dio.get(url);
 
-  if (response.statusCode == 200) {
-    final List<dynamic> taskListJson = response.data;
-    return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
-  } else {   
-    throw Exception('Failed to load tasks');
+    if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      print('this is from server : $taskListJson');
+      return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
   }
-}
-
 
   List<MainJobModel> filterTasks(
       List<MainJobModel> tasks, String? selectedGoal) {
-    if (selectedGoal == null) return tasks; // หากไม่ได้เลือก goal จะไม่กรอง
-    return tasks.where((task) => task.category == selectedGoal).toList();
+    if (selectedGoal == null) return [];
+    return tasks
+        .where((task) => task.category == selectedGoal)
+        .toList(); // ใช้ category ในการกรอง
   }
 
   @override
@@ -86,17 +88,17 @@ Future<List<MainJobModel>> fetchMainJobModels() async {
             : null,
       ),
       body: Container(
-          color: pastel.pastel2,
-          padding: const EdgeInsets.all(10),
-          child: FutureBuilder<List<MainJobModel>>(
+        color: pastel.pastel2,
+        padding: const EdgeInsets.all(10),
+        child: FutureBuilder<List<MainJobModel>>(
             future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No tasks found'));
+                // } else if (snapshot.hasError) {
+                //   return Center(child: Text('Error: ${snapshot.error}'));
+                // } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                // return const Center(child: Text('No tasks found'));
               } else {
                 final tasks = snapshot.data ?? [];
                 final filteredTasks = filterTasks(tasks, selectedGoal);
@@ -142,9 +144,7 @@ Future<List<MainJobModel>> fetchMainJobModels() async {
                                 ),
                                 children: showTask.isNotEmpty
                                     ? showTask
-                                        .map((task) => GoalTask(
-                                            task: task,
-                                            loginuserid: widget.userId))
+                                        .map((task) => GoalTask(task: task, loginuserid: widget.userId,))
                                         .toList()
                                     : [
                                         const Padding(
@@ -173,7 +173,7 @@ Future<List<MainJobModel>> fetchMainJobModels() async {
 class GoalTask extends StatelessWidget {
   final String loginuserid;
   final MainJobModel task;
-  const GoalTask({super.key, required this.task, required this.loginuserid});
+  const GoalTask({super.key, required this.task,required this.loginuserid});
 
   @override
   Widget build(BuildContext context) {
@@ -198,8 +198,8 @@ class GoalTask extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TaskDetailPage(
-                              mainJobModel: task, loginuserid: loginuserid),
+                          builder: (context) =>
+                              TaskDetailPage(mainJobModel: task ,loginuserid : loginuserid),
                         ),
                       );
                     },
@@ -281,8 +281,7 @@ class GoalSection extends StatelessWidget {
             ),
             // แสดง filtered tasks
             if (filteredTasks.isNotEmpty)
-              ...filteredTasks.map(
-                  (task) => GoalTask(task: task, loginuserid: loginuserid)),
+              ...filteredTasks.map((task) => GoalTask(task: task,loginuserid:loginuserid)),
           ],
         ),
         // ปุ่มที่ถูกจัดตำแหน่ง

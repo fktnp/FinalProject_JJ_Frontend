@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString('user_email', response.data['email'] ?? '');
           await prefs.setString(
               'user_phone', response.data['phone_number'] ?? '');
-          await prefs.setBool('isLoggedIn', true); 
+          await prefs.setBool('isLoggedIn', true);
 
           setState(() {
             _passwordError = null;
@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordError = 'Login failed. Please try again.';
           });
         }
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         print('Dio error: ${e.response?.statusCode} - ${e.message}');
         setState(() {
           _passwordError = 'Server error. Please try again later.';

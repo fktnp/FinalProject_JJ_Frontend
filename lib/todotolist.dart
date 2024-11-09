@@ -66,6 +66,9 @@ class ToDoListState extends State<ToDoList> {
           startDate: subJob.startDate,
           lastDate: subJob.lastDate,
           percentProgress: subJob.percentProgress,
+          dateCarendar: calendar.dateCalendar,
+          startTimeGoal: subJob.startTimeGoal,
+          lastTimeGoal: subJob.lastTimeGoal,
         ));
       }
 
@@ -143,6 +146,9 @@ class ToDoListState extends State<ToDoList> {
     final screenHeight = mediaQuery.size.height;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
+    // กรอง task ที่ตรงกับ currentDateTime
+    final filteredTasks = filterTasks(tasks);
+
     return Container(
       color: pastel.pastel2,
       child: Padding(
@@ -169,17 +175,22 @@ class ToDoListState extends State<ToDoList> {
               ),
               ShowListTask(
                 currentDate: currentDateTime,
-                tasks: tasks, // ส่ง tasks ไปที่ ShowListTask
-                onTaskCompleted:
-                    _completeTask, // ส่ง callback สำหรับ task ที่เสร็จแล้ว
-                onTaskUncompleted:
-                    _uncompleteTask, // ส่ง callback สำหรับ task ที่ไม่สำเร็จ
+                tasks: filteredTasks, // แสดงเฉพาะ task ที่ตรงกับวันที่
+                onTaskCompleted: _completeTask,
+                onTaskUncompleted: _uncompleteTask,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+// เพิ่มฟังก์ชัน filterTasks เพื่อกรอง tasks ที่ตรงกับวันที่
+  List<Task> filterTasks(List<Task> tasks) {
+    return tasks
+        .where((task) => isSameDate(task.dateCarendar, currentDateTime))
+        .toList();
   }
 }
 
@@ -368,7 +379,8 @@ class ShowListTask extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'Start: ${task.startDate.toLocal().toString().split(' ')[0]}',
+                          'Start: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} :'
+                          ' ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             color:
                                 task.isCompleted ? Colors.grey : Colors.black54,
@@ -379,7 +391,8 @@ class ShowListTask extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'End: ${task.lastDate.toLocal().toString().split(' ')[0]}',
+                          'End: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} :'
+                          ' ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             color:
                                 task.isCompleted ? Colors.grey : Colors.black54,
@@ -407,6 +420,9 @@ class Task {
   final DateTime startDate; // Added to hold the start date
   final DateTime lastDate; // Added to hold the last date
   final int percentProgress; // Added for progress
+  final DateTime dateCarendar;
+  final DateTime startTimeGoal;
+  final DateTime lastTimeGoal;
 
   Task({
     required this.id,
@@ -416,5 +432,8 @@ class Task {
     required this.startDate,
     required this.lastDate,
     required this.percentProgress,
+    required this.dateCarendar,
+    required this.startTimeGoal,
+    required this.lastTimeGoal,
   });
 }

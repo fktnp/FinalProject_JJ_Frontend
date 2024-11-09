@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 transitionDuration: const Duration(seconds: 1),
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        const LoginScreen(),  
+                                        const LoginScreen(),  // ไปที่หน้า LoginScreen
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   var begin = const Offset(1.0, 0.0);

@@ -4,7 +4,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'components/custom_button.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
-import 'subjob.dart';
+import 'components/subjobform.dart';
 import 'model/mainjobmodel.dart';
 
 class TaskDetailPage extends StatelessWidget {
@@ -88,8 +88,8 @@ class TaskDetailPage extends StatelessWidget {
                 labelColor: Colors.black,
                 unselectedLabelColor: Colors.black,
                 indicator: BoxDecoration(
-                  color: const Color(
-                      0xFFFFDCBC), // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
+                  color:
+                      pastel.pastel1, // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
                   borderRadius: BorderRadius.circular(20), // ขอบมนของแท็บ
                 ),
               ),
@@ -106,8 +106,8 @@ class TaskDetailPage extends StatelessWidget {
                           width: MediaQuery.of(context).size.width -
                               32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
                           padding: const EdgeInsets.all(16.0),
-                          color: const Color(
-                              0xFFFFDCBC), // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
+                          color: pastel
+                              .pastel2, // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
                           child: ListView.builder(
                             itemCount: 24, // จำนวนชั่วโมง (0-23)
                             itemBuilder: (context, index) {
@@ -133,7 +133,8 @@ class TaskDetailPage extends StatelessWidget {
                                             horizontal: 8.0),
                                         height:
                                             1, // ความสูงของเส้นขีด (ปรับให้บางลง)
-                                        color: Colors.black, // สีของเส้นขีด
+                                        color:
+                                            pastel.pastelFont, // สีของเส้นขีด
                                       ),
                                     ),
                                   ],
@@ -159,6 +160,7 @@ class TaskDetailPage extends StatelessWidget {
                                     child: CircularProgressIndicator());
                               } else {
                                 final tasks = snapshot.data ?? [];
+                                print(tasks);
                                 final subtask = tasks.where((subtask) =>
                                     (subtask.jobId == mainJobModel.jobId));
 
@@ -234,7 +236,7 @@ class SubTaskBox extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
         decoration: BoxDecoration(
           color: subtask.percentProgress < 100
-              ? const Color.fromARGB(255, 190, 223, 255)
+              ? pastel.pastelBlock
               : const Color.fromARGB(255, 190, 255, 201),
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
         ),

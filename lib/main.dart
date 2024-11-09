@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/model/mainjobmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'coop.dart';
 import 'goal.dart';
 import 'login_screen.dart';
 import 'model/theme.dart';
 import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
-import 'coop.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -19,10 +19,9 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   Future<bool> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('isLoggedIn') ?? false; 
+    return prefs.getBool('isLoggedIn') ?? false;
   }
 
   @override
@@ -33,24 +32,25 @@ class MyApp extends StatelessWidget {
           title: 'My App',
           theme: themeNotifier.themeData,
           home: FutureBuilder<bool>(
-            future: checkLoginStatus(), 
+            future: checkLoginStatus(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator()); 
+                return const Center(child: CircularProgressIndicator());
               } else {
                 if (snapshot.data == true) {
                   return FutureBuilder<String?>(
                     future: _getUserId(),
                     builder: (context, userIdSnapshot) {
-                      if (userIdSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator()); 
+                      if (userIdSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
                       } else {
-                        return MyHomePage(userId: userIdSnapshot.data ?? ''); 
+                        return MyHomePage(userId: userIdSnapshot.data ?? '');
                       }
                     },
                   );
                 } else {
-                  return const LoginScreen(); 
+                  return const LoginScreen();
                 }
               }
             },
@@ -62,12 +62,12 @@ class MyApp extends StatelessWidget {
 
   Future<String?> _getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('user_id'); 
+    return prefs.getString('user_id');
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final String userId; 
+  final String userId;
 
   const MyHomePage({
     super.key,
@@ -80,6 +80,28 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 1;
+  @override
+  void initState() {
+    super.initState();
+    _triggerServerCreation(); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
+  }
+
+  Future<void> _triggerServerCreation() async {
+    final url = 'http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}';
+
+    try {
+      final response =
+          await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
+      if (response.statusCode == 200) {
+        print('Server triggered successfully');
+        print('http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}');
+      } else {
+        print('Failed to trigger server: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error triggering server: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +111,7 @@ class MyHomePageState extends State<MyHomePage> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      body: _getPage(_currentIndex), 
+      body: _getPage(_currentIndex),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: screenHeight * 0.08,
@@ -118,8 +140,12 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Image.asset(
                     'lib/Pic/settings.png',
-                    width: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10,
-                    height: _currentIndex == 0 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    width: _currentIndex == 0
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
+                    height: _currentIndex == 0
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
                   ),
                 ),
                 label: '',
@@ -132,8 +158,12 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Image.asset(
                     'lib/Pic/calendar.png',
-                    width: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10,
-                    height: _currentIndex == 1 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    width: _currentIndex == 1
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
+                    height: _currentIndex == 1
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
                   ),
                 ),
                 label: '',
@@ -146,8 +176,12 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Image.asset(
                     'lib/Pic/Task.png',
-                    width: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10,
-                    height: _currentIndex == 2 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    width: _currentIndex == 2
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
+                    height: _currentIndex == 2
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
                   ),
                 ),
                 label: '',
@@ -160,8 +194,12 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Image.asset(
                     'lib/Pic/goal.png',
-                    width: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10,
-                    height: _currentIndex == 3 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    width: _currentIndex == 3
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
+                    height: _currentIndex == 3
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
                   ),
                 ),
                 label: '',
@@ -174,8 +212,12 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Image.asset(
                     'lib/Pic/Co-op.png',
-                    width: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10,
-                    height: _currentIndex == 4 ? screenWidth * 0.08 : screenWidth * 0.10,
+                    width: _currentIndex == 4
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
+                    height: _currentIndex == 4
+                        ? screenWidth * 0.08
+                        : screenWidth * 0.10,
                   ),
                 ),
                 label: '',
@@ -198,9 +240,9 @@ class MyHomePageState extends State<MyHomePage> {
       case 3:
         return GoalsPage(userId: widget.userId);
       case 4:
-        return CoopPage();
+        return CoopPage(userId: widget.userId);
       default:
-        return const TaskListPage();
+        return MyCalendarView(userId: widget.userId);
     }
   }
 }

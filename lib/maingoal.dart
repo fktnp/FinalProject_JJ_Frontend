@@ -20,186 +20,187 @@ class AddFromGoal {
   bool isStartDateEmpty = false;
   bool isEndDateEmpty = false;
 
-Future<void> saveTask(StateSetter setState) async {
-  // Validate input fields
-  if (taskNameController.text.isEmpty ||
-      selectedStartDate == null ||
-      selectedEndDate == null) {
-    return; // Handle the case where fields are empty
-  }
+  Future<void> saveTask() async {
+    // Validate input fields
+    if (taskNameController.text.isEmpty ||
+        selectedStartDate == null ||
+        selectedEndDate == null) {
+      return; // Handle the case where fields are empty
+    }
 
-  // Gather the necessary information
-  String userId = loginuserid;
-  String taskName = taskNameController.text; 
-  String status = "Pending"; // Default status
-  String category = goal; // Use goal as category
-  String details = detailController.text; // Get details from the input field
+    // Gather the necessary information
+    String userId = loginuserid;
+    String taskName =
+        taskNameController.text; // Get task name from the input field
+    String status = "Pending"; // Default status
+    String category = goal; // Use goal as category
+    String details = detailController.text; // Get details from the input field
 
-  // Prepare the data map for the API request
-  Map<String, dynamic> data = {
-    "user_id": userId,
-    "name": taskName,
-    "status": status,
-    "category": category,
-    "details": details,
-    "start_time_goal": {
-      "day": selectedStartDate!.day,
-      "month": selectedStartDate!.month,
-      "year": selectedStartDate!.year,
-    },
-    "last_time_goal": {
-      "day": selectedEndDate!.day,
-      "month": selectedEndDate!.month,
-      "year": selectedEndDate!.year,
-    },
-  };
+    // Prepare the data map for the API request
+    Map<String, dynamic> data = {
+      "user_id": userId,
+      "name": taskName,
+      "status": status,
+      "category": category,
+      "details": details,
+      "start_time_goal": {
+        "day": selectedStartDate!.day,
+        "month": selectedStartDate!.month,
+        "year": selectedStartDate!.year,
+      },
+      "last_time_goal": {
+        "day": selectedEndDate!.day,
+        "month": selectedEndDate!.month,
+        "year": selectedEndDate!.year,
+      },
+    };
 
-  // Make the API call to save the task
-  try {
-    var response = await Dio().post(
-      'http://192.168.1.36:8080/v1/job',
-      data: data,
-    );
-    print(response.data);
-
-    // After successful save, update the state to refresh the UI
-    setState(() {
-      // Reset the input fields or update any state
-      taskNameController.clear();
-      detailController.clear();
-      selectedStartDate = null;
-      selectedEndDate = null;
-    });
-
-    // Close the bottom sheet immediately after saving
-    Navigator.pop(context);  // Close the bottom sheet
-
-    // Optionally, trigger a refresh for the task list or UI
-    // For example: fetchTasks(); // If you have a function to fetch updated tasks
-  } on DioException catch (e) {
-    if (e.response != null) {
-      print('Error saving task: ${e.response?.data}');
-    } else {
-      print('Error sending request: ${e.message}');
+    // Make the API call to save the task
+    try {
+      var response = await Dio().post(
+        'http://192.168.1.36:8080/v1/job',
+        data: data,
+      );
+      print(response.data);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        print('Error saving task: ${e.response?.data}');
+      } else {
+        print('Error sending request: ${e.message}');
+      }
     }
   }
-}
 
-void show() {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (BuildContext context) {
-      final Pastel pastel = Theme.of(context).extension<Pastel>()!;
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.85,
-                decoration: BoxDecoration(
-                  color: pastel.pastel2,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
+  void show() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTextField(
-                            label: 'Task Name',
-                            controller: taskNameController,
-                            errorText: isTaskNameEmpty
-                                ? 'Task Name is required'
-                                : null,
-                          ),
-                          const SizedBox(height: 20),
-                          _buildTextField(
-                            label: 'Detail',
-                            controller: detailController,
-                            errorText: null,
-                          ),
-                          const SizedBox(height: 20),
-                          _buildDatePicker(
-                            context: context,
-                            date: selectedStartDate,
-                            isError: isStartDateEmpty,
-                            setState: setState,
-                            label: 'Start Date',
-                            onDatePicked: (pickedDate) {
-                              setState(() {
-                                selectedStartDate = pickedDate;
-                                isStartDateEmpty = false;
-                              });
-                            },
-                          ),
-                          _buildDatePicker(
-                            context: context,
-                            date: selectedEndDate,
-                            isError: isEndDateEmpty,
-                            setState: setState,
-                            label: 'End Date',
-                            onDatePicked: (pickedDate) {
-                              setState(() {
-                                selectedEndDate = pickedDate;
-                                isEndDateEmpty = false;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          Center(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: pastel.pastel1,
-                                shape: const CircleBorder(),
-                                padding: const EdgeInsets.all(20),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isTaskNameEmpty = taskNameController.text.isEmpty;
-                                  isStartDateEmpty = selectedStartDate == null;
-                                  isEndDateEmpty = selectedEndDate == null;
-                                });
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.85,
+                  decoration: BoxDecoration(
+                    color: pastel.pastel2,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      // Text(loginuserid),
+                      _buildHeader(),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Task Name Input
+                            _buildTextField(
+                              label: 'Task Name',
+                              controller: taskNameController,
+                              errorText: isTaskNameEmpty
+                                  ? 'Task Name is required'
+                                  : null,
+                            ),
+                            const SizedBox(height: 20),
 
-                                if (!isTaskNameEmpty && !isStartDateEmpty && !isEndDateEmpty) {
-                                  saveTask(setState);  // Pass setState to saveTask
-                                }
+                            // Detail Input
+                            _buildTextField(
+                              label: 'Detail',
+                              controller: detailController,
+                              errorText: null,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Start Date Picker
+                            _buildDatePicker(
+                              context: context,
+                              date: selectedStartDate,
+                              isError: isStartDateEmpty,
+                              setState: setState,
+                              label: 'Start Date',
+                              onDatePicked: (pickedDate) {
+                                setState(() {
+                                  selectedStartDate = pickedDate;
+                                  isStartDateEmpty = false;
+                                });
                               },
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.black,
-                                size: 30,
+                            ),
+
+                            // End Date Picker
+                            _buildDatePicker(
+                              context: context,
+                              date: selectedEndDate,
+                              isError: isEndDateEmpty,
+                              setState: setState,
+                              label: 'End Date',
+                              onDatePicked: (pickedDate) {
+                                setState(() {
+                                  selectedEndDate = pickedDate;
+                                  isEndDateEmpty = false;
+                                });
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+                            // Save Task Button
+                            Center(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: pastel.pastel1,
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(20),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isTaskNameEmpty =
+                                        taskNameController.text.isEmpty;
+                                    isStartDateEmpty =
+                                        selectedStartDate == null;
+                                    isEndDateEmpty = selectedEndDate == null;
+                                  });
+
+                                  if (!isTaskNameEmpty &&
+                                      !isStartDateEmpty &&
+                                      !isEndDateEmpty) {
+                                    saveTask();
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.black,
+                                  size: 30,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
+            );
+          },
+        );
+      },
+    );
+  }
 
   // Header Widget
   Widget _buildHeader() {

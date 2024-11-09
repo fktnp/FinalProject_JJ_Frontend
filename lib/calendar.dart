@@ -120,7 +120,7 @@ class CalendarViewState extends State<MyCalendarView> {
           recurrenceRule: _getRecurrenceRule(subJob),
           color: subJob.status == 'completed'
               ? const Color.fromARGB(255, 155, 255, 172)
-              : const Color.fromARGB(255, 168, 212, 255),
+              : const Color.fromARGB(255, 190, 223, 255),
           isAllDay: false,
         ));
       }
@@ -169,7 +169,10 @@ class CalendarViewState extends State<MyCalendarView> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+                child: Text(
+              'Error: ${snapshot.error}',
+            ));
           }
 
           return Container(
@@ -219,34 +222,63 @@ class CalendarViewState extends State<MyCalendarView> {
                               topRight: Radius.circular(20)),
                         ),
                         child: SfCalendar(
-                          timeSlotViewSettings: TimeSlotViewSettings(
-                            timeTextStyle: TextStyle(
-                              fontSize: 14,
-                              color: pastel.pastelFont,
-                              fontWeight: FontWeight.bold,
+                            timeSlotViewSettings: TimeSlotViewSettings(
+                              timeTextStyle: TextStyle(
+                                fontSize: 14,
+                                color: pastel.pastelFont,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              timeFormat: 'HH:mm',
                             ),
-                            timeFormat: 'HH:mm',
-                          ),
-                          controller: _calendarController,
-                          view: _currentView == 'day'
-                              ? CalendarView.day
-                              : _currentView == 'month'
-                                  ? CalendarView.month
-                                  : CalendarView.schedule,
-                          initialDisplayDate: currentDateTime,
-                          headerHeight: 0,
-                          onTap: (CalendarTapDetails details) {
-                            if (details.targetElement ==
-                                    CalendarElement.calendarCell ||
-                                details.targetElement ==
-                                    CalendarElement.appointment) {
-                              _calendarController.displayDate = details.date!;
-                              _onViewChanged('day');
-                              _onDateChanged(details.date!);
-                            }
-                          },
-                          dataSource: _calendarDataSource,
-                        ),
+                            controller: _calendarController,
+                            view: _currentView == 'day'
+                                ? CalendarView.day
+                                : _currentView == 'month'
+                                    ? CalendarView.month
+                                    : CalendarView.schedule,
+                            initialDisplayDate: currentDateTime,
+                            headerHeight: 0,
+                            onTap: (CalendarTapDetails details) {
+                              if (details.targetElement ==
+                                      CalendarElement.calendarCell ||
+                                  details.targetElement ==
+                                      CalendarElement.appointment) {
+                                _calendarController.displayDate = details.date!;
+                                _onViewChanged('day');
+                                _onDateChanged(details.date!);
+                              }
+                            },
+                            dataSource: _calendarDataSource,
+                            appointmentTextStyle: TextStyle(
+                              color: pastel.pastelFont,
+                              fontSize: 16,
+                            ),
+                            appointmentBuilder: (BuildContext context,
+                                CalendarAppointmentDetails details) {
+                              final Appointment appointment =
+                                  details.appointments.first;
+
+                              return Container(
+                                padding: const EdgeInsets.all(8),
+                                alignment: Alignment
+                                    .center, // ตำแหน่งตัวอักษรใน Appointment
+                                decoration: BoxDecoration(
+                                  color: appointment.color,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  appointment.subject,
+                                  style: TextStyle(
+                                    fontSize: 16, // ขนาดตัวอักษร
+                                    color: pastel.pastelFont, // สีตัวอักษร
+                                    fontWeight:
+                                        FontWeight.bold, // น้ำหนักตัวอักษร
+                                  ),
+                                  textAlign:
+                                      TextAlign.center, // จัดตำแหน่งตัวอักษร
+                                ),
+                              );
+                            }),
                       ),
                     ),
                   ],

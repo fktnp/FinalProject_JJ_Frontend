@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_application_1/model/theme.dart';
-
+import 'package:intl/intl.dart';
+import 'coopdetail.dart';
+import 'model/teamjobmodel.dart';
+import 'model/usermodel.dart';
 
 Future<void> createCoop({
   required String name,
@@ -15,11 +18,6 @@ Future<void> createCoop({
   required String headUserId,
 }) async {
   try {
-    final Dio dio = Dio();
-    final String url = 'http://192.168.1.36:8080/v1/teamJob'; // URL ของ API
-    dio.options.headers['Content-Type'] = 'application/json';
-
-    // การเตรียมข้อมูลที่จะแนบไปกับ API 
     final Map<String, dynamic> data = {
       'name': name,
       'status': status,
@@ -45,40 +43,89 @@ Future<void> createCoop({
       'work_by_user_id': workByUserIds,
       'head_user_id': headUserId,
     };
-
+    var response = await Dio().post(
+      'http://192.168.1.36:8080/v1/teamJob',
+      data: data,
+    );
     // การส่งข้อมูล POST
-    final response = await dio.post(url, data: data);
-
-    if (response.statusCode == 200) {
-      print('Coop created successfully');
+    print(response.data);
+    print(data);
+  } on DioException catch (e) {
+    if (e.response != null) {
+      print('Error status code: ${e.response?.statusCode}');
+      print('Error saving task: ${e.response?.data}');
     } else {
-      print('Failed to create Coop');
+      print('Error sending request: ${e.message}');
     }
-  } catch (e) {
-    print('Error: $e');
   }
 }
 
 class CoopPage extends StatefulWidget {
-  const CoopPage({Key? key}) : super(key: key);
+  final String userId;
+  const CoopPage({
+    super.key,
+    required this.userId,
+  });
 
   @override
   _CoopPageState createState() => _CoopPageState();
 }
 
 class _CoopPageState extends State<CoopPage> {
-  // Variables for form values
+  final TextEditingController _participantController = TextEditingController();
+  final List<User> _participants = [];
   final TextEditingController nameController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
   DateTime? startDate; // Changed to nullable
-  DateTime? lastDate;  // Changed to nullable
+  DateTime? lastDate; // Changed to nullable
   TimeOfDay? startTime; // Changed to nullable
-  TimeOfDay? lastTime;  // Changed to nullable
-  List<String> workByUserIds = ['user1', 'user2']; // Example IDs
-  String headUserId = 'headUser';
+  TimeOfDay? lastTime; // Changed to nullable
+  List<String> workByUserIds = [];
+  late Future<List<Teamjobmodel>> futureTasks;
+
+  @override
+  void initState() {
+    super.initState();
+    // ใช้ widget.userId โดยตรงในการ fetch ข้อมูล
+    futureTasks = fetchTeamTasks();
+  }
+
+  void _addParticipant() async {
+    final email = _participantController.text.trim();
+    if (email.isNotEmpty) {
+      final user = await fetchUserByEmail(email);
+      if (user != null) {
+        setState(() {
+          _participants.add(user);
+          // เพิ่ม userId ของ participant ลงใน workByUserIds
+          workByUserIds.add(user.userId);
+        });
+        _participantController.clear();
+      } else {
+        print('User not found for email: $email');
+      }
+    }
+  }
+
+  Future<List<Teamjobmodel>> fetchTeamTasks() async {
+    final Dio dio = Dio();
+    final String url = 'http://192.168.1.36:8080/v1/teamJob/job/${widget.userId}';
+    final response = await dio.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> taskListJson = response.data;
+      // print(taskListJson);
+      // print(url);
+      return taskListJson.map((json) => Teamjobmodel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       backgroundColor: pastel.pastel2,
@@ -92,9 +139,35 @@ class _CoopPageState extends State<CoopPage> {
           ),
         ),
       ),
-      body: Center(
-       
+      // body: Center(
+      body: FutureBuilder<List<Teamjobmodel>>(
+        future: futureTasks,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            final tasks = snapshot.data ?? [];
+            return Padding(
+              padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
+                  screenHeight * 0.03, screenWidth * 0.05, 0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Generate task widgets only once per task
+                    // Text(teamTask.userId),
+                    ...tasks.map((tasks) => TeamTaskBox(
+                          teamtask: tasks,
+                          userId: widget.userId,
+                        )),
+                  ],
+                ),
+              ),
+            );
+          }
+        },
       ),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddGoalCoopBottomSheet(context, pastel);
@@ -106,13 +179,16 @@ class _CoopPageState extends State<CoopPage> {
   }
 
   void _showAddGoalCoopBottomSheet(BuildContext context, Pastel pastel) {
+    setState(() {
+      workByUserIds = [widget.userId];
+    });
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Color(0xFFFFECDB), // Peach background color
+      backgroundColor: const Color(0xFFFFECDB), // Peach background color
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: Padding(
@@ -151,59 +227,91 @@ class _CoopPageState extends State<CoopPage> {
                 // Fields
                 _buildTextField(controller: nameController, label: 'Task Name'),
                 const SizedBox(height: 20),
-                _buildTextField(controller: detailsController, label: 'Detail', maxLines: 3),
+                _buildTextField(
+                    controller: detailsController,
+                    label: 'Detail',
+                    maxLines: 3),
                 const SizedBox(height: 20),
 
                 // Date and Time pickers
-                _buildDatePickerField(
-                  label: 'Start Date',
-                  onDatePicked: (DateTime date) {
-                    setState(() {
-                      startDate = date;
-                    });
-                  },
-                ),
+                _buildDatePickerField('Start Date', startDate, (pickedDate) {
+                  setState(() => startDate = pickedDate);
+                }),
                 const SizedBox(height: 20),
-                _buildDatePickerField(
-                  label: 'End Date',
-                  onDatePicked: (DateTime date) {
-                    setState(() {
-                      lastDate = date;
-                    });
-                  },
-                ),
+                _buildDatePickerField('Last Date', lastDate, (pickedDate) {
+                  setState(() => lastDate = pickedDate);
+                }),
                 const SizedBox(height: 20),
-                _buildTimePickerField(
-                  label: 'Start Time',
-                  onTimePicked: (TimeOfDay time) {
-                    setState(() {
-                      startTime = time;
-                    });
-                  },
-                ),
+                _buildTimePicker('Start Time', startTime, (pickedTime) {
+                  setState(() => startTime = pickedTime);
+                }),
                 const SizedBox(height: 20),
-                _buildTimePickerField(
-                  label: 'End Time',
-                  onTimePicked: (TimeOfDay time) {
-                    setState(() {
-                      lastTime = time;
-                    });
-                  },
-                ),
+                _buildTimePicker('End Time', lastTime, (pickedTime) {
+                  setState(() => lastTime = pickedTime);
+                }),
                 const SizedBox(height: 20),
 
                 // Participants section
                 Row(
                   children: [
-                    Expanded(child: _buildTextField(label: 'Participants')),
+                    Expanded(
+                      child: _buildTextField(
+                        label: 'Participants',
+                        controller: _participantController,
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.add_circle, color: Colors.orange),
-                      onPressed: () {
-                        // Add participants functionality
-                      },
+                      onPressed: _addParticipant,
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                if (_participants.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Added Participants:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: _participants.map((participant) {
+                          // แสดงรูปวงกลมที่มีตัวอักษรตัวแรกของชื่อ
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: pastel
+                                      .pastel1, // ใช้สีพื้นหลังตามธีมหรือที่กำหนดไว้
+                                  child: Text(
+                                    participant.name[0]
+                                        .toUpperCase(), // ตัวอักษรตัวแรก
+                                    style: TextStyle(
+                                      color:
+                                          pastel.pastelFont, // สีข้อความในรูป
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                    width: 8), // เว้นระยะห่างระหว่างรูปและชื่อ
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+
                 const SizedBox(height: 20),
 
                 // Save Button as a '+' Icon
@@ -216,6 +324,7 @@ class _CoopPageState extends State<CoopPage> {
                     ),
                     onPressed: () {
                       // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
+                      print(startTime);
                       createCoop(
                         name: nameController.text,
                         status: 'In Progress',
@@ -225,7 +334,7 @@ class _CoopPageState extends State<CoopPage> {
                         startTime: startTime!,
                         lastTime: lastTime!,
                         workByUserIds: workByUserIds,
-                        headUserId: headUserId,
+                        headUserId: widget.userId,
                       );
                       Navigator.pop(context); // ปิด bottom sheet
                     },
@@ -245,14 +354,19 @@ class _CoopPageState extends State<CoopPage> {
   }
 
   // TextField Widget
-  Widget _buildTextField({required String label, int maxLines = 1, TextEditingController? controller}) {
+  Widget _buildTextField({
+    required String label,
+    int maxLines = 1,
+    TextEditingController? controller,
+  }) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -262,65 +376,194 @@ class _CoopPageState extends State<CoopPage> {
   }
 
   // DatePicker Widget
-  Widget _buildDatePickerField({required String label, required Function(DateTime) onDatePicked}) {
-    return InkWell(
-      onTap: () async {
-        final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: startDate ?? DateTime.now(),  // If no date selected, default to current date
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2101),
-        );
-        if (picked != null) {
-          onDatePicked(picked);
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+  Widget _buildDatePickerField(String label, DateTime? selectedDate,
+      ValueChanged<DateTime> onDatePicked) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
+        children: [
+          Text(label),
+          const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
+          TextButton(
+            onPressed: () async {
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2101),
+              );
+              if (pickedDate != null) {
+                onDatePicked(pickedDate);
+              }
+            },
+            child: Text(selectedDate == null
+                ? 'Pick a date'
+                : DateFormat('yyyy-MM-dd').format(selectedDate)),
           ),
-        ),
-        child: Text(
-          startDate != null ? '${startDate!.toLocal()}'.split(' ')[0] : 'Select date', // Show selected date or prompt
-          style: TextStyle(fontSize: 16, color: Colors.black),
-        ),
+        ],
       ),
     );
   }
 
   // TimePicker Widget
-  Widget _buildTimePickerField({required String label, required Function(TimeOfDay) onTimePicked}) {
-    return InkWell(
-      onTap: () async {
-        final TimeOfDay? picked = await showTimePicker(
-          context: context,
-          initialTime: startTime ?? TimeOfDay.now(),  // If no time selected, default to current time
-        );
-        if (picked != null) {
-          onTimePicked(picked);
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+  Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
+      ValueChanged<TimeOfDay> onTimePicked) {
+    return Container(
+      // margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
+        children: [
+          Text(label),
+          const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
+          TextButton(
+            onPressed: () async {
+              TimeOfDay? pickedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (pickedTime != null) {
+                onTimePicked(pickedTime);
+              }
+            },
+            child: Text(selectedTime == null
+                ? 'Pick a time'
+                : selectedTime.format(context)),
           ),
-        ),
-        child: Text(
-          startTime != null ? '${startTime!.format(context)}' : 'Select time', // Show selected time or prompt
-          style: TextStyle(fontSize: 16, color: Colors.black),
-        ),
+        ],
       ),
     );
   }
 }
 
+class TeamTaskBox extends StatefulWidget {
+  final Teamjobmodel teamtask;
+  final String userId;
+
+  const TeamTaskBox({
+    super.key,
+    required this.teamtask,
+    required this.userId,
+  });
+
+  @override
+  _TeamTaskBoxState createState() => _TeamTaskBoxState();
+}
+
+class _TeamTaskBoxState extends State<TeamTaskBox> {
+  late List<User> participatingUsers;
+
+  @override
+  void initState() {
+    super.initState();
+    participatingUsers = [];
+    fetchParticipatingUsers();
+    print('in the Team Task box now');
+  }
+
+  Future<void> fetchParticipatingUsers() async {
+    for (String userId in widget.teamtask.workByUserID) {
+      User? user = await fetchUserById(userId);
+      if (user != null) {
+        participatingUsers.add(user);
+      }
+    }
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+    return GestureDetector(
+        onTap: () {
+          // เมื่อ TaskBox ถูกกด จะเปลี่ยนไปที่หน้า CoopDetailPage พร้อมส่งข้อมูล
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CoopDetailPage(
+                teamjobmodel: widget.teamtask, // ส่งข้อมูล task ที่เลือกไป
+                loginuserid: widget.userId, // ส่ง userId ไปด้วย
+              ),
+            ),
+          );
+        },
+        child: Container(
+          width: screenWidth * 0.98,
+          height: screenHeight * 0.13,
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
+          margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
+          decoration: BoxDecoration(
+            color: widget.teamtask.status != "Completed"
+                ? pastel.pastelBlock
+                : const Color.fromARGB(255, 190, 255, 201),
+            borderRadius: BorderRadius.circular(screenWidth * 0.05),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.teamtask.name,
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.065,
+                        color: pastel.pastelFont),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    '${widget.teamtask.startDate.day}/${widget.teamtask.startDate.month}/${widget.teamtask.startDate.year} - ${widget.teamtask.lastDate.day}/${widget.teamtask.lastDate.month}/${widget.teamtask.lastDate.year}',
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.035,
+                        color: pastel.pastelFont),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: participatingUsers.map((user) {
+                      return Container(
+                        width: screenWidth * 0.08,
+                        height: screenWidth * 0.08,
+                        margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                        decoration: BoxDecoration(
+                          color: pastel.pastelProgress,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            user.name.isNotEmpty
+                                ? user.name[0].toUpperCase()
+                                : '',
+                            style: TextStyle(
+                              color: pastel.pastelFont,
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.04,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 5),
+                ],
+              ),
+            ],
+          ),
+        ));
+  }
+}
