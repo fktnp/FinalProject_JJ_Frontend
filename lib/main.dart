@@ -87,16 +87,13 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _triggerServerCreation() async {
-    final url =
-        'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}';
+    final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}';
 
     try {
       final response =
           await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
       if (response.statusCode == 200) {
         print('Server triggered successfully');
-        print(
-            'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}');
       } else {
         print('Failed to trigger server: ${response.statusCode}');
       }

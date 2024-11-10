@@ -56,6 +56,53 @@ class CalendarViewState extends State<MyCalendarView> {
     }
   }
 
+  Future<List<SubJobModel>> fetchAllSubJob() async {
+    final Dio dio = Dio();
+    // ตรวจสอบให้แน่ใจว่า URL ถูกต้อง
+    String url =
+        'http://10.0.2.2:8080/v1/subjob/user/${widget.userId}'; // เพิ่ม 'user' ในพาท
+
+    try {
+      // กำหนดค่า validateStatus เพื่อไม่ให้ throw error ทันที
+      final response = await dio.get(
+        url,
+        options: Options(
+          validateStatus: (status) {
+            return status! < 500; // ยอมรับ status code ที่ต่ำกว่า 500
+          },
+        ),
+      );
+
+      // ตรวจสอบ response status และ data
+      if (response.statusCode == 200 && response.data != null) {
+        print(
+            'Response data: ${response.data}'); // เพิ่ม log เพื่อดูข้อมูลที่ได้
+
+        if (response.data is List) {
+          final List<dynamic> taskListJson = response.data;
+          return taskListJson
+              .map((json) => SubJobModel.fromJson(json))
+              .toList();
+        } else {
+          // ถ้าข้อมูลไม่ใช่ List
+          print('Invalid data format: ${response.data}');
+          return []; // ส่งคืน List ว่าง
+        }
+      } else {
+        print('Server response: ${response.statusCode} - ${response.data}');
+        return []; // ส่งคืน List ว่างถ้าไม่มีข้อมูล
+      }
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      print('Error status code: ${e.response?.statusCode}');
+      return []; // ส่งคืน List ว่างในกรณีที่มี error
+    } catch (e) {
+      print('Unexpected error: $e');
+      return []; // ส่งคืน List ว่างในกรณีที่มี error อื่นๆ
+    }
+  }
+
   String _getRecurrenceRule(SubJobModel subJob) {
     if (subJob.frequency == 'daily') {
       return 'FREQ=DAILY;INTERVAL=${subJob.frequencyDay};UNTIL=${subJob.lastDate.toIso8601String()}';
@@ -91,24 +138,24 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<void> _generateSampleTasks() async {
     try {
-      List<CalendarModel> calendars = await fetchCalendarData();
+      // เปลี่ยนจาก fetchCalendarData() เป็น fetchAllSubJob()
+      List<SubJobModel> subJobs = await fetchAllSubJob();
       List<Appointment> appointments = [];
 
-      for (var calendar in calendars) {
-        SubJobModel subJob = await fetchSubJob(calendar.subJobID);
-
+      for (var subJob in subJobs) {
+        // ใช้วันที่จาก subJob.startDate โดยตรง
         DateTime currentstartTime = DateTime(
-          calendar.dateCalendar.year,
-          calendar.dateCalendar.month,
-          calendar.dateCalendar.day,
+          subJob.startDate.year,
+          subJob.startDate.month,
+          subJob.startDate.day,
           subJob.startTimeGoal.hour,
           subJob.startTimeGoal.minute,
         );
 
         DateTime currentendTime = DateTime(
-          calendar.dateCalendar.year,
-          calendar.dateCalendar.month,
-          calendar.dateCalendar.day,
+          subJob.startDate.year,
+          subJob.startDate.month,
+          subJob.startDate.day,
           subJob.lastTimeGoal.hour,
           subJob.lastTimeGoal.minute,
         );
@@ -123,6 +170,9 @@ class CalendarViewState extends State<MyCalendarView> {
               : const Color.fromARGB(255, 190, 223, 255),
           isAllDay: false,
         ));
+
+        print('this is start time : $currentstartTime');
+        print('this is end time : $currentendTime');
       }
 
       _calendarDataSource = AppointmentDataSource(appointments);
