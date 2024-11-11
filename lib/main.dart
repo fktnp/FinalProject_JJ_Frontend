@@ -19,6 +19,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   Future<bool> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isLoggedIn') ?? false;
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
       builder: (context, themeNotifier, child) {
         return MaterialApp(
           title: 'My App',
-          theme: themeNotifier.themeData,
+          theme: themeNotifier.themeData, 
           home: FutureBuilder<bool>(
             future: checkLoginStatus(),
             builder: (context, snapshot) {
@@ -41,8 +42,7 @@ class MyApp extends StatelessWidget {
                   return FutureBuilder<String?>(
                     future: _getUserId(),
                     builder: (context, userIdSnapshot) {
-                      if (userIdSnapshot.connectionState ==
-                          ConnectionState.waiting) {
+                      if (userIdSnapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else {
                         return MyHomePage(userId: userIdSnapshot.data ?? '');
@@ -87,14 +87,16 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _triggerServerCreation() async {
-    final url = 'http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}';
+    final url =
+        'http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}';
 
     try {
       final response =
           await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
       if (response.statusCode == 200) {
         print('Server triggered successfully');
-        print('http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}');
+        print(
+            'http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}');
       } else {
         print('Failed to trigger server: ${response.statusCode}');
       }
