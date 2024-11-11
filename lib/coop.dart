@@ -49,7 +49,7 @@ Future<void> createCoop({
     );
     // การส่งข้อมูล POST
     print(response.data);
-    print(data);
+    // print(data);
   } on DioException catch (e) {
     if (e.response != null) {
       print('Error status code: ${e.response?.statusCode}');
@@ -113,7 +113,7 @@ class _CoopPageState extends State<CoopPage> {
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
-      // print(taskListJson);
+      print(taskListJson);
       // print(url);
       return taskListJson.map((json) => Teamjobmodel.fromJson(json)).toList();
     } else {
@@ -167,13 +167,12 @@ class _CoopPageState extends State<CoopPage> {
           }
         },
       ),
-      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddGoalCoopBottomSheet(context, pastel);
         },
-        backgroundColor: pastel.pastel1,
-        child: const Icon(Icons.add, color: Color.fromARGB(255, 0, 0, 0)),
+        backgroundColor: pastel.pastelFont,
+        child: Icon(Icons.add, color: pastel.pastel1),
       ),
     );
   }
@@ -188,7 +187,7 @@ class _CoopPageState extends State<CoopPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: const Color(0xFFFFECDB), // Peach background color
+      backgroundColor: pastel.pastel2, // Peach background color
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: Padding(
@@ -206,8 +205,8 @@ class _CoopPageState extends State<CoopPage> {
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: pastel.pastel1,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(20),
                     ),
                   ),
                   child: Center(
@@ -261,7 +260,7 @@ class _CoopPageState extends State<CoopPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_circle, color: Colors.orange),
+                      icon: Icon(Icons.add_circle, color: pastel.pastelFont),
                       onPressed: _addParticipant,
                     ),
                   ],
@@ -281,7 +280,6 @@ class _CoopPageState extends State<CoopPage> {
                       const SizedBox(height: 8),
                       Row(
                         children: _participants.map((participant) {
-                          // แสดงรูปวงกลมที่มีตัวอักษรตัวแรกของชื่อ
                           return Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 4.0),
@@ -338,9 +336,9 @@ class _CoopPageState extends State<CoopPage> {
                       );
                       Navigator.pop(context); // ปิด bottom sheet
                     },
-                    child: const Icon(
+                    child: Icon(
                       Icons.add,
-                      color: Colors.black,
+                      color: pastel.pastelProgress,
                       size: 30,
                     ),
                   ),
@@ -359,12 +357,13 @@ class _CoopPageState extends State<CoopPage> {
     int maxLines = 1,
     TextEditingController? controller,
   }) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: pastel.pastel1,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
@@ -378,13 +377,13 @@ class _CoopPageState extends State<CoopPage> {
   // DatePicker Widget
   Widget _buildDatePickerField(String label, DateTime? selectedDate,
       ValueChanged<DateTime> onDatePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+        color: pastel.pastel1,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
@@ -414,14 +413,14 @@ class _CoopPageState extends State<CoopPage> {
   // TimePicker Widget
   Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
       ValueChanged<TimeOfDay> onTimePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       // margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
+        color: pastel.pastel1,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
@@ -534,30 +533,32 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                         color: pastel.pastelFont),
                   ),
                   const SizedBox(height: 5),
-                  Row(
-                    children: participatingUsers.map((user) {
-                      return Container(
-                        width: screenWidth * 0.08,
-                        height: screenWidth * 0.08,
-                        margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                        decoration: BoxDecoration(
-                          color: pastel.pastelProgress,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            user.name.isNotEmpty
-                                ? user.name[0].toUpperCase()
-                                : '',
-                            style: TextStyle(
-                              color: pastel.pastelFont,
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.04,
+                  SingleChildScrollView(
+                    child: Row(
+                      children: participatingUsers.map((user) {
+                        return Container(
+                          width: screenWidth * 0.08,
+                          height: screenWidth * 0.08,
+                          margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                          decoration: BoxDecoration(
+                            color: pastel.pastelProgress,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              user.name.isNotEmpty
+                                  ? user.name[0].toUpperCase()
+                                  : '',
+                              style: TextStyle(
+                                color: pastel.participant,
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth * 0.04,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                   const SizedBox(height: 5),
                 ],

@@ -71,7 +71,6 @@ class ToDoListState extends State<ToDoList> {
           lastTimeGoal: subJob.lastTimeGoal,
         ));
       }
-
       // Update the tasks state
       setState(() {
         tasks = fetchedTasks;
@@ -95,6 +94,22 @@ class ToDoListState extends State<ToDoList> {
     });
   }
 
+  Future<List<CalendarModel>> fetchCalendarsToday() async {
+    final Dio dio = Dio();
+    final response = await dio.get(
+      'http://10.0.2.2:8080/v1/calendar/today/user/${widget.userId}',
+    );
+
+    if (response.statusCode == 200) {
+      // Assuming response.data is a list of JSON objects
+      return (response.data as List)
+          .map((json) => CalendarModel.fromJson(json))
+          .toList();
+    } else {
+      throw Exception('Failed to load subjobs');
+    }
+  }
+
   Future<void> _completeTask(String taskId) async {
     try {
       final response = await _dio.get(
@@ -114,28 +129,6 @@ class ToDoListState extends State<ToDoList> {
       }
     } catch (e) {
       print('Error completing task: $e');
-    }
-  }
-
-  Future<void> _uncompleteTask(String taskId) async {
-    try {
-      final response = await _dio.get(
-          'http://192.168.1.36:8080/v1/calendar/task/$taskId'); // เปลี่ยน URL ตามที่คุณใช้
-
-      if (response.statusCode == 200) {
-        // อัพเดทสถานะของ Task ในตัวแปร tasks
-        setState(() {
-          final taskIndex = tasks.indexWhere((task) => task.id == taskId);
-          if (taskIndex != -1) {
-            tasks[taskIndex].isCompleted =
-                false; // เปลี่ยนสถานะให้เป็น not completed
-          }
-        });
-      } else {
-        throw Exception('Failed to uncomplete task');
-      }
-    } catch (e) {
-      print('Error uncompleting task: $e');
     }
   }
 
@@ -166,7 +159,6 @@ class ToDoListState extends State<ToDoList> {
           ),
           child: Column(
             children: [
-              Text(currentDateTime.day.toString()),
               const HeadToDo(),
               CurrentDayDateRow(
                 title: "try",
@@ -177,7 +169,6 @@ class ToDoListState extends State<ToDoList> {
                 currentDate: currentDateTime,
                 tasks: filteredTasks, // แสดงเฉพาะ task ที่ตรงกับวันที่
                 onTaskCompleted: _completeTask,
-                onTaskUncompleted: _uncompleteTask,
               ),
             ],
           ),
@@ -227,15 +218,12 @@ class ShowListTask extends StatelessWidget {
   final DateTime currentDate;
   final List<Task> tasks;
   final Function(String) onTaskCompleted; // ฟังก์ชันสำหรับทำให้ Task สำเร็จ
-  final Function(String)
-      onTaskUncompleted; // ฟังก์ชันสำหรับทำให้ Task ไม่สำเร็จ
 
   const ShowListTask({
     super.key,
     required this.currentDate,
     required this.tasks,
     required this.onTaskCompleted,
-    required this.onTaskUncompleted, // เพิ่มฟังก์ชันสำหรับทำให้ Task ไม่สำเร็จ
   });
 
   // ใน ShowListTask widget
@@ -269,51 +257,35 @@ class ShowListTask extends StatelessWidget {
               ),
               child: Dismissible(
                 key: Key(task.id),
-                direction: DismissDirection.horizontal,
+                direction: task.isCompleted
+                    ? DismissDirection
+                        .none // ไม่อนุญาตให้ปัดถ้า task ถูก complete แล้ว
+                    : DismissDirection
+                        .startToEnd, // อนุญาตให้ปัดได้จากซ้ายไปขวาเท่านั้น
                 confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.startToEnd) {
-                    //อันนี้ปัดติ๊กถูก
-                    onTaskCompleted(task.id); // เรียกการทำงานเมื่อมีการติ๊กถูก
+                  if (direction == DismissDirection.startToEnd &&
+                      !task.isCompleted) {
+                    // เมื่อปัดจากซ้ายไปขวา และ task ยังไม่ complete
+                    await onTaskCompleted(
+                        task.id); // เรียกการทำงานเมื่อ task สำเร็จ
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        //ไว้ทำการแจ้งเตือนการปัด
                         content: Text('${task.title} marked as completed'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                    return false;
-                  } else if (direction == DismissDirection.endToStart) {
-                    //อันนี้ปัดยกเลิก
-                    onTaskUncompleted(
-                        task.id); // เรียกการทำงานเมื่อมีการยกเลิกติ๊กถูก
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        //ไว้ทำการแจ้งเตือนการปัด
-                        content: Text('${task.title} marked as uncompleted'),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                    return false;
+                    return false; // เพื่อให้ dismissible กลับสู่สภาพเดิมหลังแสดงผลสำเร็จ
                   }
                   return false;
                 },
                 background: Container(
                   decoration: BoxDecoration(
-                    color: Colors.green,
+                    color: pastel.pastelProgress,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: const Icon(Icons.check, color: Colors.white),
-                ),
-                secondaryBackground: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.undo, color: Colors.white),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),

@@ -11,13 +11,13 @@ class Themepage extends StatelessWidget {
     final pastelTheme = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      backgroundColor: pastelTheme.pastel2, 
+      backgroundColor: pastelTheme.pastel2,
       appBar: AppBar(
-        backgroundColor: pastelTheme.pastel1, 
+        backgroundColor: pastelTheme.pastel1,
         title: Align(
           alignment: Alignment.centerRight,
           child: Text(
-            'Theme', 
+            'Theme',
             style: TextStyle(
               fontSize: 20,
               color: pastelTheme.pastelFont,
@@ -37,20 +37,20 @@ class Themepage extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       if (!themeNotifier.isLightTheme) {
-                        themeNotifier.toggleTheme(); 
+                        themeNotifier.toggleTheme();
                       }
                     },
                     child: Container(
                       height: 100,
                       width: 100,
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 220, 188), 
+                        color: const Color.fromARGB(255, 255, 220, 188),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
-                          'Defualt', 
-                          style: const TextStyle(
+                          'Defualt',
+                          style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
                           ),
@@ -62,20 +62,20 @@ class Themepage extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       if (themeNotifier.isLightTheme) {
-                        themeNotifier.toggleTheme(); 
+                        themeNotifier.toggleTheme();
                       }
                     },
                     child: Container(
                       height: 100,
                       width: 100,
                       decoration: BoxDecoration(
-                        color: Colors.black, 
+                        color: Colors.black,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
-                          'Dark', 
-                          style: const TextStyle(
+                          'Dark',
+                          style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                           ),

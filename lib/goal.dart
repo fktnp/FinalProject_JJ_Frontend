@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/maingoal.dart';
+import 'package:flutter_application_1/components/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'components/custom_button.dart';
 import 'model/theme.dart';
 import 'taskdetail.dart';
 import 'model/mainjobmodel.dart';
@@ -91,16 +90,6 @@ class _GoalsPageState extends State<GoalsPage> {
           ),
         ),
         automaticallyImplyLeading: selectedGoal != null,
-        leading: selectedGoal != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  setState(() {
-                    selectedGoal = null; // Reset selected goal
-                  });
-                },
-              )
-            : null,
       ),
       body: Container(
           color: pastel.pastel2,
@@ -111,13 +100,9 @@ class _GoalsPageState extends State<GoalsPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(
-                      child: Text(
-                          'Error: ${snapshot.error}')); 
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data == null) {
-                  return const Center(
-                      child: Text(
-                          'No tasks available')); 
+                  return const Center(child: Text('No tasks available'));
                 } else {
                   final tasks = snapshot.data ?? [];
                   final filteredTasks = filterTasks(tasks, selectedGoal);
@@ -316,7 +301,7 @@ class _GoalSectionState extends State<GoalSection> {
           Positioned(
             bottom: 25,
             right: 10,
-            child: FixedBottomButton(
+            child: FloatingActionButton(
               onPressed: () {
                 AddFromGoal(
                   context: context,
@@ -326,6 +311,8 @@ class _GoalSectionState extends State<GoalSection> {
                   widget.onTaskAdded();
                 });
               },
+              backgroundColor: pastel.pastelFont,
+              child: Icon(Icons.add, color: pastel.pastel1),
             ),
           ),
       ],

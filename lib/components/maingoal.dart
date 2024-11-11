@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'model/theme.dart';
+import '../model/theme.dart';
 
 class AddFromGoal {
   final BuildContext context;
@@ -10,7 +10,8 @@ class AddFromGoal {
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController detailController = TextEditingController();
 
-  AddFromGoal({required this.context, required this.goal,required this.loginuserid});
+  AddFromGoal(
+      {required this.context, required this.goal, required this.loginuserid});
 
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
@@ -176,15 +177,15 @@ class AddFromGoal {
                                   if (!isTaskNameEmpty &&
                                       !isStartDateEmpty &&
                                       !isEndDateEmpty) {
-                                saveTask().then((_) {
-                                onTaskAdded(); 
-                                Navigator.pop(context);
-                               });
-                                      }
+                                    saveTask().then((_) {
+                                      onTaskAdded();
+                                      Navigator.pop(context);
+                                    });
+                                  }
                                 },
-                                child: const Icon(
+                                child: Icon(
                                   Icons.add,
-                                  color: Colors.black,
+                                  color: pastel.pastelFont,
                                   size: 30,
                                 ),
                               ),
@@ -234,13 +235,16 @@ class AddFromGoal {
     required TextEditingController controller,
     String? errorText,
   }) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return TextField(
+      style: TextStyle(color: pastel.pastelFont),
       controller: controller,
       decoration: InputDecoration(
+        labelStyle: TextStyle(color: pastel.pastelFont),
         labelText: label,
         errorText: errorText,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: pastel.pastel1,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
@@ -262,18 +266,19 @@ class AddFromGoal {
     required String label,
     required Function(DateTime) onDatePicked,
   }) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       title: Text(
         date == null ? 'Select $label' : DateFormat.yMMMd().format(date),
         style: TextStyle(
-          color: isError ? Colors.red : Colors.black,
+          color: isError ? Colors.red : pastel.pastelFont,
           fontSize: 16,
         ),
       ),
       leading: Icon(
         Icons.calendar_today,
-        color: isError ? Colors.red : Colors.black,
+        color: isError ? Colors.red : pastel.pastelFont,
       ),
       onTap: () async {
         final pickedDate = await showDatePicker(

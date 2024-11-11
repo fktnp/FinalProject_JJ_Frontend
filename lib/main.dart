@@ -95,8 +95,6 @@ class MyHomePageState extends State<MyHomePage> {
           await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
       if (response.statusCode == 200) {
         print('Server triggered successfully');
-        print(
-            'http://192.168.1.36:8080/v1/calendar/subjob/user/${widget.userId}');
       } else {
         print('Failed to trigger server: ${response.statusCode}');
       }

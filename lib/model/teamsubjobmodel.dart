@@ -38,7 +38,7 @@ class Teamsubjobmodel {
 
     return Teamsubjobmodel(
       jobId: json['JobID'] ?? '',
-      subJobId: json['SubJobId'] ?? '',
+      subJobId: json['SubJobID'] ?? '',
       name: json['Name'] ?? '',
       status: json['Status'] ?? '',
       details: json['Details'] ?? '',

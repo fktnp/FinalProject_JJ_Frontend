@@ -9,6 +9,7 @@ class Pastel extends ThemeExtension<Pastel> {
     required this.pastelProgress,
     required this.pastelIcon,
     required this.pastelBlock,
+    required this.participant,
   });
 
   final Color? pastel1;
@@ -18,6 +19,7 @@ class Pastel extends ThemeExtension<Pastel> {
   final Color? pastelProgress;
   final Color? pastelIcon;
   final Color? pastelBlock;
+  final Color? participant;
 
   @override
   Pastel copyWith({
@@ -28,6 +30,7 @@ class Pastel extends ThemeExtension<Pastel> {
     Color? pastelProgress,
     Color? pastelIcon,
     Color? pastelBlock,
+    Color? participant,
   }) {
     return Pastel(
       pastel1: pastel1 ?? this.pastel1,
@@ -37,6 +40,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelProgress: pastelProgress ?? this.pastelProgress,
       pastelIcon: pastelIcon ?? this.pastelIcon,
       pastelBlock: pastelBlock ?? this.pastelBlock,
+      participant: participant ?? this.participant,
     );
   }
 
@@ -53,6 +57,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelProgress: Color.lerp(pastelProgress, other.pastelProgress, t),
       pastelIcon: Color.lerp(pastelIcon, other.pastelIcon, t),
       pastelBlock: Color.lerp(pastelBlock, other.pastelBlock, t),
+      participant: Color.lerp(participant, other.participant, t),
     );
   }
 
@@ -112,6 +117,7 @@ class ThemeNotifier with ChangeNotifier {
         pastelProgress: Color.fromARGB(255, 155, 255, 172),
         pastelIcon: Colors.black,
         pastelBlock: Color.fromARGB(255, 190, 223, 255),
+        participant: Color.fromARGB(255, 41, 41, 41),
       ),
       const Dark(
         dark1: Color(0xFFE53935),
@@ -130,6 +136,7 @@ class ThemeNotifier with ChangeNotifier {
         pastelProgress: Color(0xFFECDFCC),
         pastelIcon: Colors.white,
         pastelBlock: Color.fromARGB(255, 90, 90, 90),
+        participant: Color.fromARGB(255, 26, 26, 26),
       ),
       const Dark(
         dark1: Color(0xFFEF9A9A),

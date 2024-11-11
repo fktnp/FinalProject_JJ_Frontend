@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'components/custom_button.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
 import 'components/subjobform.dart';
@@ -73,128 +72,53 @@ class TaskDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // แสดงแท็บ
-              TabBar(
-                tabs: const [
-                  SizedBox(
-                    width: 120, // ปรับความกว้างของแท็บ Routine
-                    child: Tab(text: 'Routine'),
-                  ),
-                  SizedBox(
-                    width: 120, // ปรับความกว้างของแท็บ Goal
-                    child: Tab(text: 'Goal'),
-                  ),
-                ],
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.black,
-                indicator: BoxDecoration(
-                  color:
-                      pastel.pastel1, // เปลี่ยนสีของแท็บที่เลือกเป็นสี FFDCBC
-                  borderRadius: BorderRadius.circular(20), // ขอบมนของแท็บ
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
               Expanded(
                 child: Stack(
                   children: [
-                    TabBarView(
-                      children: [
-                        // หน้า Routine
-                        Container(
-                          width: MediaQuery.of(context).size.width -
-                              32, // ความกว้างเต็มหน้าจอ - ระยะขอบ
-                          padding: const EdgeInsets.all(16.0),
-                          color: pastel
-                              .pastel2, // สีพื้นหลังสำหรับ Routine (ถ้าต้องการ)
-                          child: ListView.builder(
-                            itemCount: 24, // จำนวนชั่วโมง (0-23)
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical:
-                                        8.0), // เพิ่มระยะห่างระหว่างบรรทัด
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                    // หน้า Goal
+                    Container(
+                      height: screenHeight,
+                      width: screenWidth,
+                      decoration: BoxDecoration(
+                        color: pastel.pastel1, // สีพื้นหลัง
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: FutureBuilder<List<SubJobModel>>(
+                        future: fetchSubTasks(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            final tasks = snapshot.data ?? [];
+                            print(tasks);
+                            final subtask = tasks.where((subtask) =>
+                                (subtask.jobId == mainJobModel.jobId));
+
+                            return Padding(
+                              padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
+                                  screenHeight * 0.03, screenWidth * 0.05, 0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // แสดงชั่วโมง
-                                    Text(
-                                      '${index.toString().padLeft(2, '0')}.00',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: pastel.pastelFont),
-                                    ),
-                                    // เส้นขีด
-                                    Expanded(
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                        height:
-                                            1, // ความสูงของเส้นขีด (ปรับให้บางลง)
-                                        color:
-                                            pastel.pastelFont, // สีของเส้นขีด
-                                      ),
-                                    ),
+                                    // Generate task widgets only once per task
+                                    ...subtask.map((subtask) => SubTaskBox(
+                                          subtask: subtask,
+                                        )),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        // หน้า Goal
-                        Container(
-                          // padding: const EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: pastel.pastel1, // สีพื้นหลัง
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: FutureBuilder<List<SubJobModel>>(
-                            future: fetchSubTasks(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else {
-                                final tasks = snapshot.data ?? [];
-                                print(tasks);
-                                final subtask = tasks.where((subtask) =>
-                                    (subtask.jobId == mainJobModel.jobId));
-
-                                return Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                      screenWidth * 0.05,
-                                      screenHeight * 0.03,
-                                      screenWidth * 0.05,
-                                      0),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Generate task widgets only once per task
-                                        ...subtask.map((subtask) => SubTaskBox(
-                                              subtask: subtask,
-                                            )),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
-
-                    // เพิ่มปุ่มที่มุมขวาล่าง
                     Positioned(
                       bottom: 25,
                       right: 10,
-                      child: FixedBottomButton(
+                      child: FloatingActionButton(
                         onPressed: () {
                           AddSubTaskForm(
                                   context: context,
@@ -202,6 +126,8 @@ class TaskDetailPage extends StatelessWidget {
                                   userId: mainJobModel.userId)
                               .show();
                         },
+                        backgroundColor: pastel.pastelFont,
+                        child: Icon(Icons.add, color: pastel.pastel1),
                       ),
                     ),
                   ],

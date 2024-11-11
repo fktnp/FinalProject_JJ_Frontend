@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../model/theme.dart';
+import 'package:http/http.dart' as http;
 
 class AddSubTaskForm {
   final BuildContext context;
@@ -29,23 +30,6 @@ class AddSubTaskForm {
   bool isEndDateEmpty = false;
   bool isStartTimeEmpty = false;
   bool isEndTimeEmpty = false;
-
-  // Future<void> _triggerServerCreation() async {
-  //   final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userId';
-
-  //   try {
-  //     final response =
-  //         await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
-  //     if (response.statusCode == 200) {
-  //       print('Server triggered successfully');
-  //       print('http://10.0.2.2:8080/v1/calendar/subjob/user/$userId');
-  //     } else {
-  //       print('Failed to trigger server: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     print('Error triggering server: $error');
-  //   }
-  // }
 
   Future<void> saveSubTask() async {
     if (jobId.isEmpty ||
@@ -115,6 +99,23 @@ class AddSubTaskForm {
       } else {
         print('Error sending request: ${e.message}');
       }
+    }
+  }
+
+  Future<void> _triggerServerCreation() async {
+    final url = 'http://192.168.1.36:8080/v1/calendar/subjob/user/$userId';
+
+    try {
+      final response =
+          await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
+      if (response.statusCode == 200) {
+        print('Server triggered successfully');
+        print('http://192.168.1.36:8080/v1/calendar/subjob/user/$userId');
+      } else {
+        print('Failed to trigger server: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error triggering server: $error');
     }
   }
 
@@ -200,6 +201,7 @@ class AddSubTaskForm {
                                       !isStartTimeEmpty &&
                                       !isEndTimeEmpty) {
                                     saveSubTask();
+                                    _triggerServerCreation();
                                     Navigator.pop(context);
                                   }
                                 },
@@ -259,13 +261,16 @@ class AddSubTaskForm {
     TextEditingController controller,
     String? errorText,
   ) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return TextField(
+      style: TextStyle(color: pastel.pastelFont),
       controller: controller,
       decoration: InputDecoration(
+        labelStyle: TextStyle(color: pastel.pastelFont),
         labelText: label,
         errorText: errorText,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: pastel.pastel1,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
@@ -276,14 +281,13 @@ class AddSubTaskForm {
   }
 
   Widget _buildFrequencyPicker(StateSetter setState) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: pastel.pastel1,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-            color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
       ),
       child: DropdownButtonHideUnderline(
         // ลบเส้นขีดล่าง
@@ -291,6 +295,7 @@ class AddSubTaskForm {
           mainAxisSize: MainAxisSize.min, // ขนาดของ Row เท่ากับเนื้อหาภายใน
           children: [
             DropdownButton<String>(
+              style: TextStyle(color: pastel.pastelFont),
               value: selectedFrequency,
               items: ['daily', 'weekly', 'monthly'].map((String frequency) {
                 return DropdownMenuItem<String>(
@@ -304,9 +309,9 @@ class AddSubTaskForm {
                 });
               },
               isExpanded: false, // ไม่ขยายให้เต็มความกว้าง
-              icon: const Icon(Icons.arrow_drop_down,
-                  color: Colors.black), // ไอคอน dropdown
-              dropdownColor: Colors.white, // สีพื้นหลังของ dropdown
+              icon: Icon(Icons.arrow_drop_down,
+                  color: pastel.pastelFont), // ไอคอน dropdown
+              dropdownColor: pastel.pastel2,
             ),
           ],
         ),
@@ -315,15 +320,18 @@ class AddSubTaskForm {
   }
 
   Widget _buildDailyFrequencyInput() {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(
         width: 60, // กำหนดความกว้าง
         child: TextField(
+          style: TextStyle(color: pastel.pastelFont),
           controller: frequencyDayController,
           decoration: InputDecoration(
+            labelStyle: TextStyle(color: pastel.pastelFont),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: pastel.pastel1,
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             border: OutlineInputBorder(
@@ -337,6 +345,7 @@ class AddSubTaskForm {
   }
 
   Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
       padding: const EdgeInsets.only(top: 10, right: 10),
       child: GridView.count(
@@ -365,13 +374,9 @@ class AddSubTaskForm {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: selectedWeekDays.contains(index)
-                      ? const Color.fromARGB(255, 255, 220, 188)
-                      : Colors.white, // เปลี่ยนสีพื้นหลังเมื่อเลือก
+                      ? pastel.pastelFont
+                      : pastel.pastel1,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color.fromARGB(255, 35, 32, 32)
-                        .withOpacity(0.5), // เส้นขอบ
-                  ),
                 ),
                 child: Center(
                   child: Text(
@@ -381,8 +386,8 @@ class AddSubTaskForm {
                         .ellipsis, // ใช้ '...' เมื่อข้อความยาวเกินไป
                     style: TextStyle(
                       color: selectedWeekDays.contains(index)
-                          ? Colors.white
-                          : Colors.black, // เปลี่ยนสีข้อความตามสถานะ
+                          ? pastel.pastel1
+                          : pastel.pastelFont, // เปลี่ยนสีข้อความตามสถานะ
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -396,12 +401,13 @@ class AddSubTaskForm {
   }
 
   Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: const EdgeInsets.all(4.0),
       padding: const EdgeInsets.symmetric(horizontal: 5),
       constraints: const BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: pastel.pastel1,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
             color: const Color.fromARGB(123, 36, 36, 36), width: 1.5),
@@ -411,7 +417,10 @@ class AddSubTaskForm {
         items: List.generate(31, (index) {
           return DropdownMenuItem<int>(
             value: index + 1,
-            child: Text('Day ${index + 1}'),
+            child: Text(
+              'Day ${index + 1}',
+              style: TextStyle(color: pastel.pastelFont),
+            ),
           );
         }),
         onChanged: (int? newValue) {
@@ -426,11 +435,12 @@ class AddSubTaskForm {
 
   Widget _buildDatePicker(String label, DateTime? selectedDate,
       ValueChanged<DateTime> onDatePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: pastel.pastel1,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
@@ -462,11 +472,12 @@ class AddSubTaskForm {
 
   Widget _buildTimePicker(String label, TimeOfDay? selectedTime,
       ValueChanged<TimeOfDay> onTimePicked) {
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: pastel.pastel1,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
