@@ -38,6 +38,7 @@ class AddSubTaskForm {
         taskNameController.text.isEmpty ||
         selectedStartDate == null ||
         selectedEndDate == null) {
+      _triggerServerCreation();
       return; // Handle the case where fields are empty
     }
 
@@ -123,7 +124,7 @@ class AddSubTaskForm {
   void show() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
+    // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
     showModalBottomSheet(
       context: context,
@@ -228,7 +229,6 @@ class AddSubTaskForm {
                                     !isStartTimeEmpty &&
                                     !isEndTimeEmpty) {
                                   saveSubTask();
-                                  await _triggerServerCreation();
                                   Navigator.pop(context);
                                 }
                               },

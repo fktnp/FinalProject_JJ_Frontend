@@ -83,15 +83,24 @@ class _GoalsPageState extends State<GoalsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
-        title: Align(
-          alignment: Alignment.center,
-          child: Text(
-            AppLocalizations.of(context).translate('goals'),
-            style: TextStyle(
-                color: pastel.pastelFont, fontWeight: FontWeight.bold),
-          ),
+        centerTitle: true,
+        title: Text(
+          AppLocalizations.of(context).translate('goals'),
+          style:
+              TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
         ),
-        automaticallyImplyLeading: selectedGoal != null,
+        // แสดงปุ่มย้อนกลับเสมอเมื่อ selectedGoal ไม่เป็น null
+        leading: selectedGoal != null
+            ? IconButton(
+                icon: Icon(Icons.arrow_back, color: pastel.pastelFont),
+                onPressed: () {
+                  setState(() {
+                    selectedGoal =
+                        null; // ตั้ง selectedGoal เป็น null เพื่อกลับไปหน้า GoalsPage
+                  });
+                },
+              )
+            : null,
       ),
       body: Container(
           color: pastel.pastel2,

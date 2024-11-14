@@ -11,7 +11,7 @@ class Themepage extends StatelessWidget {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final pastelTheme = Theme.of(context).extension<Pastel>()!;
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
+    // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
 
     return Scaffold(

@@ -50,7 +50,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
   Widget sortTwelveYears() {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
-    final screenWidth = mediaQuery.size.width;
+    // final screenWidth = mediaQuery.size.width;
     return Container(
       margin: EdgeInsets.only(bottom: screenHeight * 0.01),
       width: width,

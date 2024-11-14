@@ -15,6 +15,7 @@ class LocalizedDateFormatter {
     // สร้าง pattern ตามที่ต้องการ
     return DateFormat('MMMM', locale).format(date);
   }
+
   static String formatYear(BuildContext context, DateTime date) {
     final locale = Localizations.localeOf(context).languageCode;
 

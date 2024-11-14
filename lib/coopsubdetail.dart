@@ -96,13 +96,12 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
       backgroundColor: pastel.pastel2,
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
-        title: Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            'Goal',
-            style: TextStyle(color: pastel.pastelFont),
-          ),
+        title: Text(
+          AppLocalizations.of(context).translate('coop'),
+          style:
+              TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: pastel.pastelFont),

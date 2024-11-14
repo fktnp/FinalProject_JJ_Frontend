@@ -99,13 +99,12 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       backgroundColor: pastel.pastel2,
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
-        title: Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            AppLocalizations.of(context).translate('coop'),
-            style: TextStyle(color: pastel.pastelFont),
-          ),
+        title: Text(
+          AppLocalizations.of(context).translate('coop'),
+          style:
+              TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
         ),
+        centerTitle: true, // เพิ่มบรรทัดนี้
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: pastel.pastelFont),
@@ -415,7 +414,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                       createSubCoop(
                         jobId: widget.teamjobmodel.jobId,
                         name: nameController.text,
-                        status: 'Incomplete',
+                        status: 'In Progress',
                         details: detailsController.text,
                         startDate: startDate!,
                         lastDate: lastDate!,
@@ -653,6 +652,12 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
                 const SizedBox(height: 5),
               ],
             ),
+            Icon(
+                size: screenWidth * 0.1,
+                widget.teamSubtask.status == 'In Progress'
+                    ? Icons.radio_button_unchecked
+                    : Icons.check_circle,
+                color: pastel.pastelProgress),
           ],
         ),
       ),

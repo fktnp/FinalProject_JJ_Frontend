@@ -132,7 +132,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
   Widget yearCapsuleView(int index) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
+    // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
     return GestureDetector(
       onTap: () {

@@ -171,11 +171,7 @@ class CalendarViewState extends State<MyCalendarView> {
               : const Color.fromARGB(255, 190, 223, 255),
           isAllDay: false,
         ));
-
-        // print('this is start time : $currentstartTime');
-        // print('this is end time : $currentendTime');
       }
-
       _calendarDataSource = AppointmentDataSource(appointments);
     } catch (e) {
       print('Error: $e');

@@ -10,13 +10,11 @@ class AppLocalizations {
   
   static AppLocalizations of(BuildContext context) {
     final localizations = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    print('Current localizations locale: ${localizations?.locale.languageCode}'); // Debug print
     return localizations ?? AppLocalizations(const Locale('th'));
   }
   
   String translate(String key) {
     final translation = _localizedValues[locale.languageCode]?[key];
-    print('Translating $key for ${locale.languageCode}: $translation'); // Debug print
     return translation ?? key;
   }
 
