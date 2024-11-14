@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'l10n/app_localizations.dart';
 import 'model/theme.dart';
 import 'taskdetail.dart';
 import 'model/mainjobmodel.dart';
@@ -83,10 +84,11 @@ class _GoalsPageState extends State<GoalsPage> {
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         title: Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment.center,
           child: Text(
-            selectedGoal == null ? 'Goals' : selectedGoal!,
-            style: TextStyle(color: pastel.pastelFont),
+            AppLocalizations.of(context).translate('goals'),
+            style: TextStyle(
+                color: pastel.pastelFont, fontWeight: FontWeight.bold),
           ),
         ),
         automaticallyImplyLeading: selectedGoal != null,
@@ -99,10 +101,6 @@ class _GoalsPageState extends State<GoalsPage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data == null) {
-                  return const Center(child: Text('No tasks available'));
                 } else {
                   final tasks = snapshot.data ?? [];
                   final filteredTasks = filterTasks(tasks, selectedGoal);
@@ -111,6 +109,40 @@ class _GoalsPageState extends State<GoalsPage> {
                           itemCount: goals.length,
                           itemBuilder: (context, index) {
                             final goal = goals[index];
+                            // ดึงข้อความแปลตาม goal ปัจจุบัน
+                            String goalTranslation;
+                            switch (goal) {
+                              case 'Health':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('health');
+                                break;
+                              case 'Financial':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('financial');
+                                break;
+                              case 'Career':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('career');
+                                break;
+                              case 'Family':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('family');
+                                break;
+                              case 'Social':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('social');
+                                break;
+                              case 'Leisure':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('leisure');
+                                break;
+                              case 'Friendship':
+                                goalTranslation = AppLocalizations.of(context)
+                                    .translate('friendship');
+                                break;
+                              default:
+                                goalTranslation = goal;
+                            }
                             final showTask = tasks
                                 .where((task) => task.category == goal)
                                 .toList();
@@ -129,7 +161,10 @@ class _GoalsPageState extends State<GoalsPage> {
                                       });
                                     },
                                     child: Text(
-                                      '$goal Planning',
+                                      AppLocalizations.of(context)
+                                          .translate('planing')
+                                          .replaceFirst(
+                                              '{goal}', goalTranslation),
                                       style: TextStyle(
                                           fontSize: 18,
                                           color: pastel.pastelFont),
@@ -268,9 +303,32 @@ class GoalSection extends StatefulWidget {
 }
 
 class _GoalSectionState extends State<GoalSection> {
+  String _getGoalTranslation(String goal) {
+    switch (goal) {
+      case 'Health':
+        return AppLocalizations.of(context).translate('health');
+      case 'Financial':
+        return AppLocalizations.of(context).translate('financial');
+      case 'Career':
+        return AppLocalizations.of(context).translate('career');
+      case 'Family':
+        return AppLocalizations.of(context).translate('family');
+      case 'Social':
+        return AppLocalizations.of(context).translate('social');
+      case 'Leisure':
+        return AppLocalizations.of(context).translate('leisure');
+      case 'Friendship':
+        return AppLocalizations.of(context).translate('friendship');
+      default:
+        return goal; // คืนค่าดั้งเดิมถ้าไม่มีการแปล
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+    final goalTranslation = _getGoalTranslation(widget.goal);
+
     return Stack(
       children: [
         Column(
@@ -287,7 +345,9 @@ class _GoalSectionState extends State<GoalSection> {
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
                 title: Text(
-                  '${widget.goal} Planning',
+                  AppLocalizations.of(context)
+                      .translate('planing')
+                      .replaceFirst('{goal}', goalTranslation),
                   style: TextStyle(fontSize: 18, color: pastel.pastelFont),
                 ),
               ),

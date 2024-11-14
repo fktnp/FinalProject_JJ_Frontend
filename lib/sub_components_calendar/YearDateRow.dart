@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/date_formatter.dart';
 import '../model/theme.dart';
 
 class CurrentYearRow extends StatefulWidget {
@@ -36,21 +37,22 @@ class CurrentYearRowState extends State<CurrentYearRow> {
   Widget titleView() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-      child: Text(
-        DateFormat('yyyy').format(currentDateTime),
-        style: TextStyle(
-          color: pastel.pastelFont,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+    return Text(
+      LocalizedDateFormatter.formatYear(context, currentDateTime),
+      style: TextStyle(
+        color: pastel.pastelFont,
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
       ),
     );
   }
 
   Widget sortTwelveYears() {
-    return SizedBox(
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+    return Container(
+      margin: EdgeInsets.only(bottom: screenHeight * 0.01),
       width: width,
       height: height * 0.1, // กำหนดความสูงของปี
       child: ListView.builder(
@@ -103,7 +105,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
 
   Widget topView() {
     return SizedBox(
-      height: height * 0.2,
+      // height: height * 0.2,
       width: width,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

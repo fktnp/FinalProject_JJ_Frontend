@@ -6,6 +6,7 @@ import 'package:flutter_application_1/sub_components_calendar/daydaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/monthdaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/yeardaterow.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'l10n/app_localizations.dart';
 import 'model/theme.dart';
 
 class MyCalendarView extends StatefulWidget {
@@ -75,8 +76,8 @@ class CalendarViewState extends State<MyCalendarView> {
 
       // ตรวจสอบ response status และ data
       if (response.statusCode == 200 && response.data != null) {
-        print(
-            'Response data: ${response.data}'); // เพิ่ม log เพื่อดูข้อมูลที่ได้
+        // print(
+        //     'Response data: ${response.data}'); // เพิ่ม log เพื่อดูข้อมูลที่ได้
 
         if (response.data is List) {
           final List<dynamic> taskListJson = response.data;
@@ -171,8 +172,8 @@ class CalendarViewState extends State<MyCalendarView> {
           isAllDay: false,
         ));
 
-        print('this is start time : $currentstartTime');
-        print('this is end time : $currentendTime');
+        // print('this is start time : $currentstartTime');
+        // print('this is end time : $currentendTime');
       }
 
       _calendarDataSource = AppointmentDataSource(appointments);
@@ -246,11 +247,20 @@ class CalendarViewState extends State<MyCalendarView> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildToggleButton(
-                            'Day', 'day', screenWidth, screenHeight),
+                            AppLocalizations.of(context).translate('day'),
+                            'day',
+                            screenWidth,
+                            screenHeight),
                         _buildToggleButton(
-                            'Month', 'month', screenWidth, screenHeight),
+                            AppLocalizations.of(context).translate('month'),
+                            'month',
+                            screenWidth,
+                            screenHeight),
                         _buildToggleButton(
-                            'Year', 'year', screenWidth, screenHeight),
+                            AppLocalizations.of(context).translate('year'),
+                            'year',
+                            screenWidth,
+                            screenHeight),
                       ],
                     ),
                     _currentView == 'day'

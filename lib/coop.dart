@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_application_1/model/theme.dart';
 import 'package:intl/intl.dart';
 import 'coopdetail.dart';
+import 'l10n/app_localizations.dart';
 import 'model/teamjobmodel.dart';
 import 'model/usermodel.dart';
 
@@ -132,10 +133,11 @@ class _CoopPageState extends State<CoopPage> {
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         title: Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment.center,
           child: Text(
-            'Coop',
-            style: TextStyle(color: pastel.pastelFont),
+            AppLocalizations.of(context).translate('coop'),
+            style: TextStyle(
+                color: pastel.pastelFont, fontWeight: FontWeight.bold),
           ),
         ),
       ),

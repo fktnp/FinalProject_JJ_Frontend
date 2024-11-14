@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'components/workwithform.dart';
+import 'l10n/app_localizations.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -126,13 +127,13 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
-                'Date : ${widget.teamsubjobmodel.startDate.day.toString()}/${widget.teamsubjobmodel.startDate.month.toString()}/${widget.teamsubjobmodel.startDate.year.toString()} - ${widget.teamsubjobmodel.lastDate.day.toString()}/${widget.teamsubjobmodel.lastDate.month.toString()}/${widget.teamsubjobmodel.lastDate.year.toString()}',
+                '${AppLocalizations.of(context).translate('date')} : ${widget.teamsubjobmodel.startDate.day.toString()}/${widget.teamsubjobmodel.startDate.month.toString()}/${widget.teamsubjobmodel.startDate.year.toString()} - ${widget.teamsubjobmodel.lastDate.day.toString()}/${widget.teamsubjobmodel.lastDate.month.toString()}/${widget.teamsubjobmodel.lastDate.year.toString()}',
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
-                "Participants :",
+                '${AppLocalizations.of(context).translate('participants')} :',
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),
@@ -187,7 +188,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
-                "Details :",
+                "${AppLocalizations.of(context).translate('details')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),
@@ -202,7 +203,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
-                "Working Area :",
+                "${AppLocalizations.of(context).translate('work_link')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),
@@ -258,7 +259,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
-                "Submit Work :",
+                "${AppLocalizations.of(context).translate('submit_link')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/date_formatter.dart';
 import '../model/theme.dart';
 
 class CurrentMonthRow extends StatefulWidget {
@@ -50,15 +51,12 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
 
   Widget titleView() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-      child: Text(
-        DateFormat('MMMM yyyy').format(currentDateTime),
-        style: TextStyle(
-          color: pastel.pastelFont,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+    return Text(
+      LocalizedDateFormatter.formatMonth(context, currentDateTime),
+      style: TextStyle(
+        color: pastel.pastelFont,
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
       ),
     );
   }
@@ -66,7 +64,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
   Widget sortTwelveYears() {
     return SizedBox(
       width: width,
-      height: height * 0.1, // กำหนดความสูงของปี
+      height: height * 0.05, // กำหนดความสูงของปี
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: yearsInRange.length,
@@ -80,7 +78,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
   Widget sortTwelveMonths() {
     return SizedBox(
       width: width,
-      height: height * 0.05, // กำหนดความสูงของเดือน
+      height: height * 0.07, // กำหนดความสูงของเดือน
       child: ListView.builder(
         controller: pageController,
         scrollDirection: Axis.horizontal,
@@ -114,7 +112,8 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                DateFormat('MMM').format(monthsInYear[index]),
+                LocalizedDateFormatter.formatShortMonth(
+                    context, monthsInYear[index]),
                 style: TextStyle(
                   fontSize: height * 0.025,
                   fontWeight: FontWeight.bold,
@@ -132,6 +131,9 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
 
   Widget yearCapsuleView(int index) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -143,7 +145,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
         widget.onDateChanged(yearsInRange[index]);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
         decoration: BoxDecoration(
           color: (yearsInRange[index].year == currentDateTime.year)
               ? pastel.pastel2 // สีสำหรับปีปัจจุบัน
@@ -173,7 +175,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
 
   Widget topView() {
     return SizedBox(
-      height: height * 0.2,
+      // height: height * 0.2,
       width: width,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

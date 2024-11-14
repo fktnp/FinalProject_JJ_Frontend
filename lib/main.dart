@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'coop.dart';
 import 'goal.dart';
+import 'l10n/app_localizations_delegate.dart';
 import 'login_screen.dart';
 import 'model/theme.dart';
+import 'providers/locale_provider.dart';
 import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(ChangeNotifierProvider(
-    create: (context) => ThemeNotifier(),
-    child: const MyApp(),
-  ));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  print(
+      'Initial language code: ${prefs.getString('language_code')}'); // Debug print
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (context) => LocaleProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -28,34 +41,51 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
-        return MaterialApp(
-          title: 'My App',
-          theme: themeNotifier.themeData,
-          home: FutureBuilder<bool>(
-            future: checkLoginStatus(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else {
-                if (snapshot.data == true) {
-                  return FutureBuilder<String?>(
-                    future: _getUserId(),
-                    builder: (context, userIdSnapshot) {
-                      if (userIdSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else {
-                        return MyHomePage(userId: userIdSnapshot.data ?? '');
-                      }
-                    },
-                  );
+        return Consumer<LocaleProvider>(
+            builder: (context, localeProvider, child) {
+          print(
+              'Building MaterialApp with locale: ${localeProvider.locale.languageCode}');
+          return MaterialApp(
+            title: 'My App',
+            theme: themeNotifier.themeData,
+            locale: localeProvider.locale,
+            supportedLocales: const [
+              Locale('th'),
+              Locale('en'),
+            ],
+            localizationsDelegates: const [
+              AppLocalizationsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: FutureBuilder<bool>(
+              future: checkLoginStatus(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 } else {
-                  return const LoginScreen();
+                  if (snapshot.data == true) {
+                    return FutureBuilder<String?>(
+                      future: _getUserId(),
+                      builder: (context, userIdSnapshot) {
+                        if (userIdSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else {
+                          return MyHomePage(userId: userIdSnapshot.data ?? '');
+                        }
+                      },
+                    );
+                  } else {
+                    return const LoginScreen();
+                  }
                 }
-              }
-            },
-          ),
-        );
+              },
+            ),
+          );
+        });
       },
     );
   }
@@ -93,6 +123,7 @@ class MyHomePageState extends State<MyHomePage> {
       final response =
           await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
       if (response.statusCode == 200) {
+        print(url);
         print('Server triggered successfully');
       } else {
         print('Failed to trigger server: ${response.statusCode}');

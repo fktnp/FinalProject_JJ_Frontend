@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../model/theme.dart';
 import 'package:http/http.dart' as http;
 
@@ -121,6 +122,9 @@ class AddSubTaskForm {
 
   void show() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -131,101 +135,123 @@ class AddSubTaskForm {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: pastel.pastel2,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
+                child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: pastel.pastel2,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTextField(
-                              'Task Name',
-                              taskNameController,
-                              isTaskNameEmpty ? 'Task Name is required' : null,
-                            ),
-                            _buildFrequencyPicker(setState),
-                            if (selectedFrequency == 'daily')
-                              _buildDailyFrequencyInput(),
-                            if (selectedFrequency == 'weekly')
-                              _buildWeeklyFrequencyPicker(setState),
-                            if (selectedFrequency == 'monthly')
-                              _buildMonthlyFrequencyPicker(setState),
-                            _buildDatePicker('Start Date', selectedStartDate,
-                                (pickedDate) {
-                              setState(() => selectedStartDate = pickedDate);
-                            }),
-                            _buildDatePicker('End Date', selectedEndDate,
-                                (pickedDate) {
-                              setState(() => selectedEndDate = pickedDate);
-                            }),
-                            _buildTimePicker('Start Time', selectedStartTime,
-                                (pickedTime) {
-                              setState(() => selectedStartTime = pickedTime);
-                            }),
-                            _buildTimePicker('End Time', selectedEndTime,
-                                (pickedTime) {
-                              setState(() => selectedEndTime = pickedTime);
-                            }),
-                            const SizedBox(height: 10),
-                            Center(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isTaskNameEmpty =
-                                        taskNameController.text.isEmpty;
-                                    isStartDateEmpty =
-                                        selectedStartDate == null;
-                                    isEndDateEmpty = selectedEndDate == null;
-                                    isStartTimeEmpty =
-                                        selectedStartTime == null;
-                                    isEndTimeEmpty = selectedEndTime == null;
-                                  });
-                                  if (!isTaskNameEmpty &&
-                                      !isStartDateEmpty &&
-                                      !isEndDateEmpty &&
-                                      !isStartTimeEmpty &&
-                                      !isEndTimeEmpty) {
-                                    saveSubTask();
-                                    _triggerServerCreation();
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: const CircleBorder(),
-                                  backgroundColor:
-                                      const Color.fromARGB(255, 255, 220, 188),
-                                  padding: const EdgeInsets.all(10),
-                                ),
-                                child: const Icon(
-                                  Icons.add,
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  size: 40,
-                                ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTextField(
+                            'Task Name',
+                            taskNameController,
+                            isTaskNameEmpty ? 'Task Name is required' : null,
+                          ),
+                          _buildFrequencyPicker(setState),
+                          if (selectedFrequency == 'daily')
+                            _buildDailyFrequencyInput(),
+                          if (selectedFrequency == 'weekly')
+                            _buildWeeklyFrequencyPicker(setState),
+                          if (selectedFrequency == 'monthly')
+                            _buildMonthlyFrequencyPicker(setState),
+                          _buildDatePicker(
+                              AppLocalizations.of(context)
+                                  .translate('start')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('day')),
+                              selectedStartDate, (pickedDate) {
+                            setState(() => selectedStartDate = pickedDate);
+                          }),
+                          _buildDatePicker(
+                              AppLocalizations.of(context)
+                                  .translate('end')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('day')),
+                              selectedEndDate, (pickedDate) {
+                            setState(() => selectedEndDate = pickedDate);
+                          }),
+                          _buildTimePicker(
+                              AppLocalizations.of(context)
+                                  .translate('start')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('time')),
+                              selectedStartTime, (pickedTime) {
+                            setState(() => selectedStartTime = pickedTime);
+                          }),
+                          _buildTimePicker(
+                              AppLocalizations.of(context)
+                                  .translate('end')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('time')),
+                              selectedEndTime, (pickedTime) {
+                            setState(() => selectedEndTime = pickedTime);
+                          }),
+                          const SizedBox(height: 10),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                setState(() {
+                                  isTaskNameEmpty =
+                                      taskNameController.text.isEmpty;
+                                  isStartDateEmpty = selectedStartDate == null;
+                                  isEndDateEmpty = selectedEndDate == null;
+                                  isStartTimeEmpty = selectedStartTime == null;
+                                  isEndTimeEmpty = selectedEndTime == null;
+                                });
+                                if (!isTaskNameEmpty &&
+                                    !isStartDateEmpty &&
+                                    !isEndDateEmpty &&
+                                    !isStartTimeEmpty &&
+                                    !isEndTimeEmpty) {
+                                  saveSubTask();
+                                  await _triggerServerCreation();
+                                  Navigator.pop(context);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: const CircleBorder(),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 255, 220, 188),
+                                padding: const EdgeInsets.all(10),
+                              ),
+                              child: const Icon(
+                                Icons.add,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                size: 40,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
+            ));
           },
         );
       },
@@ -246,7 +272,8 @@ class AddSubTaskForm {
       ),
       child: Center(
         child: Text(
-          'Add Sub Goal',
+          AppLocalizations.of(context).translate('add_goal').replaceFirst(
+              '{text}', AppLocalizations.of(context).translate('sub')),
           style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -283,7 +310,7 @@ class AddSubTaskForm {
   Widget _buildFrequencyPicker(StateSetter setState) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: pastel.pastel1,
@@ -298,9 +325,26 @@ class AddSubTaskForm {
               style: TextStyle(color: pastel.pastelFont),
               value: selectedFrequency,
               items: ['daily', 'weekly', 'monthly'].map((String frequency) {
+                String frequencyTranslation;
+                switch (frequency) {
+                  case 'daily':
+                    frequencyTranslation =
+                        AppLocalizations.of(context).translate('daily');
+                    break;
+                  case 'weekly':
+                    frequencyTranslation =
+                        AppLocalizations.of(context).translate('weekly');
+                    break;
+                  case 'monthly':
+                    frequencyTranslation =
+                        AppLocalizations.of(context).translate('monthly');
+                    break;
+                  default:
+                    frequencyTranslation = frequency;
+                }
                 return DropdownMenuItem<String>(
                   value: frequency,
-                  child: Text(frequency),
+                  child: Text(frequencyTranslation),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -322,7 +366,7 @@ class AddSubTaskForm {
   Widget _buildDailyFrequencyInput() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: SizedBox(
         width: 60, // กำหนดความกว้าง
         child: TextField(
@@ -347,13 +391,21 @@ class AddSubTaskForm {
   Widget _buildWeeklyFrequencyPicker(StateSetter setState) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Padding(
-      padding: const EdgeInsets.only(top: 10, right: 10),
+      padding: const EdgeInsets.only(top: 0, right: 0),
       child: GridView.count(
         crossAxisCount: 4, // เพิ่มเป็น 4 คอลัมน์
         shrinkWrap: true, // ย่อขนาดให้พอดีกับเนื้อหา
         physics: const NeverScrollableScrollPhysics(), // ปิดการเลื่อน
         children: List.generate(7, (index) {
-          String day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index];
+          String dayTrans = [
+            AppLocalizations.of(context).translate('sun'),
+            AppLocalizations.of(context).translate('mon'),
+            AppLocalizations.of(context).translate('tue'),
+            AppLocalizations.of(context).translate('wed'),
+            AppLocalizations.of(context).translate('thu'),
+            AppLocalizations.of(context).translate('fri'),
+            AppLocalizations.of(context).translate('sat')
+          ][index];
           return Card(
             elevation: 1, // เพิ่มเงาให้การ์ด
             margin: const EdgeInsets.all(8), // เพิ่มระยะห่างรอบการ์ด
@@ -380,7 +432,7 @@ class AddSubTaskForm {
                 ),
                 child: Center(
                   child: Text(
-                    day,
+                    dayTrans,
                     maxLines: 1, // จำกัดให้แสดงได้ 1 บรรทัด
                     overflow: TextOverflow
                         .ellipsis, // ใช้ '...' เมื่อข้อความยาวเกินไป
@@ -403,7 +455,7 @@ class AddSubTaskForm {
   Widget _buildMonthlyFrequencyPicker(StateSetter setState) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
-      margin: const EdgeInsets.all(4.0),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 5),
       constraints: const BoxConstraints(maxWidth: 100), // กำหนดความกว้างสูงสุด
       decoration: BoxDecoration(
@@ -418,7 +470,7 @@ class AddSubTaskForm {
           return DropdownMenuItem<int>(
             value: index + 1,
             child: Text(
-              'Day ${index + 1}',
+              '${AppLocalizations.of(context).translate('date')} ${index + 1}',
               style: TextStyle(color: pastel.pastelFont),
             ),
           );
@@ -437,7 +489,7 @@ class AddSubTaskForm {
       ValueChanged<DateTime> onDatePicked) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
           color: pastel.pastel1,
@@ -447,7 +499,11 @@ class AddSubTaskForm {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.calendar_today,
+            color: pastel.pastelFont,
+          ),
+
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {
@@ -462,7 +518,7 @@ class AddSubTaskForm {
               }
             },
             child: Text(selectedDate == null
-                ? 'Pick a date'
+                ? label
                 : DateFormat('yyyy-MM-dd').format(selectedDate)),
           ),
         ],
@@ -474,7 +530,7 @@ class AddSubTaskForm {
       ValueChanged<TimeOfDay> onTimePicked) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
           color: pastel.pastel1,
@@ -484,7 +540,10 @@ class AddSubTaskForm {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.timer,
+            color: pastel.pastelFont,
+          ),
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {

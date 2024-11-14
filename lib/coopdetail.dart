@@ -4,6 +4,7 @@ import 'package:flutter_application_1/model/teamjobmodel.dart';
 import 'package:intl/intl.dart';
 import 'components/workwithform.dart';
 import 'coopsubdetail.dart';
+import 'l10n/app_localizations.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -101,7 +102,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
         title: Align(
           alignment: Alignment.centerRight,
           child: Text(
-            'Goal',
+            AppLocalizations.of(context).translate('coop'),
             style: TextStyle(color: pastel.pastelFont),
           ),
         ),
@@ -135,7 +136,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Date : ${widget.teamjobmodel.startDate.day.toString()}/${widget.teamjobmodel.startDate.month.toString()}/${widget.teamjobmodel.startDate.year.toString()} - ${widget.teamjobmodel.lastDate.day.toString()}/${widget.teamjobmodel.lastDate.month.toString()}/${widget.teamjobmodel.lastDate.year.toString()}',
+                '${AppLocalizations.of(context).translate('date')} : ${widget.teamjobmodel.startDate.day.toString()}/${widget.teamjobmodel.startDate.month.toString()}/${widget.teamjobmodel.startDate.year.toString()} - ${widget.teamjobmodel.lastDate.day.toString()}/${widget.teamjobmodel.lastDate.month.toString()}/${widget.teamjobmodel.lastDate.year.toString()}',
                 style: TextStyle(fontSize: 16, color: pastel.pastelFont),
               ),
               const SizedBox(height: 10),

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
+import 'l10n/app_localizations.dart';
 import 'model/theme.dart';
 import 'sub_components_calendar/daydaterow.dart';
 
@@ -25,6 +26,7 @@ class ToDoListState extends State<ToDoList> {
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
+      print(url);
       return data.map((item) => CalendarModel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load calendar data');
@@ -74,7 +76,7 @@ class ToDoListState extends State<ToDoList> {
       // Update the tasks state
       setState(() {
         tasks = fetchedTasks;
-        print(tasks);
+        // print(tasks);
       });
     } catch (e) {
       // Handle any errors that may occur during fetching
@@ -92,22 +94,6 @@ class ToDoListState extends State<ToDoList> {
     setState(() {
       currentDateTime = date;
     });
-  }
-
-  Future<List<CalendarModel>> fetchCalendarsToday() async {
-    final Dio dio = Dio();
-    final response = await dio.get(
-      'http://10.0.2.2:8080/v1/calendar/today/user/${widget.userId}',
-    );
-
-    if (response.statusCode == 200) {
-      // Assuming response.data is a list of JSON objects
-      return (response.data as List)
-          .map((json) => CalendarModel.fromJson(json))
-          .toList();
-    } else {
-      throw Exception('Failed to load subjobs');
-    }
   }
 
   Future<void> _completeTask(String taskId) async {
@@ -203,7 +189,7 @@ class HeadToDo extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
-        "Task For A Day",
+        AppLocalizations.of(context).translate('task_for_a_day'),
         style: TextStyle(
           fontSize: screenHeight * 0.03,
           color: pastel.pastelFont,

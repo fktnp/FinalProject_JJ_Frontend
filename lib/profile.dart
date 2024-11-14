@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/app_localizations.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
 
@@ -14,13 +15,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final Dio _dio = Dio();
   late Future<User> _userFuture;
-  String? _selectedImagePath;
-
-  final List<String> _sampleImages = [
-    'assets/images/image1.png',
-    'assets/images/image2.png',
-    'assets/images/image3.png',
-  ];
 
   Future<User> fetchUserData() async {
     try {
@@ -63,28 +57,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _userFuture = fetchUserData();
-    _userFuture.then((user) {
-      _loadSelectedImagePath(
-          user.userId); // Load the image specific to the current user
-    });
-  }
-
-  Future<void> _loadSelectedImagePath(String userId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedImagePath =
-          prefs.getString('profile_image_path_$userId') ?? _sampleImages[0];
-    });
-  }
-
-  Future<void> changeProfileImage(String imagePath, String userId) async {
-    setState(() {
-      _selectedImagePath = imagePath;
-    });
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profile_image_path_$userId',
-        imagePath); // Save image path specific to the user
   }
 
   @override
@@ -92,11 +64,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
-        title: const Align(
-          alignment: Alignment.centerRight,
-          child: Text('Profile'),
+        title: Text(
+          AppLocalizations.of(context).translate('profile'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: pastel.pastel1,
+        centerTitle: true,
       ),
       body: Container(
         color: pastel.pastel2,
@@ -115,59 +88,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Select Profile Image'),
-                              content: SizedBox(
-                                height: 200,
-                                width: double.maxFinite,
-                                child: GridView.builder(
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
-                                    childAspectRatio: 1,
-                                  ),
-                                  itemCount: _sampleImages.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        changeProfileImage(
-                                            _sampleImages[index], user.userId);
-                                        Navigator.of(context)
-                                            .pop(); // Close dialog after selecting image
-                                      },
-                                      child: Image.asset(
-                                        _sampleImages[index],
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // Close dialog
-                                  },
-                                  child: const Text('Close'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundImage: _selectedImagePath != null
-                              ? AssetImage(_selectedImagePath!)
-                              : (user.profileImageUrl.isNotEmpty
-                                  ? NetworkImage(user.profileImageUrl)
-                                      as ImageProvider
-                                  : const AssetImage(
-                                      'assets/default_avatar.png')),
-                        ),
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundImage: user.profileImageUrl.isNotEmpty
+                            ? NetworkImage(user.profileImageUrl)
+                                as ImageProvider
+                            : const AssetImage('assets/default_avatar.png'),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -179,18 +105,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: pastel.pastelFont)),
                     ),
                     const SizedBox(height: 20),
-                    Text('Contact',
+                    Text(AppLocalizations.of(context).translate('contact'),
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: pastel.pastelFont)),
                     const Divider(thickness: 1.5, color: Colors.grey),
                     const SizedBox(height: 10),
-                    Text('Email: ${user.email}',
+                    Text(
+                        '${AppLocalizations.of(context).translate('email')} : ${user.email}',
                         style:
                             TextStyle(fontSize: 20, color: pastel.pastelFont)),
                     const SizedBox(height: 10),
-                    Text('Phone: ${user.phoneNumber}',
+                    Text(
+                        '${AppLocalizations.of(context).translate('phone')} ${user.phoneNumber}',
                         style:
                             TextStyle(fontSize: 20, color: pastel.pastelFont)),
                   ],

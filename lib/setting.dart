@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';  
+import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/app_localizations.dart';
+import 'language.dart';
 import 'model/theme.dart';
 import 'profile.dart';
-import 'themepage.dart'; 
+import 'themepage.dart';
 
 class SettingsPage extends StatefulWidget {
   final String userId;
   const SettingsPage({
-    super.key, required this.userId,
+    super.key,
+    required this.userId,
   });
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -22,10 +25,11 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         title: Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment.center,
           child: Text(
-            'Settings',
-            style: TextStyle(color: pastel.pastelFont),
+            AppLocalizations.of(context).translate('settings'),
+            style: TextStyle(
+                color: pastel.pastelFont, fontWeight: FontWeight.bold),
             textAlign: TextAlign.right,
           ),
         ),
@@ -35,10 +39,13 @@ class _SettingsPageState extends State<SettingsPage> {
         color: pastel.pastel2,
         child: Column(
           children: [
+            const SizedBox(
+              height: 20,
+            ),
             ListTile(
               leading: const Icon(Icons.person, size: 50),
               title: Text(
-                'Profile',
+                AppLocalizations.of(context).translate('profile'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () {
@@ -53,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.palette, size: 50),
               title: Text(
-                'Theme',
+                AppLocalizations.of(context).translate('theme'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () {
@@ -61,11 +68,25 @@ class _SettingsPageState extends State<SettingsPage> {
                     MaterialPageRoute(builder: (context) => const Themepage()));
               },
             ),
+            const SizedBox(height: 30),
+            ListTile(
+              leading: const Icon(Icons.language, size: 50),
+              title: Text(
+                AppLocalizations.of(context).translate('language'),
+                style: TextStyle(fontSize: 24, color: pastel.pastelFont),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LanguageSetting()));
+              },
+            ),
             const Spacer(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, size: 50),
               title: Text(
-                'Sign out',
+                AppLocalizations.of(context).translate('sign_out'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
               onTap: () async {
@@ -73,32 +94,37 @@ class _SettingsPageState extends State<SettingsPage> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirm Sign out'),
-                      content: const Text('Are you sure you want to sign out?'),
+                      title: Text(AppLocalizations.of(context)
+                          .translate('confirm_sign_out')),
+                      content:
+                          Text(AppLocalizations.of(context).translate('sure')),
                       actions: <Widget>[
                         TextButton(
-                          child: const Text('Cancel'),
+                          child: Text(
+                              AppLocalizations.of(context).translate('cancel')),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                         ),
                         TextButton(
-                          child: const Text('Yes'),
+                          child: Text(
+                              AppLocalizations.of(context).translate('yes')),
                           onPressed: () async {
                             // ลบข้อมูลที่เกี่ยวข้องกับการล็อกอิน
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
                             await prefs.remove('isLoggedIn');
                             await prefs.remove('user_id');
-                            
+
                             // นำผู้ใช้กลับไปที่หน้า LoginScreen
                             Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
                               PageRouteBuilder(
                                 transitionDuration: const Duration(seconds: 1),
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        const LoginScreen(),  // ไปที่หน้า LoginScreen
+                                pageBuilder: (context, animation,
+                                        secondaryAnimation) =>
+                                    const LoginScreen(), // ไปที่หน้า LoginScreen
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   var begin = const Offset(1.0, 0.0);

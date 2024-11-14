@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/date_formatter.dart';
 import '../model/theme.dart';
 
 class CurrentDayDateRow extends StatefulWidget {
@@ -79,8 +80,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Text(
-        DateFormat('dd MMMM yyyy')
-            .format(currentDateTime), // ใช้ DateFormat จาก intl
+        LocalizedDateFormatter.formatDate(
+            context, currentDateTime), // ใช้ DateFormat จาก intl
         style: TextStyle(
           color: pastel.pastelFont,
           fontWeight: FontWeight.bold,
@@ -151,7 +152,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      DateFormat('MMM').format(multiMonthList[index]),
+                      LocalizedDateFormatter.formatShortMonth(
+                          context, multiMonthList[index]),
                       style: TextStyle(
                         fontSize: height * 0.018,
                         fontWeight: FontWeight.bold,
@@ -173,7 +175,8 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                       ),
                     ),
                     Text(
-                      DateFormat('EEE').format(multiMonthList[index]),
+                      LocalizedDateFormatter.formatShortDay(
+                          context, multiMonthList[index]),
                       style: TextStyle(
                         fontSize: height * 0.018,
                         fontWeight: FontWeight.bold,

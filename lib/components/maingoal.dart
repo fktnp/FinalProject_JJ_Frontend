@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../model/theme.dart';
 
 class AddFromGoal {
@@ -99,8 +100,6 @@ class AddFromGoal {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
-                      // Text(loginuserid),
                       _buildHeader(),
                       const SizedBox(height: 20),
                       Padding(
@@ -110,7 +109,8 @@ class AddFromGoal {
                           children: [
                             // Task Name Input
                             _buildTextField(
-                              label: 'Task Name',
+                              label: AppLocalizations.of(context)
+                                  .translate('task_name'),
                               controller: taskNameController,
                               errorText: isTaskNameEmpty
                                   ? 'Task Name is required'
@@ -120,7 +120,8 @@ class AddFromGoal {
 
                             // Detail Input
                             _buildTextField(
-                              label: 'Detail',
+                              label: AppLocalizations.of(context)
+                                  .translate('details'),
                               controller: detailController,
                               errorText: null,
                             ),
@@ -132,7 +133,12 @@ class AddFromGoal {
                               date: selectedStartDate,
                               isError: isStartDateEmpty,
                               setState: setState,
-                              label: 'Start Date',
+                              label: AppLocalizations.of(context)
+                                  .translate('start')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('day')),
                               onDatePicked: (pickedDate) {
                                 setState(() {
                                   selectedStartDate = pickedDate;
@@ -147,7 +153,12 @@ class AddFromGoal {
                               date: selectedEndDate,
                               isError: isEndDateEmpty,
                               setState: setState,
-                              label: 'End Date',
+                              label: AppLocalizations.of(context)
+                                  .translate('end')
+                                  .replaceFirst(
+                                      '{text}',
+                                      AppLocalizations.of(context)
+                                          .translate('day')),
                               onDatePicked: (pickedDate) {
                                 setState(() {
                                   selectedEndDate = pickedDate;
@@ -219,7 +230,8 @@ class AddFromGoal {
       ),
       child: Center(
         child: Text(
-          'Add Main Goal',
+          AppLocalizations.of(context).translate('add_goal').replaceFirst(
+              '{text}', AppLocalizations.of(context).translate('main')),
           style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -270,7 +282,7 @@ class AddFromGoal {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       title: Text(
-        date == null ? 'Select $label' : DateFormat.yMMMd().format(date),
+        date == null ? label : DateFormat.yMMMd().format(date),
         style: TextStyle(
           color: isError ? Colors.red : pastel.pastelFont,
           fontSize: 16,
