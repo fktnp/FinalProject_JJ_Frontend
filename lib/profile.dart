@@ -61,10 +61,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    // final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('profile'),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -79,7 +83,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(
+                  child: Text(
+                      overflow: TextOverflow.ellipsis,
+                      'Error: ${snapshot.error}'));
             } else if (snapshot.hasData) {
               User user = snapshot.data!;
               return Padding(
@@ -88,24 +95,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundImage: user.profileImageUrl.isNotEmpty
-                            ? NetworkImage(user.profileImageUrl)
-                                as ImageProvider
-                            : const AssetImage('assets/default_avatar.png'),
-                      ),
-                    ),
+                        child: CircleAvatar(
+                            radius: screenWidth * 0.1,
+                            backgroundColor:
+                                pastel.pastel1, // สีเมื่อไม่ถูกเลือก
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+                              user.name[0].toUpperCase(),
+                              style: TextStyle(
+                                color: pastel
+                                    .pastelFont, // สีตัวอักษรเมื่อไม่ถูกเลือก
+                                fontSize: screenWidth * 0.1,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ))),
                     const SizedBox(height: 20),
                     Center(
-                      child: Text(user.name,
+                      child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          user.name,
                           style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: pastel.pastelFont)),
                     ),
                     const SizedBox(height: 20),
-                    Text(AppLocalizations.of(context).translate('contact'),
+                    Text(
+                        overflow: TextOverflow.ellipsis,
+                        AppLocalizations.of(context).translate('contact'),
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -113,11 +130,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(thickness: 1.5, color: Colors.grey),
                     const SizedBox(height: 10),
                     Text(
+                        overflow: TextOverflow.ellipsis,
                         '${AppLocalizations.of(context).translate('email')} : ${user.email}',
                         style:
                             TextStyle(fontSize: 20, color: pastel.pastelFont)),
                     const SizedBox(height: 10),
                     Text(
+                        overflow: TextOverflow.ellipsis,
                         '${AppLocalizations.of(context).translate('phone')} ${user.phoneNumber}',
                         style:
                             TextStyle(fontSize: 20, color: pastel.pastelFont)),
@@ -125,7 +144,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
             } else {
-              return const Center(child: Text('No data available'));
+              return const Center(
+                  child: Text(
+                      overflow: TextOverflow.ellipsis, 'No data available'));
             }
           },
         ),

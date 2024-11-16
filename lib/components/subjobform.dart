@@ -160,7 +160,7 @@ class AddSubTaskForm {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildTextField(
-                            'Task Name',
+                            AppLocalizations.of(context).translate('task_name'),
                             taskNameController,
                             isTaskNameEmpty ? 'Task Name is required' : null,
                           ),
@@ -234,13 +234,12 @@ class AddSubTaskForm {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 220, 188),
+                                backgroundColor: pastel.pastel1,
                                 padding: const EdgeInsets.all(10),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.add,
-                                color: Color.fromARGB(255, 0, 0, 0),
+                                color: pastel.pastelFont,
                                 size: 40,
                               ),
                             ),
@@ -272,6 +271,7 @@ class AddSubTaskForm {
       ),
       child: Center(
         child: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('add_goal').replaceFirst(
               '{text}', AppLocalizations.of(context).translate('sub')),
           style: TextStyle(
@@ -344,7 +344,8 @@ class AddSubTaskForm {
                 }
                 return DropdownMenuItem<String>(
                   value: frequency,
-                  child: Text(frequencyTranslation),
+                  child: Text(
+                      overflow: TextOverflow.ellipsis, frequencyTranslation),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -432,10 +433,10 @@ class AddSubTaskForm {
                 ),
                 child: Center(
                   child: Text(
+                    overflow: TextOverflow.ellipsis,
                     dayTrans,
                     maxLines: 1, // จำกัดให้แสดงได้ 1 บรรทัด
-                    overflow: TextOverflow
-                        .ellipsis, // ใช้ '...' เมื่อข้อความยาวเกินไป
+
                     style: TextStyle(
                       color: selectedWeekDays.contains(index)
                           ? pastel.pastel1
@@ -470,6 +471,7 @@ class AddSubTaskForm {
           return DropdownMenuItem<int>(
             value: index + 1,
             child: Text(
+              overflow: TextOverflow.ellipsis,
               '${AppLocalizations.of(context).translate('date')} ${index + 1}',
               style: TextStyle(color: pastel.pastelFont),
             ),
@@ -517,9 +519,11 @@ class AddSubTaskForm {
                 onDatePicked(pickedDate);
               }
             },
-            child: Text(selectedDate == null
-                ? label
-                : DateFormat('yyyy-MM-dd').format(selectedDate)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedDate == null
+                    ? label
+                    : DateFormat('yyyy-MM-dd').format(selectedDate)),
           ),
         ],
       ),
@@ -555,9 +559,9 @@ class AddSubTaskForm {
                 onTimePicked(pickedTime);
               }
             },
-            child: Text(selectedTime == null
-                ? 'Pick a time'
-                : selectedTime.format(context)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedTime == null ? label : selectedTime.format(context)),
           ),
         ],
       ),

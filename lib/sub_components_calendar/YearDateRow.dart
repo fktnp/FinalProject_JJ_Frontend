@@ -38,6 +38,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Text(
+      overflow: TextOverflow.ellipsis,
       LocalizedDateFormatter.formatYear(context, currentDateTime),
       style: TextStyle(
         color: pastel.pastelFont,
@@ -87,6 +88,7 @@ class CurrentYearRowState extends State<CurrentYearRow> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
+                overflow: TextOverflow.ellipsis,
                 DateFormat('yyyy').format(yearsInRange[index]),
                 style: TextStyle(
                   fontSize: height * 0.025,

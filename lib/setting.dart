@@ -27,6 +27,7 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Align(
           alignment: Alignment.center,
           child: Text(
+            overflow: TextOverflow.ellipsis,
             AppLocalizations.of(context).translate('settings'),
             style: TextStyle(
                 color: pastel.pastelFont, fontWeight: FontWeight.bold),
@@ -45,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.person, size: 50),
               title: Text(
+                overflow: TextOverflow.ellipsis,
                 AppLocalizations.of(context).translate('profile'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
@@ -60,6 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.palette, size: 50),
               title: Text(
+                overflow: TextOverflow.ellipsis,
                 AppLocalizations.of(context).translate('theme'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
@@ -72,6 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.language, size: 50),
               title: Text(
+                overflow: TextOverflow.ellipsis,
                 AppLocalizations.of(context).translate('language'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
@@ -86,6 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.exit_to_app, size: 50),
               title: Text(
+                overflow: TextOverflow.ellipsis,
                 AppLocalizations.of(context).translate('sign_out'),
                 style: TextStyle(fontSize: 24, color: pastel.pastelFont),
               ),
@@ -94,13 +99,17 @@ class _SettingsPageState extends State<SettingsPage> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text(AppLocalizations.of(context)
-                          .translate('confirm_sign_out')),
-                      content:
-                          Text(AppLocalizations.of(context).translate('sure')),
+                      title: Text(
+                          overflow: TextOverflow.ellipsis,
+                          AppLocalizations.of(context)
+                              .translate('confirm_sign_out')),
+                      content: Text(
+                          overflow: TextOverflow.ellipsis,
+                          AppLocalizations.of(context).translate('sure')),
                       actions: <Widget>[
                         TextButton(
                           child: Text(
+                              overflow: TextOverflow.ellipsis,
                               AppLocalizations.of(context).translate('cancel')),
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -108,6 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         TextButton(
                           child: Text(
+                              overflow: TextOverflow.ellipsis,
                               AppLocalizations.of(context).translate('yes')),
                           onPressed: () async {
                             // ลบข้อมูลที่เกี่ยวข้องกับการล็อกอิน

@@ -52,6 +52,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
   Widget titleView() {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Text(
+      overflow: TextOverflow.ellipsis,
       LocalizedDateFormatter.formatMonth(context, currentDateTime),
       style: TextStyle(
         color: pastel.pastelFont,
@@ -112,6 +113,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
+                overflow: TextOverflow.ellipsis,
                 LocalizedDateFormatter.formatShortMonth(
                     context, monthsInYear[index]),
                 style: TextStyle(
@@ -157,6 +159,7 @@ class CurrentMonthRowState extends State<CurrentMonthRow> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
+                overflow: TextOverflow.ellipsis,
                 DateFormat('yyyy').format(yearsInRange[index]),
                 style: TextStyle(
                   fontSize: height * 0.025,

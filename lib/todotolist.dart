@@ -52,6 +52,13 @@ class ToDoListState extends State<ToDoList> {
     }
   }
 
+  void toggleTaskComplete(String taskId, bool isTeamTask) async {
+    await _completeTask(taskId, isTeamTask); // API สำหรับเปลี่ยนสถานะ
+    setState(() {
+      _fetchAllTasks(); // โหลด Task ใหม่จาก Server
+    });
+  }
+
   bool isSameDate(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&
@@ -135,9 +142,15 @@ class ToDoListState extends State<ToDoList> {
       if (isTeamTask) {
         // สำหรับ team task ส่ง status เป็น "Complete" หรือ status เดิม
         final task = allTasks.firstWhere((t) => t.id == taskId);
-        final String newStatus = complete ? "Complete" : task.status;
+        // final String newStatus = complete ? "Complete" : task.status;
+        final String newStatus;
 
         final String endpoint = 'http://10.0.2.2:8080/v1/teamSubJob/$taskId';
+        if (task.status == 'Complete') {
+          newStatus = 'In progress';
+        } else {
+          newStatus = 'Complete';
+        }
         final response = await _dio.put(
           endpoint,
           data: {'status': newStatus},
@@ -211,7 +224,7 @@ class ToDoListState extends State<ToDoList> {
                 tasks: filteredTasks,
                 onTaskCompleted: (String taskId) {
                   final task = allTasks.firstWhere((t) => t.id == taskId);
-                  _completeTask(taskId, task.isTeamTask);
+                  toggleTaskComplete(taskId, task.isTeamTask);
                 },
               ),
             ],
@@ -222,9 +235,18 @@ class ToDoListState extends State<ToDoList> {
   }
 
   List<Task> filterTasks(List<Task> tasks) {
-    return tasks
-        .where((task) => isSameDate(task.dateCalendar, currentDateTime))
-        .toList();
+    return tasks.where((task) {
+      if (task.isTeamTask) {
+        // แสดง task team ทุกวันในช่วง startDate ถึง lastDate
+        return currentDateTime
+                .isAfter(task.startDate.subtract(const Duration(days: 1))) &&
+            currentDateTime
+                .isBefore(task.lastDate.add(const Duration(days: 1)));
+      } else {
+        // สำหรับ task ปกติ แสดงเฉพาะวันที่ตรงกับ dateCalendar
+        return isSameDate(task.dateCalendar, currentDateTime);
+      }
+    }).toList();
   }
 }
 
@@ -246,6 +268,7 @@ class HeadToDo extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
+        overflow: TextOverflow.ellipsis,
         AppLocalizations.of(context).translate('task_for_a_day'),
         style: TextStyle(
           fontSize: screenHeight * 0.03,
@@ -309,7 +332,9 @@ class ShowListTask extends StatelessWidget {
                       await onTaskCompleted(task.id);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${task.title} marked as completed'),
+                          content: Text(
+                              overflow: TextOverflow.ellipsis,
+                              '${task.title} marked as completed'),
                           duration: const Duration(seconds: 2),
                         ),
                       );
@@ -320,8 +345,9 @@ class ShowListTask extends StatelessWidget {
                       await onTaskCompleted(task.id);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content:
-                              Text('${task.title} marked as not completed'),
+                          content: Text(
+                              overflow: TextOverflow.ellipsis,
+                              '${task.title} marked as not completed'),
                           duration: const Duration(seconds: 2),
                         ),
                       );
@@ -358,9 +384,10 @@ class ShowListTask extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
+                                      overflow: TextOverflow.ellipsis,
                                       task.title,
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: screenWidth * 0.045,
                                         fontWeight: FontWeight.bold,
                                         decoration: task.isCompleted
                                             ? TextDecoration.lineThrough
@@ -396,36 +423,39 @@ class ShowListTask extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
+                              overflow: TextOverflow.ellipsis,
                               task.details,
                               style: TextStyle(
                                 color: task.isCompleted
                                     ? Colors.grey
                                     : Colors.black54,
-                                fontSize: 14,
+                                fontSize: screenWidth * 0.035,
                               ),
                             ),
                           ),
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
+                            overflow: TextOverflow.ellipsis,
                             'Start: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} : ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
                                   ? Colors.grey
                                   : Colors.black54,
-                              fontSize: 14,
+                              fontSize: screenWidth * 0.03,
                             ),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
+                            overflow: TextOverflow.ellipsis,
                             'End: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} : ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
                                   ? Colors.grey
                                   : Colors.black54,
-                              fontSize: 14,
+                              fontSize: screenWidth * 0.03,
                             ),
                           ),
                         ),

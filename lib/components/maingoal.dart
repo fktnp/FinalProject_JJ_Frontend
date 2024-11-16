@@ -230,6 +230,7 @@ class AddFromGoal {
       ),
       child: Center(
         child: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('add_goal').replaceFirst(
               '{text}', AppLocalizations.of(context).translate('main')),
           style: TextStyle(
@@ -282,6 +283,7 @@ class AddFromGoal {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       title: Text(
+        overflow: TextOverflow.ellipsis,
         date == null ? label : DateFormat.yMMMd().format(date),
         style: TextStyle(
           color: isError ? Colors.red : pastel.pastelFont,

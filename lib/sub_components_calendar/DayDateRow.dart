@@ -78,6 +78,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Text(
+        overflow: TextOverflow.ellipsis,
         LocalizedDateFormatter.formatDate(
             context, currentDateTime), // ใช้ DateFormat จาก intl
         style: TextStyle(
@@ -150,6 +151,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
+                      overflow: TextOverflow.ellipsis,
                       LocalizedDateFormatter.formatShortMonth(
                           context, multiMonthList[index]),
                       style: TextStyle(
@@ -162,6 +164,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                       ),
                     ),
                     Text(
+                      overflow: TextOverflow.ellipsis,
                       multiMonthList[index].day.toString(),
                       style: TextStyle(
                         fontSize: height * 0.018,
@@ -173,6 +176,7 @@ class CurrentDayDateRowState extends State<CurrentDayDateRow> {
                       ),
                     ),
                     Text(
+                      overflow: TextOverflow.ellipsis,
                       LocalizedDateFormatter.formatShortDay(
                           context, multiMonthList[index]),
                       style: TextStyle(

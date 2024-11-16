@@ -100,6 +100,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         title: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('coop'),
           style:
               TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
@@ -122,44 +123,48 @@ class CoopDetailPageState extends State<CoopDetailPage> {
             children: [
               // แสดงชื่อของเป้าหมาย
               Text(
+                overflow: TextOverflow.ellipsis,
                 widget.teamjobmodel.name,
                 style: TextStyle(
-                    fontSize: 24,
+                    fontSize: screenWidth * 0.07,
                     fontWeight: FontWeight.bold,
                     color: pastel.pastelFont),
               ),
-              const SizedBox(height: 10),
               Text(
+                overflow: TextOverflow.ellipsis,
                 widget.teamjobmodel.details,
-                style: TextStyle(fontSize: 16, color: pastel.pastelFont),
+                style: TextStyle(
+                    fontSize: screenWidth * 0.035, color: pastel.pastelFont),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.02),
               Text(
+                overflow: TextOverflow.ellipsis,
                 '${AppLocalizations.of(context).translate('date')} : ${widget.teamjobmodel.startDate.day.toString()}/${widget.teamjobmodel.startDate.month.toString()}/${widget.teamjobmodel.startDate.year.toString()} - ${widget.teamjobmodel.lastDate.day.toString()}/${widget.teamjobmodel.lastDate.month.toString()}/${widget.teamjobmodel.lastDate.year.toString()}',
-                style: TextStyle(fontSize: 16, color: pastel.pastelFont),
+                style: TextStyle(
+                    fontSize: screenWidth * 0.045, color: pastel.pastelFont),
               ),
-              const SizedBox(height: 10),
               Row(
                 children: [
                   Row(
                     children: participatingUsers.map((user) {
                       return Container(
-                        width: screenWidth * 0.08,
-                        height: screenWidth * 0.08,
-                        margin: EdgeInsets.only(left: screenWidth * 0.03),
+                        width: screenWidth * 0.09,
+                        height: screenWidth * 0.09,
+                        margin: EdgeInsets.only(left: screenWidth * 0.02),
                         decoration: BoxDecoration(
                           color: pastel.pastelProgress,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
+                            overflow: TextOverflow.ellipsis,
                             user.name.isNotEmpty
                                 ? user.name[0].toUpperCase()
                                 : '',
                             style: TextStyle(
                               color: pastel.participant,
                               fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.04,
+                              fontSize: screenWidth * 0.05,
                             ),
                           ),
                         ),
@@ -189,7 +194,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                 ],
               ),
               SizedBox(
-                height: screenHeight * 0.02,
+                height: screenHeight * 0.01,
               ),
 
               Expanded(
@@ -250,6 +255,9 @@ class CoopDetailPageState extends State<CoopDetailPage> {
   }
 
   void _showAddGoalCoopBottomSheet(BuildContext context, Pastel pastel) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
     setState(() {
       headSubJobId = widget.loginuserid;
     });
@@ -262,180 +270,213 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       backgroundColor: pastel.pastel2, // Peach background color
       builder: (BuildContext context) {
         return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 20.0,
-              right: 20.0,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: pastel.pastel1,
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: pastel.pastel1,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    overflow: TextOverflow.ellipsis,
+                    AppLocalizations.of(context)
+                        .translate('add_goal')
+                        .replaceFirst('{text}',
+                            AppLocalizations.of(context).translate('main')),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.06,
+                      fontWeight: FontWeight.bold,
+                      color: pastel.pastelFont,
                     ),
                   ),
-                  child: Center(
-                    child: Text(
-                      'Add a Collective Goal',
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                child: Column(
+                  children: [
+                    SizedBox(height: screenHeight * 0.0135),
+
+                    // Fields
+                    _buildTextField(
+                        controller: nameController,
+                        label: AppLocalizations.of(context)
+                            .translate('task_name')),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildTextField(
+                        controller: detailsController,
+                        label:
+                            AppLocalizations.of(context).translate('details'),
+                        maxLines: 3),
+                    SizedBox(height: screenHeight * 0.0135),
+
+                    // Date and Time pickers
+                    _buildDatePickerField(
+                        AppLocalizations.of(context)
+                            .translate('start')
+                            .replaceFirst('{text}',
+                                AppLocalizations.of(context).translate('day')),
+                        startDate, (pickedDate) {
+                      setState(() => startDate = pickedDate);
+                    }),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildDatePickerField(
+                        AppLocalizations.of(context)
+                            .translate('end')
+                            .replaceFirst('{text}',
+                                AppLocalizations.of(context).translate('day')),
+                        lastDate, (pickedDate) {
+                      setState(() => lastDate = pickedDate);
+                    }),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildTimePicker(
+                        AppLocalizations.of(context)
+                            .translate('start')
+                            .replaceFirst('{text}',
+                                AppLocalizations.of(context).translate('time')),
+                        startTime, (pickedTime) {
+                      setState(() => startTime = pickedTime);
+                    }),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildTimePicker(
+                        AppLocalizations.of(context)
+                            .translate('end')
+                            .replaceFirst('{text}',
+                                AppLocalizations.of(context).translate('time')),
+                        lastTime, (pickedTime) {
+                      setState(() => lastTime = pickedTime);
+                    }),
+                    SizedBox(height: screenHeight * 0.0125),
+                    Text(
+                      overflow: TextOverflow.ellipsis,
+                      '${AppLocalizations.of(context).translate('select_participants')} :',
                       style: TextStyle(
-                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: pastel.pastelFont,
+                        fontSize: screenWidth * 0.035,
                       ),
                     ),
-                  ),
-                ),
+                    if (participatingUsers.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: participatingUsers.map((user) {
+                              final isSelected =
+                                  selectedUserIds.contains(user.userId);
 
-                const SizedBox(height: 20),
-
-                // Fields
-                _buildTextField(controller: nameController, label: 'Task Name'),
-                const SizedBox(height: 20),
-                _buildTextField(
-                    controller: detailsController,
-                    label: 'Detail',
-                    maxLines: 3),
-                const SizedBox(height: 20),
-
-                // Date and Time pickers
-                _buildDatePickerField('Start Date', startDate, (pickedDate) {
-                  setState(() => startDate = pickedDate);
-                }),
-                const SizedBox(height: 20),
-                _buildDatePickerField('Last Date', lastDate, (pickedDate) {
-                  setState(() => lastDate = pickedDate);
-                }),
-                const SizedBox(height: 20),
-                _buildTimePicker('Start Time', startTime, (pickedTime) {
-                  setState(() => startTime = pickedTime);
-                }),
-                const SizedBox(height: 20),
-                _buildTimePicker('End Time', lastTime, (pickedTime) {
-                  setState(() => lastTime = pickedTime);
-                }),
-                const SizedBox(height: 16),
-                const Text(
-                  'Select Participants:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                if (participatingUsers.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: participatingUsers.map((user) {
-                          final isSelected =
-                              selectedUserIds.contains(user.userId);
-
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: GestureDetector(
-                              onTap: () => toggleUserSelection(user.userId),
-                              child: Row(
-                                children: [
-                                  Stack(
+                              return Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.008),
+                                child: GestureDetector(
+                                  onTap: () => toggleUserSelection(user.userId),
+                                  child: Row(
                                     children: [
-                                      CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: isSelected
-                                            ? pastel
-                                                .pastelFont // สีเมื่อถูกเลือก
-                                            : pastel
-                                                .pastel1, // สีเมื่อไม่ถูกเลือก
-                                        child: Text(
-                                          user.name[0].toUpperCase(),
-                                          style: TextStyle(
-                                            color: isSelected
+                                      Stack(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: screenWidth * 0.06,
+                                            backgroundColor: isSelected
                                                 ? pastel
-                                                    .pastel1 // สีตัวอักษรเมื่อถูกเลือก
+                                                    .pastelFont // สีเมื่อถูกเลือก
                                                 : pastel
-                                                    .pastelFont, // สีตัวอักษรเมื่อไม่ถูกเลือก
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                                    .pastel1, // สีเมื่อไม่ถูกเลือก
+                                            child: Text(
+                                              overflow: TextOverflow.ellipsis,
+                                              user.name[0].toUpperCase(),
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? pastel
+                                                        .pastel1 // สีตัวอักษรเมื่อถูกเลือก
+                                                    : pastel
+                                                        .pastelFont, // สีตัวอักษรเมื่อไม่ถูกเลือก
+                                                fontSize: screenWidth * 0.045,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          if (isSelected)
+                                            Positioned(
+                                              right: 0,
+                                              bottom: 0,
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(2),
+                                                decoration: BoxDecoration(
+                                                  color: pastel.pastelFont,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.check,
+                                                  size: screenWidth * 0.035,
+                                                  color: pastel.pastel1,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
-                                      if (isSelected)
-                                        Positioned(
-                                          right: 0,
-                                          bottom: 0,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(2),
-                                            decoration: BoxDecoration(
-                                              color: pastel.pastelFont,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.check,
-                                              size: 12,
-                                              color: pastel.pastel1,
-                                            ),
-                                          ),
-                                        ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                const SizedBox(height: 20),
-                _buildTextField(
-                    controller: linkWorkAreaController,
-                    label: 'Link For Word Area'),
-                const SizedBox(height: 20),
-                _buildTextField(
-                    controller: linkSubmitWorkController,
-                    label: 'Link For Submit Work'),
-                const SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: pastel.pastel1,
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildTextField(
+                        controller: linkWorkAreaController,
+                        label: AppLocalizations.of(context)
+                            .translate('work_link')),
+                    SizedBox(height: screenHeight * 0.0135),
+                    _buildTextField(
+                        controller: linkSubmitWorkController,
+                        label: AppLocalizations.of(context)
+                            .translate('submit_link')),
+                    SizedBox(height: screenHeight * 0.0135),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: pastel.pastel1,
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(20),
+                        ),
+                        onPressed: () {
+                          // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
+                          createSubCoop(
+                            jobId: widget.teamjobmodel.jobId,
+                            name: nameController.text,
+                            status: 'In progress',
+                            details: detailsController.text,
+                            startDate: startDate!,
+                            lastDate: lastDate!,
+                            startTime: startTime!,
+                            lastTime: lastTime!,
+                            workByUserIds: workByUserIds,
+                            linkWorkArea: linkWorkAreaController.text,
+                            linkSubmitWork: linkSubmitWorkController.text,
+                            headUserId: headSubJobId,
+                          );
+                          Navigator.pop(context); // ปิด bottom sheet
+                        },
+                        child: Icon(
+                          Icons.add,
+                          color: pastel.pastelFont,
+                          size: screenWidth * 0.06,
+                        ),
+                      ),
                     ),
-                    onPressed: () {
-                      // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
-                      createSubCoop(
-                        jobId: widget.teamjobmodel.jobId,
-                        name: nameController.text,
-                        status: 'In Progress',
-                        details: detailsController.text,
-                        startDate: startDate!,
-                        lastDate: lastDate!,
-                        startTime: startTime!,
-                        lastTime: lastTime!,
-                        workByUserIds: workByUserIds,
-                        linkWorkArea: linkWorkAreaController.text,
-                        linkSubmitWork: linkSubmitWorkController.text,
-                        headUserId: headSubJobId,
-                      );
-                      Navigator.pop(context); // ปิด bottom sheet
-                    },
-                    child: Icon(
-                      Icons.add,
-                      color: pastel.pastelProgress,
-                      size: 30,
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -479,7 +520,10 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.calendar_today,
+            color: pastel.pastelFont,
+          ),
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {
@@ -493,9 +537,11 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                 onDatePicked(pickedDate);
               }
             },
-            child: Text(selectedDate == null
-                ? 'Pick a date'
-                : DateFormat('yyyy-MM-dd').format(selectedDate)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedDate == null
+                    ? label
+                    : DateFormat('yyyy-MM-dd').format(selectedDate)),
           ),
         ],
       ),
@@ -517,7 +563,10 @@ class CoopDetailPageState extends State<CoopDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.calendar_today,
+            color: pastel.pastelFont,
+          ),
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {
@@ -529,9 +578,9 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                 onTimePicked(pickedTime);
               }
             },
-            child: Text(selectedTime == null
-                ? 'Pick a time'
-                : selectedTime.format(context)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedTime == null ? label : selectedTime.format(context)),
           ),
         ],
       ),
@@ -613,12 +662,14 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
+                  overflow: TextOverflow.ellipsis,
                   widget.teamSubtask.name,
                   style: TextStyle(
                       fontSize: screenWidth * 0.065, color: pastel.pastelFont),
                 ),
                 const SizedBox(height: 5),
                 Text(
+                  overflow: TextOverflow.ellipsis,
                   '${widget.teamSubtask.startDate.day}/${widget.teamSubtask.startDate.month}/${widget.teamSubtask.startDate.year} - ${widget.teamSubtask.lastDate.day}/${widget.teamSubtask.lastDate.month}/${widget.teamSubtask.lastDate.year}',
                   style: TextStyle(
                       fontSize: screenWidth * 0.035, color: pastel.pastelFont),
@@ -636,6 +687,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
                       ),
                       child: Center(
                         child: Text(
+                          overflow: TextOverflow.ellipsis,
                           user.name.isNotEmpty
                               ? user.name[0].toUpperCase()
                               : '',

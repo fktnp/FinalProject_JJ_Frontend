@@ -135,6 +135,7 @@ class _CoopPageState extends State<CoopPage> {
         title: Align(
           alignment: Alignment.center,
           child: Text(
+            overflow: TextOverflow.ellipsis,
             AppLocalizations.of(context).translate('coop'),
             style: TextStyle(
                 color: pastel.pastelFont, fontWeight: FontWeight.bold),
@@ -157,7 +158,7 @@ class _CoopPageState extends State<CoopPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Generate task widgets only once per task
-                    // Text(teamTask.userId),
+                    // Text(overflow: TextOverflow.ellipsis,teamTask.userId),
                     ...tasks.map((tasks) => TeamTaskBox(
                           teamtask: tasks,
                           userId: widget.userId,
@@ -213,6 +214,7 @@ class _CoopPageState extends State<CoopPage> {
                   ),
                   child: Center(
                     child: Text(
+                      overflow: TextOverflow.ellipsis,
                       'Add a Collective Goal',
                       style: TextStyle(
                         fontSize: 24,
@@ -226,28 +228,48 @@ class _CoopPageState extends State<CoopPage> {
                 const SizedBox(height: 20),
 
                 // Fields
-                _buildTextField(controller: nameController, label: 'Task Name'),
+                _buildTextField(
+                    controller: nameController,
+                    label: AppLocalizations.of(context).translate('task_name')),
                 const SizedBox(height: 20),
                 _buildTextField(
                     controller: detailsController,
-                    label: 'Detail',
+                    label: AppLocalizations.of(context).translate('details'),
                     maxLines: 3),
                 const SizedBox(height: 20),
 
                 // Date and Time pickers
-                _buildDatePickerField('Start Date', startDate, (pickedDate) {
+                _buildDatePickerField(
+                    AppLocalizations.of(context)
+                        .translate('start')
+                        .replaceFirst('{text}',
+                            AppLocalizations.of(context).translate('day')),
+                    startDate, (pickedDate) {
                   setState(() => startDate = pickedDate);
                 }),
                 const SizedBox(height: 20),
-                _buildDatePickerField('Last Date', lastDate, (pickedDate) {
+                _buildDatePickerField(
+                    AppLocalizations.of(context).translate('end').replaceFirst(
+                        '{text}',
+                        AppLocalizations.of(context).translate('day')),
+                    lastDate, (pickedDate) {
                   setState(() => lastDate = pickedDate);
                 }),
                 const SizedBox(height: 20),
-                _buildTimePicker('Start Time', startTime, (pickedTime) {
+                _buildTimePicker(
+                    AppLocalizations.of(context)
+                        .translate('start')
+                        .replaceFirst('{text}',
+                            AppLocalizations.of(context).translate('time')),
+                    startTime, (pickedTime) {
                   setState(() => startTime = pickedTime);
                 }),
                 const SizedBox(height: 20),
-                _buildTimePicker('End Time', lastTime, (pickedTime) {
+                _buildTimePicker(
+                    AppLocalizations.of(context).translate('end').replaceFirst(
+                        '{text}',
+                        AppLocalizations.of(context).translate('time')),
+                    lastTime, (pickedTime) {
                   setState(() => lastTime = pickedTime);
                 }),
                 const SizedBox(height: 20),
@@ -257,7 +279,8 @@ class _CoopPageState extends State<CoopPage> {
                   children: [
                     Expanded(
                       child: _buildTextField(
-                        label: 'Participants',
+                        label:
+                            '${AppLocalizations.of(context).translate('email_of')} ${AppLocalizations.of(context).translate('participants')}',
                         controller: _participantController,
                       ),
                     ),
@@ -273,6 +296,7 @@ class _CoopPageState extends State<CoopPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
+                        overflow: TextOverflow.ellipsis,
                         'Added Participants:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -292,6 +316,7 @@ class _CoopPageState extends State<CoopPage> {
                                   backgroundColor: pastel
                                       .pastel1, // ใช้สีพื้นหลังตามธีมหรือที่กำหนดไว้
                                   child: Text(
+                                    overflow: TextOverflow.ellipsis,
                                     participant.name[0]
                                         .toUpperCase(), // ตัวอักษรตัวแรก
                                     style: TextStyle(
@@ -383,13 +408,17 @@ class _CoopPageState extends State<CoopPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: pastel.pastel1,
-        borderRadius: BorderRadius.circular(10),
-      ),
+          color: pastel.pastel1,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.calendar_today,
+            color: pastel.pastelFont,
+          ),
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {
@@ -403,9 +432,11 @@ class _CoopPageState extends State<CoopPage> {
                 onDatePicked(pickedDate);
               }
             },
-            child: Text(selectedDate == null
-                ? 'Pick a date'
-                : DateFormat('yyyy-MM-dd').format(selectedDate)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedDate == null
+                    ? label
+                    : DateFormat('yyyy-MM-dd').format(selectedDate)),
           ),
         ],
       ),
@@ -420,13 +451,17 @@ class _CoopPageState extends State<CoopPage> {
       // margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: pastel.pastel1,
-        borderRadius: BorderRadius.circular(10),
-      ),
+          color: pastel.pastel1,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: const Color.fromARGB(123, 36, 36, 36), width: 1.5)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย
         children: [
-          Text(label),
+          Icon(
+            Icons.timer,
+            color: pastel.pastelFont,
+          ),
           const SizedBox(width: 10), // เพิ่มระยะห่างเล็กน้อย
           TextButton(
             onPressed: () async {
@@ -438,9 +473,9 @@ class _CoopPageState extends State<CoopPage> {
                 onTimePicked(pickedTime);
               }
             },
-            child: Text(selectedTime == null
-                ? 'Pick a time'
-                : selectedTime.format(context)),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                selectedTime == null ? label : selectedTime.format(context)),
           ),
         ],
       ),
@@ -522,6 +557,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
+                    overflow: TextOverflow.ellipsis,
                     widget.teamtask.name,
                     style: TextStyle(
                         fontSize: screenWidth * 0.065,
@@ -529,6 +565,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                   ),
                   const SizedBox(height: 5),
                   Text(
+                    overflow: TextOverflow.ellipsis,
                     '${widget.teamtask.startDate.day}/${widget.teamtask.startDate.month}/${widget.teamtask.startDate.year} - ${widget.teamtask.lastDate.day}/${widget.teamtask.lastDate.month}/${widget.teamtask.lastDate.year}',
                     style: TextStyle(
                         fontSize: screenWidth * 0.035,
@@ -548,6 +585,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                           ),
                           child: Center(
                             child: Text(
+                              overflow: TextOverflow.ellipsis,
                               user.name.isNotEmpty
                                   ? user.name[0].toUpperCase()
                                   : '',

@@ -97,6 +97,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         title: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('coop'),
           style:
               TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
@@ -118,6 +119,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                overflow: TextOverflow.ellipsis,
                 widget.teamsubjobmodel.name,
                 style: TextStyle(
                     fontSize: screenWidth * 0.09,
@@ -126,12 +128,14 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
+                overflow: TextOverflow.ellipsis,
                 '${AppLocalizations.of(context).translate('date')} : ${widget.teamsubjobmodel.startDate.day.toString()}/${widget.teamsubjobmodel.startDate.month.toString()}/${widget.teamsubjobmodel.startDate.year.toString()} - ${widget.teamsubjobmodel.lastDate.day.toString()}/${widget.teamsubjobmodel.lastDate.month.toString()}/${widget.teamsubjobmodel.lastDate.year.toString()}',
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
+                overflow: TextOverflow.ellipsis,
                 '${AppLocalizations.of(context).translate('participants')} :',
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
@@ -150,6 +154,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                         ),
                         child: Center(
                           child: Text(
+                            overflow: TextOverflow.ellipsis,
                             user.name.isNotEmpty
                                 ? user.name[0].toUpperCase()
                                 : '',
@@ -187,6 +192,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
+                overflow: TextOverflow.ellipsis,
                 "${AppLocalizations.of(context).translate('details')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
@@ -194,6 +200,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               Wrap(
                 children: [
                   Text(
+                    overflow: TextOverflow.ellipsis,
                     widget.teamsubjobmodel.details,
                     style: TextStyle(
                         fontSize: screenWidth * 0.04, color: pastel.pastelFont),
@@ -202,6 +209,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
+                overflow: TextOverflow.ellipsis,
                 "${AppLocalizations.of(context).translate('work_link')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
@@ -221,9 +229,9 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                         }
                       },
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
                         widget.teamsubjobmodel.linkAreaWork,
                         maxLines: 2, // กำหนดให้ขึ้นได้สูงสุด 2 บรรทัด
-                        overflow: TextOverflow.ellipsis, // ตัดข้อความด้วย ...
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                           color: pastel.pastelFont,
@@ -258,6 +266,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
+                overflow: TextOverflow.ellipsis,
                 "${AppLocalizations.of(context).translate('submit_link')} :",
                 style: TextStyle(
                     fontSize: screenWidth * 0.06, color: pastel.pastelFont),
@@ -277,9 +286,9 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                         }
                       },
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
                         widget.teamsubjobmodel.linkSubmitWork,
                         maxLines: 2, // กำหนดให้ขึ้นได้สูงสุด 2 บรรทัด
-                        overflow: TextOverflow.ellipsis, // ตัดข้อความด้วย ...
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                           color: pastel.pastelFont,

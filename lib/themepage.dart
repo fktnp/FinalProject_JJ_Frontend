@@ -19,6 +19,7 @@ class Themepage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: pastelTheme.pastel1,
         title: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('theme'),
           style: TextStyle(
             fontSize: 20,
@@ -51,6 +52,7 @@ class Themepage extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
                         AppLocalizations.of(context).translate('light_mode'),
                         style: const TextStyle(
                           fontSize: 18,
@@ -76,6 +78,7 @@ class Themepage extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
                         AppLocalizations.of(context).translate('dark_mode'),
                         style: const TextStyle(
                           fontSize: 18,

@@ -218,6 +218,7 @@ class CalendarViewState extends State<MyCalendarView> {
           } else if (snapshot.hasError) {
             return Center(
                 child: Text(
+              overflow: TextOverflow.ellipsis,
               'Error: ${snapshot.error}',
             ));
           }
@@ -280,7 +281,7 @@ class CalendarViewState extends State<MyCalendarView> {
                         child: SfCalendar(
                             timeSlotViewSettings: TimeSlotViewSettings(
                               timeTextStyle: TextStyle(
-                                fontSize: 14,
+                                fontSize: screenWidth * 0.035,
                                 color: pastel.pastelFont,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -307,7 +308,7 @@ class CalendarViewState extends State<MyCalendarView> {
                             dataSource: _calendarDataSource,
                             appointmentTextStyle: TextStyle(
                               color: pastel.pastelFont,
-                              fontSize: 16,
+                              fontSize: screenWidth * 0.027,
                             ),
                             appointmentBuilder: (BuildContext context,
                                 CalendarAppointmentDetails details) {
@@ -317,21 +318,21 @@ class CalendarViewState extends State<MyCalendarView> {
                               return Container(
                                 padding: const EdgeInsets.all(8),
                                 alignment: Alignment
-                                    .center, // ตำแหน่งตัวอักษรใน Appointment
+                                    .centerLeft, // ตำแหน่งตัวอักษรใน Appointment
                                 decoration: BoxDecoration(
                                   color: appointment.color,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
+                                  overflow: TextOverflow.ellipsis,
                                   appointment.subject,
                                   style: TextStyle(
-                                    fontSize: 16, // ขนาดตัวอักษร
+                                    fontSize:
+                                        screenWidth * 0.04, // ขนาดตัวอักษร
                                     color: pastel.pastelFont, // สีตัวอักษร
                                     fontWeight:
                                         FontWeight.bold, // น้ำหนักตัวอักษร
                                   ),
-                                  textAlign:
-                                      TextAlign.center, // จัดตำแหน่งตัวอักษร
                                 ),
                               );
                             }),
@@ -366,6 +367,7 @@ class CalendarViewState extends State<MyCalendarView> {
         ),
         child: Center(
           child: Text(
+            overflow: TextOverflow.ellipsis,
             text,
             style: TextStyle(
               fontSize: screenHeight * 0.03,

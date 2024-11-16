@@ -79,12 +79,16 @@ class _GoalsPageState extends State<GoalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    // final screenHeight = mediaQuery.size.height;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
         centerTitle: true,
         title: Text(
+          overflow: TextOverflow.ellipsis,
           AppLocalizations.of(context).translate('goals'),
           style:
               TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
@@ -170,12 +174,13 @@ class _GoalsPageState extends State<GoalsPage> {
                                       });
                                     },
                                     child: Text(
+                                      overflow: TextOverflow.ellipsis,
                                       AppLocalizations.of(context)
                                           .translate('planing')
                                           .replaceFirst(
                                               '{goal}', goalTranslation),
                                       style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: screenWidth * 0.045,
                                           color: pastel.pastelFont),
                                     ),
                                   ),
@@ -199,7 +204,9 @@ class _GoalsPageState extends State<GoalsPage> {
                                       : [
                                           const Padding(
                                             padding: EdgeInsets.all(16.0),
-                                            child: Text('No tasks available'),
+                                            child: Text(
+                                                overflow: TextOverflow.ellipsis,
+                                                'No tasks available'),
                                           ),
                                         ],
                                 ),
@@ -253,22 +260,25 @@ class GoalTask extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+                          overflow: TextOverflow.ellipsis,
                           task.name,
-                          style:
-                              TextStyle(fontSize: 22, color: pastel.pastelFont),
+                          style: TextStyle(
+                              fontSize: screenWidth * 0.05,
+                              color: pastel.pastelFont),
                         ),
-                        const SizedBox(
-                          width: 20,
+                        Text(
+                          overflow: TextOverflow.ellipsis,
+                          '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
+                          style: TextStyle(
+                              fontSize: screenWidth * 0.035,
+                              color: pastel.pastelFont),
                         ),
                       ],
                     ),
-                  ),
-                  Text(
-                    '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
-                    style: TextStyle(fontSize: 16, color: pastel.pastelFont),
                   ),
                 ],
               ),
@@ -278,7 +288,9 @@ class GoalTask extends StatelessWidget {
                   radius: screenWidth * 0.07,
                   lineWidth: screenWidth * 0.014,
                   percent: task.percentProgress / 100,
-                  center: Text('${task.percentProgress.toString()}%'),
+                  center: Text(
+                      overflow: TextOverflow.ellipsis,
+                      '${task.percentProgress.toString()}%'),
                   progressColor: pastel.pastelProgress,
                   backgroundColor: const Color.fromARGB(82, 0, 0, 0),
                 ),
@@ -337,6 +349,9 @@ class _GoalSectionState extends State<GoalSection> {
   Widget build(BuildContext context) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     final goalTranslation = _getGoalTranslation(widget.goal);
+    final mediaQuery = MediaQuery.of(context);
+    // final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
 
     return Stack(
       children: [
@@ -354,10 +369,12 @@ class _GoalSectionState extends State<GoalSection> {
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
                 title: Text(
+                  overflow: TextOverflow.ellipsis,
                   AppLocalizations.of(context)
                       .translate('planing')
                       .replaceFirst('{goal}', goalTranslation),
-                  style: TextStyle(fontSize: 18, color: pastel.pastelFont),
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.05, color: pastel.pastelFont),
                 ),
               ),
             ),

@@ -78,6 +78,7 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
+        overflow: TextOverflow.ellipsis,
         'Add a Participant',
         style: TextStyle(
           color: widget.pastel.pastelFont,
@@ -107,7 +108,8 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
                 }
               }
             },
-            child: const Text('Add Participant'),
+            child:
+                const Text(overflow: TextOverflow.ellipsis, 'Add Participant'),
           ),
         ],
       ),
@@ -196,6 +198,7 @@ class _AddTeamSubParticipantPopupState
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
+        overflow: TextOverflow.ellipsis,
         'Add a Participant',
         style: TextStyle(
           color: widget.pastel.pastelFont,
@@ -225,7 +228,8 @@ class _AddTeamSubParticipantPopupState
                 }
               }
             },
-            child: const Text('Add Participant'),
+            child:
+                const Text(overflow: TextOverflow.ellipsis, 'Add Participant'),
           ),
         ],
       ),
@@ -291,6 +295,7 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
+        overflow: TextOverflow.ellipsis,
         widget.teamsubJobmodel.jobId,
         style: TextStyle(
           color: widget.pastel.pastelFont,
@@ -319,7 +324,8 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
                 // รีเซ็ตหน้าหลักหรือโหลดข้อมูลใหม่ถ้าต้องการ
               });
             },
-            child: const Text('Change Work Link'),
+            child:
+                const Text(overflow: TextOverflow.ellipsis, 'Change Work Link'),
           ),
         ],
       ),
@@ -385,6 +391,7 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
+        overflow: TextOverflow.ellipsis,
         widget.teamsubJobmodel.jobId,
         style: TextStyle(
           color: widget.pastel.pastelFont,
@@ -413,7 +420,8 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
                 // รีเซ็ตหน้าหลักหรือโหลดข้อมูลใหม่ถ้าต้องการ
               });
             },
-            child: const Text('Change Work Link'),
+            child:
+                const Text(overflow: TextOverflow.ellipsis, 'Change Work Link'),
           ),
         ],
       ),

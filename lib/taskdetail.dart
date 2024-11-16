@@ -38,13 +38,14 @@ class TaskDetailPage extends StatelessWidget {
         title: Align(
           alignment: Alignment.centerRight,
           child: Text(
+            overflow: TextOverflow.ellipsis,
             'Goal',
             style: TextStyle(color: pastel.pastelFont),
           ),
         ),
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: pastel.pastelFont),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -59,6 +60,7 @@ class TaskDetailPage extends StatelessWidget {
             children: [
               // แสดงชื่อของเป้าหมาย
               Text(
+                overflow: TextOverflow.ellipsis,
                 mainJobModel.name,
                 style: TextStyle(
                     fontSize: 24,
@@ -67,6 +69,7 @@ class TaskDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
+                overflow: TextOverflow.ellipsis,
                 'Date : ${mainJobModel.startTimeGoal.day.toString()}/${mainJobModel.startTimeGoal.month.toString()}/${mainJobModel.startTimeGoal.year.toString()} - ${mainJobModel.lastTimeGoal.day.toString()}/${mainJobModel.lastTimeGoal.month.toString()}/${mainJobModel.lastTimeGoal.year.toString()}',
                 style: TextStyle(fontSize: 16, color: pastel.pastelFont),
               ),
@@ -175,6 +178,7 @@ class SubTaskBox extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
+                  overflow: TextOverflow.ellipsis,
                   subtask.name,
                   style: TextStyle(
                       fontSize: screenWidth * 0.065, color: pastel.pastelFont),
@@ -182,6 +186,7 @@ class SubTaskBox extends StatelessWidget {
                 const SizedBox(height: 5),
                 // Show the start and end date in one line
                 Text(
+                  overflow: TextOverflow.ellipsis,
                   '${subtask.startDate.day}/${subtask.startDate.month}/${subtask.startDate.year} - ${subtask.lastDate.day}/${subtask.lastDate.month}/${subtask.lastDate.year}',
                   style: TextStyle(
                       fontSize: screenWidth * 0.035, color: pastel.pastelFont),
@@ -192,7 +197,9 @@ class SubTaskBox extends StatelessWidget {
               radius: screenWidth * 0.07,
               lineWidth: screenWidth * 0.014,
               percent: subtask.percentProgress / 100,
-              center: Text('${subtask.percentProgress.toString()}%'),
+              center: Text(
+                  overflow: TextOverflow.ellipsis,
+                  '${subtask.percentProgress.toString()}%'),
               progressColor: pastel.pastelProgress,
               backgroundColor: const Color.fromARGB(82, 0, 0, 0),
             ),
