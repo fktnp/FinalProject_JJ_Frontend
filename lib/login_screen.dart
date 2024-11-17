@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_button.dart';
 import 'components/custom_textfield.dart';
@@ -24,6 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _passwordError;
 
   Future<void> login(BuildContext context) async {
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
     if (_formKey.currentState!.validate()) {
       try {
         dio.options.headers['Content-Type'] = 'application/json';
@@ -33,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
         String password = _passwordController.text;
 
         Response response = await dio.post(
-          'http://10.0.2.2:8080/v1/user/login',
+          '$apiUrl/v1/user/login',
           data: {
             "email": username,
             "password": password,

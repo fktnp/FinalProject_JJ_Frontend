@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/login_screen.dart';
+import 'package:provider/provider.dart';
 import 'components/custom_textfield.dart';
+import 'main.dart';
 import 'model/theme.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -17,6 +19,8 @@ class RegisterScreen extends StatelessWidget {
   });
   // ฟังก์ชันสำหรับเรียก API
   Future<void> _registerUser(BuildContext context) async {
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
     try {
       dio.options.headers['Content-Type'] =
           'application/json'; // ตั้งค่า Header สำหรับ JSON
@@ -26,8 +30,8 @@ class RegisterScreen extends StatelessWidget {
       String username = _userNameController.text;
       String phoneNumber = _telController.text;
 
-      var response =
-          await dio.post('http://10.0.2.2:8080/v1/user/register', data: {
+      print('$apiUrl/v1/user/register');
+      var response = await dio.post('$apiUrl/v1/user/register', data: {
         "email": email,
         "password": password,
         "name": username,
@@ -90,7 +94,8 @@ class RegisterScreen extends StatelessWidget {
                   fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
+                    borderSide: BorderSide(
+                        color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -116,7 +121,8 @@ class RegisterScreen extends StatelessWidget {
                   fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
+                    borderSide: BorderSide(
+                        color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -141,7 +147,8 @@ class RegisterScreen extends StatelessWidget {
                   fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
+                    borderSide: BorderSide(
+                        color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
@@ -165,7 +172,8 @@ class RegisterScreen extends StatelessWidget {
                   fillColor: pastel.pastel2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
+                    borderSide: BorderSide(
+                        color: pastel.pastel2 ?? const Color(0xFFFFECDB)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,

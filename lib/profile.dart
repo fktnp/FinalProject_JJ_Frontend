@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
 
@@ -17,6 +19,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<User> _userFuture;
 
   Future<User> fetchUserData() async {
+        final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('auth_token');
@@ -27,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       _dio.options.headers["Authorization"] = "Bearer $token";
 
-      Response response = await _dio.get('http://10.0.2.2:8080/v1/user');
+      Response response = await _dio.get('$apiUrl/v1/user');
 
       if (response.statusCode == 200) {
         if (response.data is List && response.data.isNotEmpty) {

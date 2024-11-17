@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 class User {
   final String userId;
@@ -27,8 +31,13 @@ class User {
   }
 }
 
-Future<User?> fetchUserByEmail(String email) async {
-  final url = Uri.parse('http://10.0.2.2:8080/v1/user');
+Future<User?> fetchUserByEmail(
+  String email,
+  BuildContext context,
+) async {
+  final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
+  final url = Uri.parse('$apiUrl/v1/user');
   print('in fetch user use : $email');
 
   try {
@@ -52,8 +61,9 @@ Future<User?> fetchUserByEmail(String email) async {
   return null; // คืนค่า null หากไม่พบผู้ใช้
 }
 
-Future<User?> fetchUserById(String userId) async {
-  final url = Uri.parse('http://10.0.2.2:8080/v1/user/$userId');
+Future<User?> fetchUserById(String userId,BuildContext context) async {
+  final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+  final url = Uri.parse('$apiUrl/v1/user/$userId');
 
   try {
     final response = await http.get(url);

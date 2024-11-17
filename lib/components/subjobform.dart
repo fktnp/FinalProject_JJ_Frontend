@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
+import '../main.dart';
 import '../model/theme.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,6 +13,7 @@ class AddSubTaskForm {
   final String userId;
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController frequencyDayController = TextEditingController();
+  final Function onSubmitSuccess;
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
   TimeOfDay? selectedStartTime;
@@ -24,6 +27,7 @@ class AddSubTaskForm {
     required this.context,
     required this.jobId,
     required this.userId,
+    required this.onSubmitSuccess,
   });
 
   bool isTaskNameEmpty = false;
@@ -33,12 +37,13 @@ class AddSubTaskForm {
   bool isEndTimeEmpty = false;
 
   Future<void> saveSubTask() async {
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
     if (jobId.isEmpty ||
         userId.isEmpty ||
         taskNameController.text.isEmpty ||
         selectedStartDate == null ||
         selectedEndDate == null) {
-      _triggerServerCreation();
+      // _triggerServerCreation();
       return; // Handle the case where fields are empty
     }
 
@@ -89,11 +94,12 @@ class AddSubTaskForm {
     };
 
     try {
-      var response = await Dio().post(
-        'http://10.0.2.2:8080/v1/subjob',
+      await Dio().post(
+        '$apiUrl/v1/subjob',
         data: data,
       );
-      print(response.data);
+      onSubmitSuccess();
+      print('sent complete');
     } on DioException catch (e) {
       if (e.response != null) {
         print('Error status code: ${e.response?.statusCode}');
@@ -105,14 +111,15 @@ class AddSubTaskForm {
   }
 
   Future<void> _triggerServerCreation() async {
-    final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/$userId';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final url = '$apiUrl/v1/calendar/subjob/user/$userId';
 
     try {
       final response =
           await http.get(Uri.parse(url)); // ใช้ GET ตามที่ตั้งค่าใน Postman
       if (response.statusCode == 200) {
-        print('Server triggered successfully');
-        print('http://10.0.2.2:8080/v1/calendar/subjob/user/$userId');
+        print(
+            'Server triggered successfully $apiUrl/v1/calendar/subjob/user/$userId');
       } else {
         print('Failed to trigger server: ${response.statusCode}');
       }
@@ -228,8 +235,9 @@ class AddSubTaskForm {
                                     !isEndDateEmpty &&
                                     !isStartTimeEmpty &&
                                     !isEndTimeEmpty) {
-                                  saveSubTask();
                                   Navigator.pop(context);
+                                  await saveSubTask();
+                                  await _triggerServerCreation();
                                 }
                               },
                               style: ElevatedButton.styleFrom(

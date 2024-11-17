@@ -1,21 +1,28 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'main.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
 import 'components/subjobform.dart';
 import 'model/mainjobmodel.dart';
 
-class TaskDetailPage extends StatelessWidget {
+class TaskDetailPage extends StatefulWidget {
   final MainJobModel mainJobModel;
   final String loginuserid;
 
   const TaskDetailPage(
       {super.key, required this.mainJobModel, required this.loginuserid});
+  @override
+  TaskDetailPageState createState() => TaskDetailPageState();
+}
 
-  Future<List<SubJobModel>> fetchSubTasks() async {
+class TaskDetailPageState extends State<TaskDetailPage> {
+  Future<List<SubJobModel>> fetchSubTasks(BuildContext context) async {
     final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/subjob/user/$loginuserid';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/subjob/user/${widget.loginuserid}';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
@@ -61,7 +68,7 @@ class TaskDetailPage extends StatelessWidget {
               // แสดงชื่อของเป้าหมาย
               Text(
                 overflow: TextOverflow.ellipsis,
-                mainJobModel.name,
+                widget.mainJobModel.name,
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -70,7 +77,7 @@ class TaskDetailPage extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 overflow: TextOverflow.ellipsis,
-                'Date : ${mainJobModel.startTimeGoal.day.toString()}/${mainJobModel.startTimeGoal.month.toString()}/${mainJobModel.startTimeGoal.year.toString()} - ${mainJobModel.lastTimeGoal.day.toString()}/${mainJobModel.lastTimeGoal.month.toString()}/${mainJobModel.lastTimeGoal.year.toString()}',
+                'Date : ${widget.mainJobModel.startTimeGoal.day.toString()}/${widget.mainJobModel.startTimeGoal.month.toString()}/${widget.mainJobModel.startTimeGoal.year.toString()} - ${widget.mainJobModel.lastTimeGoal.day.toString()}/${widget.mainJobModel.lastTimeGoal.month.toString()}/${widget.mainJobModel.lastTimeGoal.year.toString()}',
                 style: TextStyle(fontSize: 16, color: pastel.pastelFont),
               ),
               const SizedBox(height: 10),
@@ -87,7 +94,7 @@ class TaskDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: FutureBuilder<List<SubJobModel>>(
-                        future: fetchSubTasks(),
+                        future: fetchSubTasks(context),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -97,7 +104,7 @@ class TaskDetailPage extends StatelessWidget {
                             final tasks = snapshot.data ?? [];
                             print(tasks);
                             final subtask = tasks.where((subtask) =>
-                                (subtask.jobId == mainJobModel.jobId));
+                                (subtask.jobId == widget.mainJobModel.jobId));
 
                             return Padding(
                               padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
@@ -124,10 +131,16 @@ class TaskDetailPage extends StatelessWidget {
                       child: FloatingActionButton(
                         onPressed: () {
                           AddSubTaskForm(
-                                  context: context,
-                                  jobId: mainJobModel.jobId,
-                                  userId: mainJobModel.userId)
-                              .show();
+                            context: context,
+                            jobId: widget.mainJobModel.jobId,
+                            userId: widget.mainJobModel.userId,
+                            onSubmitSuccess: () {
+                              setState(() {
+                                fetchSubTasks(
+                                    context); // หรือฟังก์ชันที่ใช้โหลดข้อมูลใหม่
+                              });
+                            },
+                          ).show();
                         },
                         backgroundColor: pastel.pastelFont,
                         child: Icon(Icons.add, color: pastel.pastel1),

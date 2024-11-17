@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/model/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'coopdetail.dart';
 import 'l10n/app_localizations.dart';
 import 'model/teamjobmodel.dart';
 import 'model/usermodel.dart';
 
 Future<void> createCoop({
+  required BuildContext context,
   required String name,
   required String status,
   required String details,
@@ -44,8 +47,10 @@ Future<void> createCoop({
       'work_by_user_id': workByUserIds,
       'head_user_id': headUserId,
     };
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
     var response = await Dio().post(
-      'http://10.0.2.2:8080/v1/teamJob',
+      '$apiUrl/v1/teamJob',
       data: data,
     );
     // การส่งข้อมูล POST
@@ -94,7 +99,7 @@ class _CoopPageState extends State<CoopPage> {
   void _addParticipant() async {
     final email = _participantController.text.trim();
     if (email.isNotEmpty) {
-      final user = await fetchUserByEmail(email);
+      final user = await fetchUserByEmail(email, context);
       if (user != null) {
         setState(() {
           _participants.add(user);
@@ -110,12 +115,12 @@ class _CoopPageState extends State<CoopPage> {
 
   Future<List<Teamjobmodel>> fetchTeamTasks() async {
     final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/teamJob/job/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/teamJob/job/${widget.userId}';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
-      print(taskListJson);
-      // print(url);
+      print(apiUrl);
       return taskListJson.map((json) => Teamjobmodel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load tasks');
@@ -349,8 +354,8 @@ class _CoopPageState extends State<CoopPage> {
                     ),
                     onPressed: () {
                       // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
-                      print(startTime);
                       createCoop(
+                        context: context,
                         name: nameController.text,
                         status: 'In Progress',
                         details: detailsController.text,
@@ -510,7 +515,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
 
   Future<void> fetchParticipatingUsers() async {
     for (String userId in widget.teamtask.workByUserID) {
-      User? user = await fetchUserById(userId);
+      User? user = await fetchUserById(userId, context);
       if (user != null) {
         participatingUsers.add(user);
       }

@@ -5,8 +5,10 @@ import 'package:flutter_application_1/model/subJobModel.dart';
 import 'package:flutter_application_1/sub_components_calendar/daydaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/monthdaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/yeardaterow.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/theme.dart';
 
 class MyCalendarView extends StatefulWidget {
@@ -35,7 +37,8 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<List<CalendarModel>> fetchCalendarData() async {
     final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/calendar/user/${widget.userId}';
 
     final response = await dio.get(url);
     if (response.statusCode == 200) {
@@ -48,7 +51,8 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<SubJobModel> fetchSubJob(String subJobID) async {
     final Dio dio = Dio();
-    final response = await dio.get('http://10.0.2.2:8080/v1/subjob/$subJobID');
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final response = await dio.get('$apiUrl/v1/subjob/$subJobID');
 
     if (response.statusCode == 200) {
       return SubJobModel.fromJson(response.data);
@@ -60,8 +64,9 @@ class CalendarViewState extends State<MyCalendarView> {
   Future<List<SubJobModel>> fetchAllSubJob() async {
     final Dio dio = Dio();
     // ตรวจสอบให้แน่ใจว่า URL ถูกต้อง
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
     String url =
-        'http://10.0.2.2:8080/v1/subjob/user/${widget.userId}'; // เพิ่ม 'user' ในพาท
+        '$apiUrl/v1/subjob/user/${widget.userId}'; // เพิ่ม 'user' ในพาท
 
     try {
       // กำหนดค่า validateStatus เพื่อไม่ให้ throw error ทันที

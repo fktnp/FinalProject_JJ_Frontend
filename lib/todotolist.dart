@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
+import 'package:provider/provider.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'sub_components_calendar/daydaterow.dart';
@@ -21,10 +23,12 @@ class ToDoListState extends State<ToDoList> {
   final Dio _dio = Dio();
 
   Future<List<CalendarModel>> fetchCalendars() async {
-    final String url = 'http://10.0.2.2:8080/v1/calendar/user/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/calendar/user/${widget.userId}';
     final response = await _dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
+      print('fetchCalendars complete');
       return data.map((item) => CalendarModel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load calendar data');
@@ -32,11 +36,12 @@ class ToDoListState extends State<ToDoList> {
   }
 
   Future<List<Teamsubjobmodel>> fetchTeamSubTasks() async {
-    final String url =
-        'http://10.0.2.2:8080/v1/teamSubJob/subjob/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/teamSubJob/subjob/${widget.userId}';
     final response = await _dio.get(url);
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
+      print('fetchTeamSubTasks complete');
       return data.map((item) => Teamsubjobmodel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load team tasks');
@@ -44,8 +49,10 @@ class ToDoListState extends State<ToDoList> {
   }
 
   Future<SubJobModel> fetchSubJob(String subJobID) async {
-    final response = await _dio.get('http://10.0.2.2:8080/v1/subjob/$subJobID');
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final response = await _dio.get('$apiUrl/v1/subjob/$subJobID');
     if (response.statusCode == 200) {
+      print('fetchSubJob complete');
       return SubJobModel.fromJson(response.data);
     } else {
       throw Exception('Failed to load subjob');
@@ -67,60 +74,74 @@ class ToDoListState extends State<ToDoList> {
 
   Future<void> _fetchAllTasks() async {
     try {
-      final Future<List<CalendarModel>> calendarsFuture = fetchCalendars();
-      final Future<List<Teamsubjobmodel>> teamTasksFuture = fetchTeamSubTasks();
-
-      final results = await Future.wait([calendarsFuture, teamTasksFuture]);
-      final List<CalendarModel> calendars = results[0] as List<CalendarModel>;
-      final List<Teamsubjobmodel> teamTasks =
-          results[1] as List<Teamsubjobmodel>;
-
       List<Task> fetchedTasks = [];
 
-      // แปลง calendars เป็น Task
-      for (var calendar in calendars) {
-        SubJobModel subJob = await fetchSubJob(calendar.subJobID);
-        fetchedTasks.add(Task(
-          id: calendar.id,
-          title: subJob.name,
-          details: subJob.details,
-          isCompleted: calendar.statusSubJob,
-          startDate: subJob.startDate,
-          lastDate: subJob.lastDate,
-          percentProgress: subJob.percentProgress,
-          dateCalendar: calendar.dateCalendar,
-          statusSubJob: calendar.statusSubJob,
-          startTimeGoal: subJob.startTimeGoal,
-          lastTimeGoal: subJob.lastTimeGoal,
-          isTeamTask: false,
-          status: '', // เพิ่ม field status สำหรับ team task
-        ));
+      // ดึงข้อมูล calendars
+      try {
+        final List<CalendarModel> calendars = await fetchCalendars();
+        // แปลง calendars เป็น Task
+        for (var calendar in calendars) {
+          try {
+            SubJobModel subJob = await fetchSubJob(calendar.subJobID);
+            fetchedTasks.add(Task(
+              id: calendar.id,
+              title: subJob.name,
+              details: subJob.details,
+              isCompleted: calendar.statusSubJob,
+              startDate: subJob.startDate,
+              lastDate: subJob.lastDate,
+              percentProgress: subJob.percentProgress,
+              dateCalendar: calendar.dateCalendar,
+              statusSubJob: calendar.statusSubJob,
+              startTimeGoal: subJob.startTimeGoal,
+              lastTimeGoal: subJob.lastTimeGoal,
+              isTeamTask: false,
+              status: '',
+            ));
+          } catch (e) {
+            print('Error fetching subjob: $e');
+            // ข้าม task นี้ถ้าไม่สามารถดึงข้อมูล subjob ได้
+            continue;
+          }
+        }
+      } catch (e) {
+        print('Error fetching calendars: $e');
+        // ถ้าดึง calendars ไม่ได้ จะมี fetchedTasks เป็น list ว่าง
       }
 
-      // แปลง teamTasks เป็น Task
-      for (var teamTask in teamTasks) {
-        fetchedTasks.add(Task(
-          id: teamTask.subJobId,
-          title: "${teamTask.name} (Team)",
-          details: teamTask.details,
-          isCompleted: teamTask.status == "Complete",
-          startDate: teamTask.startDate,
-          lastDate: teamTask.lastDate,
-          percentProgress: 0,
-          dateCalendar: teamTask.startDate,
-          statusSubJob: teamTask.status == "Complete",
-          startTimeGoal: teamTask.startTime,
-          lastTimeGoal: teamTask.lastTime,
-          isTeamTask: true,
-          status: teamTask.status, // เก็บค่า status string ไว้
-        ));
+      // ดึงข้อมูล teamTasks แยกต่างหาก
+      try {
+        final List<Teamsubjobmodel> teamTasks = await fetchTeamSubTasks();
+        // แปลง teamTasks เป็น Task
+        for (var teamTask in teamTasks) {
+          fetchedTasks.add(Task(
+            id: teamTask.subJobId,
+            title: "${teamTask.name} (Team)",
+            details: teamTask.details,
+            isCompleted: teamTask.status == "Complete",
+            startDate: teamTask.startDate,
+            lastDate: teamTask.lastDate,
+            percentProgress: 0,
+            dateCalendar: teamTask.startDate,
+            statusSubJob: teamTask.status == "Complete",
+            startTimeGoal: teamTask.startTime,
+            lastTimeGoal: teamTask.lastTime,
+            isTeamTask: true,
+            status: teamTask.status,
+          ));
+        }
+      } catch (e) {
+        print('Error fetching team tasks: $e');
+        // ถ้าดึง teamTasks ไม่ได้ จะยังคงมี fetchedTasks จาก calendars
       }
 
+      // อัพเดท state ไม่ว่าจะดึงข้อมูลส่วนไหนสำเร็จหรือไม่
       setState(() {
         allTasks = fetchedTasks;
+        print('all task complete with ${fetchedTasks.length} tasks');
       });
     } catch (e) {
-      print('Error fetching tasks: $e');
+      print('Error in _fetchAllTasks: $e');
     }
   }
 
@@ -139,13 +160,15 @@ class ToDoListState extends State<ToDoList> {
   Future<void> _completeTask(String taskId, bool isTeamTask,
       {bool complete = true}) async {
     try {
+      final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+
       if (isTeamTask) {
         // สำหรับ team task ส่ง status เป็น "Complete" หรือ status เดิม
         final task = allTasks.firstWhere((t) => t.id == taskId);
         // final String newStatus = complete ? "Complete" : task.status;
         final String newStatus;
 
-        final String endpoint = 'http://10.0.2.2:8080/v1/teamSubJob/$taskId';
+        final String endpoint = '$apiUrl/v1/teamSubJob/$taskId';
         if (task.status == 'Complete') {
           newStatus = 'In progress';
         } else {
@@ -169,7 +192,8 @@ class ToDoListState extends State<ToDoList> {
         }
       } else {
         // สำหรับ calendar task (ใช้โค้ดเดิม)
-        final String endpoint = 'http://10.0.2.2:8080/v1/calendar/task/$taskId';
+        final String endpoint = '$apiUrl/v1/calendar/task/$taskId';
+        print('endpoint = $endpoint');
         final response = await _dio.get(endpoint);
 
         if (response.statusCode == 200) {

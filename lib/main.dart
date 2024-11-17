@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,16 +19,34 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   print(
       'Initial language code: ${prefs.getString('language_code')}'); // Debug print
+  await dotenv.load(fileName: "assets/env/api.env");
 
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => EnvProvider()..loadEnv()),
         ChangeNotifierProvider(create: (context) => ThemeNotifier()),
         ChangeNotifierProvider(create: (context) => LocaleProvider()),
       ],
       child: const MyApp(),
     ),
   );
+}
+
+class EnvProvider with ChangeNotifier {
+  String _apiUrl = '';
+
+  String get apiUrl => _apiUrl;
+
+  Future<void> loadEnv() async {
+    try {
+      _apiUrl = dotenv.env['API_URL'] ?? 'https://default.com/api';
+      print('Loaded API_URL: $_apiUrl');
+      notifyListeners();
+    } catch (e) {
+      print('Error in EnvProvider: $e');
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -117,7 +136,8 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _triggerServerCreation() async {
-    final url = 'http://10.0.2.2:8080/v1/calendar/subjob/user/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final url = '$apiUrl/v1/calendar/subjob/user/${widget.userId}';
 
     try {
       final response =

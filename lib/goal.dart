@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/maingoal.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/theme.dart';
 import 'taskdetail.dart';
 import 'model/mainjobmodel.dart';
@@ -51,7 +53,8 @@ class _GoalsPageState extends State<GoalsPage> {
 
   Future<List<MainJobModel>> fetchMainJobModels() async {
     final Dio dio = Dio();
-    final String url = 'http://10.0.2.2:8080/v1/job/user/${widget.userId}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/job/user/${widget.userId}';
     try {
       final response = await dio.get(url);
 

@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'components/workwithform.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -47,7 +49,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
 
   Future<void> fetchParticipatingUsers() async {
     for (String userId in widget.teamsubjobmodel.workByUserID) {
-      User? user = await fetchUserById(userId);
+      User? user = await fetchUserById(userId,context);
       if (user != null) {
         participatingUsers.add(user);
         workByUserIds.add(userId);
@@ -70,8 +72,8 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
 
   Future<List<Teamsubjobmodel>> fetchTeamSubTasks() async {
     final Dio dio = Dio();
-    final String url =
-        'http://10.0.2.2:8080/v1/teamSubJob/subjob/${widget.loginuserid}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/teamSubJob/subjob/${widget.loginuserid}';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;

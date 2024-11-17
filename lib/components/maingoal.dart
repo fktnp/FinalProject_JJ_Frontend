@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
+import '../main.dart';
 import '../model/theme.dart';
 
 class AddFromGoal {
@@ -58,8 +60,9 @@ class AddFromGoal {
 
     // Make the API call to save the task
     try {
+      var apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
       var response = await Dio().post(
-        'http://10.0.2.2:8080/v1/job',
+        '$apiUrl/v1/job',
         data: data,
       );
       print(response.data);

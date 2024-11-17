@@ -2,9 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/teamjobmodel.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'components/workwithform.dart';
 import 'coopsubdetail.dart';
 import 'l10n/app_localizations.dart';
+import 'main.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -49,7 +51,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
 
   Future<void> fetchParticipatingUsers() async {
     for (String userId in widget.teamjobmodel.workByUserID) {
-      User? user = await fetchUserById(userId);
+      User? user = await fetchUserById(userId, context);
       if (user != null) {
         participatingUsers.add(user);
         workByUserIds.add(userId);
@@ -73,8 +75,8 @@ class CoopDetailPageState extends State<CoopDetailPage> {
 
   Future<List<Teamsubjobmodel>> fetchTeamSubTasks() async {
     final Dio dio = Dio();
-    final String url =
-        'http://10.0.2.2:8080/v1/teamSubJob/subjob/${widget.loginuserid}';
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/teamSubJob/subjob/${widget.loginuserid}';
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> taskListJson = response.data;
@@ -451,6 +453,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                         onPressed: () {
                           // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
                           createSubCoop(
+                            context: context,
                             jobId: widget.teamjobmodel.jobId,
                             name: nameController.text,
                             status: 'In progress',
@@ -615,7 +618,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
 
   Future<void> fetchParticipatingUsers() async {
     for (String userId in widget.teamSubtask.workByUserID) {
-      User? user = await fetchUserById(userId);
+      User? user = await fetchUserById(userId, context);
       if (user != null) {
         participatingUsers.add(user);
       }

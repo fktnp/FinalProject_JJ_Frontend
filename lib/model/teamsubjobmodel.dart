@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 class Teamsubjobmodel {
   final String jobId;
@@ -61,6 +64,7 @@ class Teamsubjobmodel {
 }
 
 Future<void> createSubCoop({
+  required BuildContext context,
   required String jobId,
   required String name,
   required String status,
@@ -103,8 +107,9 @@ Future<void> createSubCoop({
       'link_submit_work': linkSubmitWork,
       'head_sub_job_id': headUserId,
     };
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
     var response = await Dio().post(
-      'http://10.0.2.2:8080/v1/teamSubJob',
+      '$apiUrl/v1/teamSubJob',
       data: data,
     );
     // การส่งข้อมูล POST

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/teamjobmodel.dart';
+import 'package:provider/provider.dart';
+import '../main.dart';
 import '../model/teamsubjobmodel.dart';
 import '../model/theme.dart';
 import '../model/usermodel.dart';
@@ -32,9 +34,9 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
     };
 
     try {
-      // ใช้ `put` แทน `post` เพื่ออัปเดตข้อมูล
+      final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
       final response = await Dio().put(
-        'http://10.0.2.2:8080/v1/teamJob/${widget.teamjobmodel.jobId}',
+        '$apiUrl/v1/teamJob/${widget.teamjobmodel.jobId}',
         data: data,
       );
 
@@ -102,7 +104,7 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
               final email = _emailController.text.trim();
               if (email.isNotEmpty &&
                   !widget.currentParticipants.contains(email)) {
-                final User? newUser = await fetchUserByEmail(email);
+                final User? newUser = await fetchUserByEmail(email,context);
                 if (newUser != null) {
                   onParticipantAdded(newUser.userId);
                 }
@@ -152,9 +154,10 @@ class _AddTeamSubParticipantPopupState
     };
 
     try {
+      final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
       // ใช้ `put` แทน `post` เพื่ออัปเดตข้อมูล
       final response = await Dio().put(
-        'http://10.0.2.2:8080/v1/teamSubJob/${widget.teamsubJobmodel.jobId}',
+        '$apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.jobId}',
         data: data,
       );
 
@@ -222,7 +225,7 @@ class _AddTeamSubParticipantPopupState
               final email = _emailController.text.trim();
               if (email.isNotEmpty &&
                   !widget.currentParticipants.contains(email)) {
-                final User? newUser = await fetchUserByEmail(email);
+                final User? newUser = await fetchUserByEmail(email,context);
                 if (newUser != null) {
                   onParticipantAdded(newUser.userId);
                 }
@@ -267,9 +270,10 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
     };
 
     try {
+      final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
       // ใช้ `put` แทน `post` เพื่ออัปเดตข้อมูล
       final response = await Dio().put(
-        'http://10.0.2.2:8080/v1/teamSubJob/${widget.teamsubJobmodel.subJobId}',
+        '$apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId}',
         data: data,
       );
 
@@ -277,7 +281,7 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
       if (response.statusCode == 200) {
         print('Update successful');
         print(
-            'With http://10.0.2.2:8080/v1/teamSubJob/${widget.teamsubJobmodel.subJobId} By $data');
+            'With $apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId} By $data');
       } else {
         print('Update failed with status: ${response.statusCode}');
       }
@@ -363,9 +367,10 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
     };
 
     try {
+      final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
       // ใช้ `put` แทน `post` เพื่ออัปเดตข้อมูล
       final response = await Dio().put(
-        'http://10.0.2.2:8080/v1/teamSubJob/${widget.teamsubJobmodel.subJobId}',
+        '$apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId}',
         data: data,
       );
 
@@ -373,7 +378,7 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
       if (response.statusCode == 200) {
         print('Update successful');
         print(
-            'With http://10.0.2.2:8080/v1/teamSubJob/${widget.teamsubJobmodel.subJobId} By $data');
+            'With $apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId} By $data');
       } else {
         print('Update failed with status: ${response.statusCode}');
       }
