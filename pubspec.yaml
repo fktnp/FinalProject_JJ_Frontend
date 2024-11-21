@@ -53,6 +53,7 @@ dependencies:
   
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
@@ -67,3 +68,8 @@ flutter:
     - assets/images/image3.png
     - assets/default_avatar.png
     - assets/env/api.env
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"

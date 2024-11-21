@@ -20,6 +20,7 @@ Future<void> createCoop({
   required TimeOfDay lastTime,
   required List<String> workByUserIds,
   required String headUserId,
+  required VoidCallback onTaskCreated, // เพิ่ม callback เพื่อรีเฟรชข้อมูล
 }) async {
   try {
     final Map<String, dynamic> data = {
@@ -53,9 +54,10 @@ Future<void> createCoop({
       '$apiUrl/v1/teamJob',
       data: data,
     );
-    // การส่งข้อมูล POST
     print(response.data);
-    // print(data);
+
+    // เรียก callback หลังสร้างงานสำเร็จ
+    onTaskCreated();
   } on DioException catch (e) {
     if (e.response != null) {
       print('Error status code: ${e.response?.statusCode}');
@@ -162,8 +164,6 @@ class _CoopPageState extends State<CoopPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Generate task widgets only once per task
-                    // Text(overflow: TextOverflow.ellipsis,teamTask.userId),
                     ...tasks.map((tasks) => TeamTaskBox(
                           teamtask: tasks,
                           userId: widget.userId,
@@ -353,20 +353,33 @@ class _CoopPageState extends State<CoopPage> {
                       padding: const EdgeInsets.all(20),
                     ),
                     onPressed: () {
-                      // เมื่อกดปุ่มบันทึก ส่งข้อมูลไปยัง API
-                      createCoop(
-                        context: context,
-                        name: nameController.text,
-                        status: 'In Progress',
-                        details: detailsController.text,
-                        startDate: startDate!,
-                        lastDate: lastDate!,
-                        startTime: startTime!,
-                        lastTime: lastTime!,
-                        workByUserIds: workByUserIds,
-                        headUserId: widget.userId,
-                      );
-                      Navigator.pop(context); // ปิด bottom sheet
+                      if (nameController.text.isNotEmpty &&
+                          startDate != null &&
+                          lastDate != null &&
+                          startTime != null &&
+                          lastTime != null) {
+                        createCoop(
+                          context: context,
+                          name: nameController.text,
+                          status: 'In Progress',
+                          details: detailsController.text,
+                          startDate: startDate!,
+                          lastDate: lastDate!,
+                          startTime: startTime!,
+                          lastTime: lastTime!,
+                          workByUserIds: workByUserIds,
+                          headUserId: widget.userId,
+                          onTaskCreated: () {
+                            // อัปเดต futureTasks และรีเฟรช UI
+                            setState(() {
+                              futureTasks = fetchTeamTasks();
+                            });
+                          },
+                        );
+                        Navigator.pop(context); // ปิด Bottom Sheet
+                      } else {
+                        print('กรุณากรอกข้อมูลให้ครบถ้วน');
+                      }
                     },
                     child: Icon(
                       Icons.add,

@@ -13,7 +13,8 @@ import 'model/theme.dart';
 
 class MyCalendarView extends StatefulWidget {
   final String userId;
-  const MyCalendarView({super.key, required this.userId});
+  final Pastel pastel;
+  const MyCalendarView({super.key, required this.userId, required this.pastel});
 
   @override
   CalendarViewState createState() => CalendarViewState();
@@ -29,10 +30,11 @@ class CalendarViewState extends State<MyCalendarView> {
   @override
   void initState() {
     super.initState();
+
     currentDateTime = DateTime.now();
     _calendarController = CalendarController();
     _calendarDataSource = AppointmentDataSource([]);
-    _initializationFuture = _generateSampleTasks();
+    _initializationFuture = _generateSampleTasks(widget.pastel);
   }
 
   Future<List<CalendarModel>> fetchCalendarData() async {
@@ -142,7 +144,7 @@ class CalendarViewState extends State<MyCalendarView> {
     }
   }
 
-  Future<void> _generateSampleTasks() async {
+  Future<void> _generateSampleTasks(Pastel pastel) async {
     try {
       // เปลี่ยนจาก fetchCalendarData() เป็น fetchAllSubJob()
       List<SubJobModel> subJobs = await fetchAllSubJob();
@@ -173,7 +175,7 @@ class CalendarViewState extends State<MyCalendarView> {
           recurrenceRule: _getRecurrenceRule(subJob),
           color: subJob.status == 'completed'
               ? const Color.fromARGB(255, 155, 255, 172)
-              : const Color.fromARGB(255, 190, 223, 255),
+              : pastel.pastel1 ?? Colors.grey, // กำหนด fallback color
           isAllDay: false,
         ));
       }

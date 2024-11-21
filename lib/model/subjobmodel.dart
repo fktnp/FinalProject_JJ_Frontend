@@ -1,6 +1,7 @@
 class SubJobModel {
   final String jobId;
   final String userId;
+  final String subJobID;
   final String name;
   final String status;
   final String details;
@@ -19,6 +20,7 @@ class SubJobModel {
   SubJobModel({
     required this.jobId,
     required this.userId,
+    required this.subJobID,
     required this.name,
     required this.status,
     required this.details,
@@ -42,6 +44,7 @@ class SubJobModel {
     return SubJobModel(
       jobId: json['JobID'],
       userId: json['UserID'],
+      subJobID: json['SubJobID'],
       name: json['Name'],
       status: json['Status'],
       details: json['Details'],

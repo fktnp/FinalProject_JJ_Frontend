@@ -12,9 +12,13 @@ import 'model/usermodel.dart';
 class CoopSubDetailPage extends StatefulWidget {
   final Teamsubjobmodel teamsubjobmodel;
   final String loginuserid;
+  final List<User> allParticipants;
 
   const CoopSubDetailPage(
-      {super.key, required this.teamsubjobmodel, required this.loginuserid});
+      {super.key,
+      required this.teamsubjobmodel,
+      required this.loginuserid,
+      required this.allParticipants});
   @override
   CoopSubDetailPageState createState() => CoopSubDetailPageState();
 }
@@ -49,7 +53,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
 
   Future<void> fetchParticipatingUsers() async {
     for (String userId in widget.teamsubjobmodel.workByUserID) {
-      User? user = await fetchUserById(userId,context);
+      User? user = await fetchUserById(userId, context);
       if (user != null) {
         participatingUsers.add(user);
         workByUserIds.add(userId);
@@ -66,7 +70,15 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
       } else {
         selectedUserIds.add(userId);
       }
-      workByUserIds = selectedUserIds;
+      workByUserIds = selectedUserIds; // Update the selected user list
+    });
+  }
+
+  void refreshPageData() {
+    setState(() {
+      futureTasks = fetchTeamSubTasks();
+      participatingUsers = [];
+      fetchParticipatingUsers();
     });
   }
 
@@ -80,8 +92,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
       return taskListJson
           .map((json) => Teamsubjobmodel.fromJson(json))
           .where((task) =>
-              task.jobId ==
-              widget.teamsubjobmodel.jobId) // กรองให้ตรงกับ jobId ของ Teamjob
+              task.jobId == widget.teamsubjobmodel.jobId) // กรอง jobId
           .toList();
     } else {
       throw Exception('Failed to load tasks');
@@ -120,13 +131,25 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                overflow: TextOverflow.ellipsis,
-                widget.teamsubjobmodel.name,
-                style: TextStyle(
-                    fontSize: screenWidth * 0.09,
-                    fontWeight: FontWeight.bold,
-                    color: pastel.pastelFont),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    overflow: TextOverflow.ellipsis,
+                    widget.teamsubjobmodel.name,
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.09,
+                        fontWeight: FontWeight.bold,
+                        color: pastel.pastelFont),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.block_sharp),
+                    onPressed: () {
+                      showDeleteConfirmationDialog(context, 'teamSubJob',
+                          widget.teamsubjobmodel.subJobId);
+                    },
+                  ),
+                ],
               ),
               SizedBox(height: screenHeight * 0.014),
               Text(
@@ -175,9 +198,12 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return AddTeamSubParticipantPopup(
+                          return SelectParticipantsWidget(
                             teamsubJobmodel: widget.teamsubjobmodel,
-                            currentParticipants: workByUserIdsToSend,
+                            participatingUsers: widget.allParticipants,
+                            selectedUserIds: selectedUserIds,
+                            onToggleUserSelection: toggleUserSelection,
+                            refreshPageData: refreshPageData,
                             pastel: pastel,
                           );
                         },

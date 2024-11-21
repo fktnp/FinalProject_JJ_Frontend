@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Pastel extends ThemeExtension<Pastel> {
   const Pastel({
@@ -60,51 +61,38 @@ class Pastel extends ThemeExtension<Pastel> {
       participant: Color.lerp(participant, other.participant, t),
     );
   }
-
-  // Optional
-  // @override
-  // String toString() => 'Pastel(brandColor: $pastel1, danger: $dark2)';
-}
-
-class Dark extends ThemeExtension<Dark> {
-  const Dark({
-    required this.dark1,
-    required this.dark2,
-  });
-
-  final Color? dark1;
-  final Color? dark2;
-
-  @override
-  Dark copyWith({Color? dark1, Color? dark2}) {
-    return Dark(
-      dark1: dark1 ?? this.dark1,
-      dark2: dark2 ?? this.dark2,
-    );
-  }
-
-  @override
-  Dark lerp(Dark? other, double t) {
-    if (other is! Dark) {
-      return this;
-    }
-    return Dark(
-      dark1: Color.lerp(dark1, other.dark1, t),
-      dark2: Color.lerp(dark2, other.dark2, t),
-    );
-  }
 }
 
 class ThemeNotifier with ChangeNotifier {
-  bool isLightTheme = true;
+  bool _isLightTheme = true;
+  static const String _themePreferenceKey = 'is_light_theme';
 
-  void toggleTheme() {
-    isLightTheme = !isLightTheme;
+  ThemeNotifier() {
+    // Load the saved theme when the notifier is created
+    _loadThemeFromPrefs();
+  }
+
+  bool get isLightTheme => _isLightTheme;
+
+  Future<void> _loadThemeFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Default to light theme if no preference is saved
+    _isLightTheme = prefs.getBool(_themePreferenceKey) ?? true;
+    notifyListeners();
+  }
+
+  Future<void> toggleTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isLightTheme = !_isLightTheme;
+
+    // Save the new theme preference
+    await prefs.setBool(_themePreferenceKey, _isLightTheme);
+
     notifyListeners();
   }
 
   ThemeData get themeData {
-    return isLightTheme ? _lightTheme : _darkTheme;
+    return _isLightTheme ? _lightTheme : _darkTheme;
   }
 
   static final ThemeData _lightTheme = ThemeData.light().copyWith(
@@ -118,10 +106,6 @@ class ThemeNotifier with ChangeNotifier {
         pastelIcon: Colors.black,
         pastelBlock: Color.fromARGB(255, 190, 223, 255),
         participant: Color.fromARGB(255, 41, 41, 41),
-      ),
-      const Dark(
-        dark1: Color(0xFFE53935),
-        dark2: Color.fromARGB(255, 223, 97, 95),
       ),
     ],
   );
@@ -137,10 +121,6 @@ class ThemeNotifier with ChangeNotifier {
         pastelIcon: Colors.white,
         pastelBlock: Color.fromARGB(255, 90, 90, 90),
         participant: Color.fromARGB(255, 26, 26, 26),
-      ),
-      const Dark(
-        dark1: Color(0xFFEF9A9A),
-        dark2: Color.fromARGB(255, 243, 199, 199),
       ),
     ],
   );

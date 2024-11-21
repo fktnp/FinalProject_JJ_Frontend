@@ -104,7 +104,7 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
               final email = _emailController.text.trim();
               if (email.isNotEmpty &&
                   !widget.currentParticipants.contains(email)) {
-                final User? newUser = await fetchUserByEmail(email,context);
+                final User? newUser = await fetchUserByEmail(email, context);
                 if (newUser != null) {
                   onParticipantAdded(newUser.userId);
                 }
@@ -125,45 +125,60 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
   }
 }
 
-class AddTeamSubParticipantPopup extends StatefulWidget {
+class SelectParticipantsWidget extends StatefulWidget {
   final Teamsubjobmodel teamsubJobmodel;
-  final List<String> currentParticipants;
+  final List<User> participatingUsers;
+  final List<String> selectedUserIds;
+  final Function(String) onToggleUserSelection;
   final Pastel pastel;
+  final VoidCallback? refreshPageData;
 
-  const AddTeamSubParticipantPopup({
-    super.key,
-    required this.currentParticipants,
+  const SelectParticipantsWidget({
+    Key? key,
+    required this.participatingUsers,
+    required this.selectedUserIds,
+    required this.onToggleUserSelection,
     required this.pastel,
     required this.teamsubJobmodel,
-  });
+    required this.refreshPageData,
+  }) : super(key: key);
 
   @override
-  _AddTeamSubParticipantPopupState createState() =>
-      _AddTeamSubParticipantPopupState();
+  _SelectParticipantsWidgetState createState() =>
+      _SelectParticipantsWidgetState();
 }
 
-class _AddTeamSubParticipantPopupState
-    extends State<AddTeamSubParticipantPopup> {
-  final _emailController = TextEditingController();
-  List<String> workByUserIds = [];
+class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
+  late List<String> selectedUserIds; // เก็บข้อมูลใน State
 
-  Future<void> _updateParticipantsInTeamSubJob(String userId) async {
+  @override
+  void initState() {
+    super.initState();
+    selectedUserIds = List.from(widget.selectedUserIds); // คัดลอกค่าเริ่มต้น
+  }
+
+  Future<void> _updateParticipantsInTeamSubJob() async {
+    // สร้าง JSON ในรูปแบบที่ต้องการ
     final data = {
-      "work_by_user_id":
-          widget.currentParticipants, // สมมติว่าส่งรายชื่อทั้งหมดไปอัปเดต
+      "work_by_user_id": selectedUserIds.map((id) => id.toString()).toList(),
     };
+    print(data);
 
     try {
       final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
-      // ใช้ `put` แทน `post` เพื่ออัปเดตข้อมูล
+      final url = '$apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId}';
+
       final response = await Dio().put(
-        '$apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.jobId}',
+        url,
         data: data,
+        options: Options(
+          headers: {'Content-Type': 'application/json'}, // ระบุว่าเป็น JSON
+        ),
       );
 
-      // เช็คว่าอัปเดตสำเร็จหรือไม่
       if (response.statusCode == 200) {
         print('Update successful');
+        print(url);
       } else {
         print('Update failed with status: ${response.statusCode}');
       }
@@ -177,72 +192,75 @@ class _AddTeamSubParticipantPopupState
     }
   }
 
-  void onParticipantAdded(String userId) async {
-    // เพิ่มผู้ใช้งานใน currentParticipants
+  void toggleUserSelection(String userId) {
     setState(() {
-      widget.currentParticipants.add(userId);
+      if (selectedUserIds.contains(userId)) {
+        selectedUserIds.remove(userId);
+      } else {
+        selectedUserIds.add(userId);
+      }
     });
-
-    // อัปเดตไปยัง server
-    await _updateParticipantsInTeamSubJob(userId);
-
-    // ปิด popup และรีเฟรชข้อมูลบนหน้า
-    if (mounted) {
-      Navigator.pop(context, true); // ปิด popup
-
-      // หลังจากปิดหน้า dialog, สามารถรีเฟรชหน้าหลักด้วย setState
-      setState(() {
-        // รีเซ็ตหน้าหลักหรือโหลดข้อมูลใหม่ถ้าต้องการ
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        overflow: TextOverflow.ellipsis,
-        'Add a Participant',
-        style: TextStyle(
-          color: widget.pastel.pastelFont,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              hintText: 'Enter participant email',
-              hintStyle: TextStyle(color: widget.pastel.pastelFont),
-            ),
-            style: TextStyle(color: widget.pastel.pastelFont),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () async {
-              final email = _emailController.text.trim();
-              if (email.isNotEmpty &&
-                  !widget.currentParticipants.contains(email)) {
-                final User? newUser = await fetchUserByEmail(email,context);
-                if (newUser != null) {
-                  onParticipantAdded(newUser.userId);
-                }
-              }
-            },
-            child:
-                const Text(overflow: TextOverflow.ellipsis, 'Add Participant'),
-          ),
-        ],
-      ),
-    );
-  }
+    final screenWidth = MediaQuery.of(context).size.width;
 
-  @override
-  void dispose() {
-    _emailController.dispose(); // ปิดตัวควบคุม TextController ที่ไม่ใช้
-    super.dispose();
+    return Row(
+      children: [
+        Row(
+          children: widget.participatingUsers.map((user) {
+            final isSelected = selectedUserIds.contains(user.userId);
+            return GestureDetector(
+              onTap: () {
+                toggleUserSelection(user.userId);
+              },
+              child: Container(
+                width: screenWidth * 0.09,
+                height: screenWidth * 0.09,
+                margin: EdgeInsets.only(left: screenWidth * 0.03),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? widget.pastel.pastelFont
+                      : widget.pastel.pastelProgress,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    user.name.isNotEmpty ? user.name[0].toUpperCase() : '',
+                    style: TextStyle(
+                      color: isSelected
+                          ? widget.pastel.pastelProgress
+                          : widget.pastel.pastelFont,
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth * 0.06,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            // อัปเดตข้อมูลในระบบ
+            await _updateParticipantsInTeamSubJob();
+
+            // ปิด popup
+            if (context.mounted) Navigator.pop(context);
+
+            // เรียกการโหลดข้อมูลใหม่
+            widget.refreshPageData;
+          },
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            backgroundColor: widget.pastel.pastelProgress,
+            foregroundColor: widget.pastel.participant,
+          ),
+          child: Icon(Icons.add, color: widget.pastel.participant),
+        ),
+      ],
+    );
   }
 }
 
@@ -437,5 +455,60 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
   void dispose() {
     workLink.dispose(); // ปิดตัวควบคุม TextController ที่ไม่ใช้
     super.dispose();
+  }
+}
+
+Future<void> showDeleteConfirmationDialog(
+    BuildContext context, String core, String jobId) async {
+  print(core);
+  print(jobId);
+  bool? confirmDelete = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text('Are you sure you want to delete this job?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (confirmDelete == true) {
+    await deleteThis(context, core, jobId);
+  }
+}
+
+Future<void> deleteThis(BuildContext context, String core, String id) async {
+  try {
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final url = '$apiUrl/v1/$core/$id';
+    print(url);
+    final response = await Dio().delete(url);
+
+    if (response.statusCode == 200) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Deletion successful')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Deletion failed with status: ${response.statusCode}')),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.message}')),
+    );
   }
 }

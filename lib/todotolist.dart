@@ -170,7 +170,7 @@ class ToDoListState extends State<ToDoList> {
 
         final String endpoint = '$apiUrl/v1/teamSubJob/$taskId';
         if (task.status == 'Complete') {
-          newStatus = 'In progress';
+          newStatus = 'Incomplete';
         } else {
           newStatus = 'Complete';
         }
@@ -341,7 +341,7 @@ class ShowListTask extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: pastel.pastel1,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Dismissible(
@@ -392,7 +392,7 @@ class ShowListTask extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Icon(
                       task.statusSubJob ? Icons.cancel : Icons.check,
-                      color: Colors.white,
+                      color: pastel.pastel1,
                     ),
                   ),
                   child: Padding(
@@ -417,17 +417,17 @@ class ShowListTask extends StatelessWidget {
                                             ? TextDecoration.lineThrough
                                             : null,
                                         color: task.isCompleted
-                                            ? Colors.grey
-                                            : Colors.black,
+                                            ? pastel.pastelFont2
+                                            : pastel.pastelFont,
                                       ),
                                     ),
                                   ),
                                   if (task.isCompleted)
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8),
                                       child: Icon(
                                         Icons.check_circle,
-                                        color: Colors.green,
+                                        color: pastel.pastelFont2,
                                         size: 20,
                                       ),
                                     ),
@@ -437,8 +437,8 @@ class ShowListTask extends StatelessWidget {
                             Icon(
                               Icons.hourglass_empty,
                               color: task.isCompleted
-                                  ? Colors.grey
-                                  : Colors.black54,
+                                  ? pastel.pastelFont2
+                                  : pastel.pastelFont,
                               size: 20,
                             ),
                           ],
@@ -451,8 +451,8 @@ class ShowListTask extends StatelessWidget {
                               task.details,
                               style: TextStyle(
                                 color: task.isCompleted
-                                    ? Colors.grey
-                                    : Colors.black54,
+                                    ? pastel.pastelFont2
+                                    : pastel.pastelFont,
                                 fontSize: screenWidth * 0.035,
                               ),
                             ),
@@ -464,8 +464,8 @@ class ShowListTask extends StatelessWidget {
                             'Start: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} : ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
-                                  ? Colors.grey
-                                  : Colors.black54,
+                                  ? pastel.pastelFont2
+                                  : pastel.pastelFont,
                               fontSize: screenWidth * 0.03,
                             ),
                           ),
@@ -477,8 +477,8 @@ class ShowListTask extends StatelessWidget {
                             'End: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} : ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
-                                  ? Colors.grey
-                                  : Colors.black54,
+                                  ? pastel.pastelFont2
+                                  : pastel.pastelFont,
                               fontSize: screenWidth * 0.03,
                             ),
                           ),

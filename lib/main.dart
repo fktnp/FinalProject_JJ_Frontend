@@ -128,7 +128,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
-  int _currentIndex = 1;
+  int _currentIndex = 2;
   @override
   void initState() {
     super.initState();
@@ -161,7 +161,7 @@ class MyHomePageState extends State<MyHomePage> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
 
     return Scaffold(
-      body: _getPage(_currentIndex),
+      body: _getPage(_currentIndex, pastel),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: screenHeight * 0.08,
@@ -279,12 +279,15 @@ class MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _getPage(int index) {
+  Widget _getPage(int index, Pastel pastel) {
     switch (index) {
       case 0:
         return SettingsPage(userId: widget.userId);
       case 1:
-        return MyCalendarView(userId: widget.userId);
+        return MyCalendarView(
+          userId: widget.userId,
+          pastel: pastel,
+        );
       case 2:
         return ToDoList(userId: widget.userId);
       case 3:
@@ -292,7 +295,7 @@ class MyHomePageState extends State<MyHomePage> {
       case 4:
         return CoopPage(userId: widget.userId);
       default:
-        return MyCalendarView(userId: widget.userId);
+        return ToDoList(userId: widget.userId);
     }
   }
 }

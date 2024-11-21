@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'components/workwithform.dart';
 import 'main.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
@@ -65,23 +66,40 @@ class TaskDetailPageState extends State<TaskDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // แสดงชื่อของเป้าหมาย
-              Text(
-                overflow: TextOverflow.ellipsis,
-                widget.mainJobModel.name,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: pastel.pastelFont),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        overflow: TextOverflow.ellipsis,
+                        widget.mainJobModel.name,
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: pastel.pastelFont),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        overflow: TextOverflow.ellipsis,
+                        'Date : ${widget.mainJobModel.startTimeGoal.day.toString()}/${widget.mainJobModel.startTimeGoal.month.toString()}/${widget.mainJobModel.startTimeGoal.year.toString()} - ${widget.mainJobModel.lastTimeGoal.day.toString()}/${widget.mainJobModel.lastTimeGoal.month.toString()}/${widget.mainJobModel.lastTimeGoal.year.toString()}',
+                        style:
+                            TextStyle(fontSize: 16, color: pastel.pastelFont),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.block_sharp),
+                    onPressed: () {
+                      showDeleteConfirmationDialog(
+                          context, 'job', widget.mainJobModel.jobId,);
+                      
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                overflow: TextOverflow.ellipsis,
-                'Date : ${widget.mainJobModel.startTimeGoal.day.toString()}/${widget.mainJobModel.startTimeGoal.month.toString()}/${widget.mainJobModel.startTimeGoal.year.toString()} - ${widget.mainJobModel.lastTimeGoal.day.toString()}/${widget.mainJobModel.lastTimeGoal.month.toString()}/${widget.mainJobModel.lastTimeGoal.year.toString()}',
-                style: TextStyle(fontSize: 16, color: pastel.pastelFont),
-              ),
-              const SizedBox(height: 10),
-
               Expanded(
                 child: Stack(
                   children: [
@@ -206,16 +224,28 @@ class SubTaskBox extends StatelessWidget {
                 ),
               ],
             ),
-            CircularPercentIndicator(
-              radius: screenWidth * 0.07,
-              lineWidth: screenWidth * 0.014,
-              percent: subtask.percentProgress / 100,
-              center: Text(
-                  overflow: TextOverflow.ellipsis,
-                  '${subtask.percentProgress.toString()}%'),
-              progressColor: pastel.pastelProgress,
-              backgroundColor: const Color.fromARGB(82, 0, 0, 0),
-            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CircularPercentIndicator(
+                  radius: screenWidth * 0.07,
+                  lineWidth: screenWidth * 0.014,
+                  percent: subtask.percentProgress / 100,
+                  center: Text(
+                      overflow: TextOverflow.ellipsis,
+                      '${subtask.percentProgress.toString()}%'),
+                  progressColor: pastel.pastelProgress,
+                  backgroundColor: const Color.fromARGB(82, 0, 0, 0),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.block_sharp),
+                  onPressed: () {
+                    showDeleteConfirmationDialog(
+                        context, 'subjob', subtask.subJobID);
+                  },
+                ),
+              ],
+            )
           ],
         ));
   }
