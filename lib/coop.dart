@@ -549,8 +549,8 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
             context,
             MaterialPageRoute(
               builder: (context) => CoopDetailPage(
-                teamjobmodel: widget.teamtask, // ส่งข้อมูล task ที่เลือกไป
-                loginuserid: widget.userId, // ส่ง userId ไปด้วย
+                teamjobmodel: widget.teamtask,
+                loginuserid: widget.userId,
               ),
             ),
           );

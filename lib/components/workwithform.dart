@@ -131,17 +131,17 @@ class SelectParticipantsWidget extends StatefulWidget {
   final List<String> selectedUserIds;
   final Function(String) onToggleUserSelection;
   final Pastel pastel;
-  final VoidCallback? refreshPageData;
+  final BuildContext context;
 
   const SelectParticipantsWidget({
-    Key? key,
+    super.key,
     required this.participatingUsers,
     required this.selectedUserIds,
     required this.onToggleUserSelection,
     required this.pastel,
     required this.teamsubJobmodel,
-    required this.refreshPageData,
-  }) : super(key: key);
+    required this.context,
+  });
 
   @override
   _SelectParticipantsWidgetState createState() =>
@@ -196,8 +196,12 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
     setState(() {
       if (selectedUserIds.contains(userId)) {
         selectedUserIds.remove(userId);
+        print("Remove $userId");
+        print(selectedUserIds);
       } else {
         selectedUserIds.add(userId);
+        print("Add $userId");
+        print(selectedUserIds);
       }
     });
   }
@@ -205,7 +209,7 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Row(
       children: [
         Row(
@@ -220,9 +224,7 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
                 height: screenWidth * 0.09,
                 margin: EdgeInsets.only(left: screenWidth * 0.03),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? widget.pastel.pastelFont
-                      : widget.pastel.pastelProgress,
+                  color: isSelected ? pastel.pastelFont : pastel.pastelProgress,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -230,8 +232,8 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
                     user.name.isNotEmpty ? user.name[0].toUpperCase() : '',
                     style: TextStyle(
                       color: isSelected
-                          ? widget.pastel.pastelProgress
-                          : widget.pastel.pastelFont,
+                          ? pastel.pastelProgress
+                          : pastel.pastelFont,
                       fontWeight: FontWeight.bold,
                       fontSize: screenWidth * 0.06,
                     ),
@@ -248,9 +250,6 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
 
             // ปิด popup
             if (context.mounted) Navigator.pop(context);
-
-            // เรียกการโหลดข้อมูลใหม่
-            widget.refreshPageData;
           },
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
@@ -496,9 +495,69 @@ Future<void> deleteThis(BuildContext context, String core, String id) async {
 
     if (response.statusCode == 200) {
       Navigator.of(context).pop();
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Deletion successful')),
+        SnackBar(
+            content:
+                Text('Deletion failed with status: ${response.statusCode}')),
       );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.message}')),
+    );
+  }
+}
+
+Future<void> showDeleteConfirmationAndReDialog(
+    BuildContext context,
+    String core,
+    String jobId,
+    State? stateName, // Make it nullable and typed as State
+    {VoidCallback? onSubmitSuccess}) async {
+  bool? confirmDelete = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text('Are you sure you want to delete this job?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (confirmDelete == true) {
+    await deleteThisAndRe(context, core, jobId, () {
+      // If a state is provided, refresh it
+      if (context.mounted && stateName != null) {
+        stateName.setState(() {});
+      }
+
+      // Call the original onSubmitSuccess callback if provided
+      onSubmitSuccess?.call();
+    });
+  }
+}
+
+Future<void> deleteThisAndRe(BuildContext context, String core, String id,
+    Function onSubmitSuccess) async {
+  try {
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final url = '$apiUrl/v1/$core/$id';
+    print(url);
+    final response = await Dio().delete(url);
+
+    if (response.statusCode == 200) {
+      onSubmitSuccess();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -271,7 +271,15 @@ class CoopDetailPageState extends State<CoopDetailPage> {
             widget.loginuserid == widget.teamjobmodel.headUserID
                 ? FloatingActionButton(
                     onPressed: () {
-                      _showAddGoalCoopBottomSheet(context, pastel);
+                      _showAddGoalCoopBottomSheet(
+                        context,
+                        pastel,
+                        () {
+                          setState(() {
+                            fetchTeamSubTasks(); // หรือฟังก์ชันที่ใช้โหลดข้อมูลใหม่
+                          });
+                        },
+                      );
                     },
                     backgroundColor: pastel.pastelFont,
                     child: Icon(Icons.add, color: pastel.pastel1),
@@ -279,7 +287,8 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                 : const SizedBox());
   }
 
-  void _showAddGoalCoopBottomSheet(BuildContext context, Pastel pastel) {
+  void _showAddGoalCoopBottomSheet(
+      BuildContext context, Pastel pastel, Function onSubmitSuccess) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;

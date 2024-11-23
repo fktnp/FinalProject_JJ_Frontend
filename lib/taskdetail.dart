@@ -94,8 +94,10 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                     icon: const Icon(Icons.block_sharp),
                     onPressed: () {
                       showDeleteConfirmationDialog(
-                          context, 'job', widget.mainJobModel.jobId,);
-                      
+                        context,
+                        'job',
+                        widget.mainJobModel.jobId,
+                      );
                     },
                   ),
                 ],
@@ -134,6 +136,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                                     // Generate task widgets only once per task
                                     ...subtask.map((subtask) => SubTaskBox(
                                           subtask: subtask,
+                                          stateNah: this,
                                         )),
                                   ],
                                 ),
@@ -177,10 +180,12 @@ class TaskDetailPageState extends State<TaskDetailPage> {
 
 class SubTaskBox extends StatelessWidget {
   final SubJobModel subtask;
+  final State stateNah;
 
   const SubTaskBox({
     super.key,
     required this.subtask,
+    required this.stateNah,
   });
 
   @override
@@ -240,8 +245,12 @@ class SubTaskBox extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.block_sharp),
                   onPressed: () {
-                    showDeleteConfirmationDialog(
-                        context, 'subjob', subtask.subJobID);
+                    showDeleteConfirmationAndReDialog(
+                      context,
+                      'subjob',
+                      subtask.subJobID,
+                      stateNah, // Pass the current state
+                    );
                   },
                 ),
               ],

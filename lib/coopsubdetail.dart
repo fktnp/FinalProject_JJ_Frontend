@@ -48,10 +48,10 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
     futureTasks =
         fetchTeamSubTasks(); // เรียกใช้ฟังก์ชันนี้ครั้งเดียวใน initState
     participatingUsers = [];
-    fetchParticipatingUsers();
+    fetchParticipatingUsers(participatingUsers);
   }
 
-  Future<void> fetchParticipatingUsers() async {
+  Future<void> fetchParticipatingUsers(List<User> participatingUsers) async {
     for (String userId in widget.teamsubjobmodel.workByUserID) {
       User? user = await fetchUserById(userId, context);
       if (user != null) {
@@ -71,14 +71,6 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
         selectedUserIds.add(userId);
       }
       workByUserIds = selectedUserIds; // Update the selected user list
-    });
-  }
-
-  void refreshPageData() {
-    setState(() {
-      futureTasks = fetchTeamSubTasks();
-      participatingUsers = [];
-      fetchParticipatingUsers();
     });
   }
 
@@ -203,8 +195,8 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                             participatingUsers: widget.allParticipants,
                             selectedUserIds: selectedUserIds,
                             onToggleUserSelection: toggleUserSelection,
-                            refreshPageData: refreshPageData,
                             pastel: pastel,
+                            context: context,
                           );
                         },
                       );
