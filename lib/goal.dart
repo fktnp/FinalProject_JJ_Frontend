@@ -119,7 +119,6 @@ class _GoalsPageState extends State<GoalsPage> {
                   return const Center(child: CircularProgressIndicator());
                 } else {
                   final tasks = snapshot.data ?? [];
-                  final filteredTasks = filterTasks(tasks, selectedGoal);
                   return selectedGoal == null
                       ? ListView.builder(
                           itemCount: goals.length,
@@ -220,8 +219,6 @@ class _GoalsPageState extends State<GoalsPage> {
                       : GoalSection(
                           goal: selectedGoal!,
                           loginuserid: widget.userId,
-                          tasks: tasks,
-                          filteredTasks: filteredTasks,
                           onTaskAdded: _onTaskAdded,
                         );
                 }
@@ -307,8 +304,6 @@ class GoalTask extends StatelessWidget {
 class GoalSection extends StatefulWidget {
   final String goal;
   final String loginuserid;
-  final List<MainJobModel> tasks;
-  final List<MainJobModel> filteredTasks;
   final bool conditionToShowButton;
   final VoidCallback onTaskAdded;
 
@@ -316,8 +311,6 @@ class GoalSection extends StatefulWidget {
     super.key,
     required this.goal,
     required this.loginuserid,
-    required this.tasks,
-    required this.filteredTasks,
     required this.onTaskAdded,
     this.conditionToShowButton = true,
   });
@@ -327,6 +320,58 @@ class GoalSection extends StatefulWidget {
 }
 
 class _GoalSectionState extends State<GoalSection> {
+  List<MainJobModel> tasks = [];
+  bool isLoading = true; // สำหรับแสดงสถานะการโหลดข้อมูล
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTasks(); // โหลดข้อมูลเมื่อเริ่มต้น
+  }
+
+  Future<void> _refreshTasks() async {
+    setState(() {
+      isLoading = true; // แสดงสถานะการโหลด
+    });
+
+    try {
+      final newTasks = await fetchMainJobModels();
+      setState(() {
+        tasks = filterTasks(newTasks, widget.goal);
+      });
+    } catch (e) {
+      print('Error refreshing tasks: $e');
+    } finally {
+      setState(() {
+        isLoading = false; // ซ่อนสถานะการโหลด
+      });
+    }
+  }
+
+  Future<List<MainJobModel>> fetchMainJobModels() async {
+    final Dio dio = Dio();
+    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
+    final String url = '$apiUrl/v1/job/user/${widget.loginuserid}';
+    try {
+      final response = await dio.get(url);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> taskListJson = response.data;
+        return taskListJson.map((json) => MainJobModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load tasks: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching tasks: $e');
+      rethrow;
+    }
+  }
+
+  List<MainJobModel> filterTasks(
+      List<MainJobModel> tasks, String selectedGoal) {
+    return tasks.where((task) => task.category == selectedGoal).toList();
+  }
+
   String _getGoalTranslation(String goal) {
     switch (goal) {
       case 'Health':
@@ -344,7 +389,7 @@ class _GoalSectionState extends State<GoalSection> {
       case 'Friendship':
         return AppLocalizations.of(context).translate('friendship');
       default:
-        return goal; // คืนค่าดั้งเดิมถ้าไม่มีการแปล
+        return goal;
     }
   }
 
@@ -353,7 +398,6 @@ class _GoalSectionState extends State<GoalSection> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     final goalTranslation = _getGoalTranslation(widget.goal);
     final mediaQuery = MediaQuery.of(context);
-    // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
 
     return Stack(
@@ -381,9 +425,15 @@ class _GoalSectionState extends State<GoalSection> {
                 ),
               ),
             ),
-            if (widget.filteredTasks.isNotEmpty)
-              ...widget.filteredTasks.map((task) =>
-                  GoalTask(task: task, loginuserid: widget.loginuserid)),
+            if (isLoading)
+              const CircularProgressIndicator(), // แสดง Loading Indicator
+            if (!isLoading && tasks.isNotEmpty)
+              ...tasks.map((task) => GoalTask(
+                    task: task,
+                    loginuserid: widget.loginuserid,
+                  )),
+            if (!isLoading && tasks.isEmpty)
+              const Text('No tasks available for this goal.'), // กรณีไม่มี task
           ],
         ),
         if (widget.conditionToShowButton)
@@ -396,8 +446,8 @@ class _GoalSectionState extends State<GoalSection> {
                   context: context,
                   goal: widget.goal,
                   loginuserid: widget.loginuserid,
-                ).show(() {
-                  widget.onTaskAdded();
+                ).show(() async {
+                  await _refreshTasks(); // โหลดข้อมูลใหม่เมื่อเพิ่มสำเร็จ
                 });
               },
               backgroundColor: pastel.pastelFont,
