@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'components/workwithform.dart';
 import 'l10n/app_localizations.dart';
 import 'main.dart';
+import 'model/teamjobmodel.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'model/usermodel.dart';
@@ -13,12 +14,16 @@ class CoopSubDetailPage extends StatefulWidget {
   final Teamsubjobmodel teamsubjobmodel;
   final String loginuserid;
   final List<User> allParticipants;
+  final Teamjobmodel teamjobmodel;
 
-  const CoopSubDetailPage(
-      {super.key,
-      required this.teamsubjobmodel,
-      required this.loginuserid,
-      required this.allParticipants});
+  const CoopSubDetailPage({
+    super.key,
+    required this.teamsubjobmodel,
+    required this.loginuserid,
+    required this.allParticipants,
+    required this.teamjobmodel,
+  });
+
   @override
   CoopSubDetailPageState createState() => CoopSubDetailPageState();
 }
@@ -41,6 +46,7 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
   TimeOfDay? lastTime; // Changed to nullable
   late Future<List<Teamsubjobmodel>> futureTasks;
   late String headSubJobId;
+  late Teamsubjobmodel teamsubjobmodel;
 
   @override
   void initState() {
@@ -137,8 +143,13 @@ class CoopSubDetailPageState extends State<CoopSubDetailPage> {
                   IconButton(
                     icon: const Icon(Icons.block_sharp),
                     onPressed: () {
-                      showDeleteConfirmationDialog(context, 'teamSubJob',
-                          widget.teamsubjobmodel.subJobId);
+                      showDeleteConfirmationDialogCoop(
+                          context,
+                          'teamSubJob',
+                          widget.teamsubjobmodel.subJobId,
+                          'coopDetail',
+                          widget.loginuserid,
+                          widget.teamjobmodel);
                     },
                   ),
                 ],

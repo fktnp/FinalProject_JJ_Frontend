@@ -86,6 +86,7 @@ class _GoalsPageState extends State<GoalsPage> {
     final screenWidth = mediaQuery.size.width;
     // final screenHeight = mediaQuery.size.height;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
+    print(selectedGoal);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: pastel.pastel1,
@@ -96,7 +97,6 @@ class _GoalsPageState extends State<GoalsPage> {
           style:
               TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
         ),
-        // แสดงปุ่มย้อนกลับเสมอเมื่อ selectedGoal ไม่เป็น null
         leading: selectedGoal != null
             ? IconButton(
                 icon: Icon(Icons.arrow_back, color: pastel.pastelFont),

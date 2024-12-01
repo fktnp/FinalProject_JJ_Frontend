@@ -94,10 +94,12 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                     icon: const Icon(Icons.block_sharp),
                     onPressed: () {
                       showDeleteConfirmationDialog(
-                        context,
-                        'job',
-                        widget.mainJobModel.jobId,
-                      );
+                          context,
+                          'job',
+                          widget.mainJobModel.jobId,
+                          'goal',
+                          widget.loginuserid,
+                          );
                     },
                   ),
                 ],

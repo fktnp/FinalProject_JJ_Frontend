@@ -42,7 +42,7 @@ Map<String, String> enTranslations = {
   'coop': 'Co-op',
   'participants': 'Participants',
   'select_participants': 'Select Participants',
-  'work_link': 'Link for work area',
+  'work_link': 'Link for work',
   'submit_link': 'Link for submit work',
   'change_language': 'Change language',
   'dark_mode': 'Dark Mode',

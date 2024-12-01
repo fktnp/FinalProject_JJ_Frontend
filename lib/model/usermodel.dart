@@ -49,7 +49,7 @@ Future<User?> fetchUserByEmail(
         User user = User.fromJson(item);
         print('got this user : ${user.name}');
         if (user.email == email) {
-          print(user.email);
+          print("${user.email} ${user.userId}");
           return user; // คืนค่า User ที่ตรงกัน
         }
       }

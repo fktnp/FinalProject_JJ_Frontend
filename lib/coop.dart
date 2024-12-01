@@ -138,6 +138,7 @@ class _CoopPageState extends State<CoopPage> {
     return Scaffold(
       backgroundColor: pastel.pastel2,
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: pastel.pastel1,
         title: Align(
           alignment: Alignment.center,
@@ -158,20 +159,22 @@ class _CoopPageState extends State<CoopPage> {
           } else {
             final tasks = snapshot.data ?? [];
             return Padding(
-              padding: EdgeInsets.fromLTRB(screenWidth * 0.05,
-                  screenHeight * 0.03, screenWidth * 0.05, 0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...tasks.map((tasks) => TeamTaskBox(
-                          teamtask: tasks,
-                          userId: widget.userId,
-                        )),
-                  ],
-                ),
-              ),
-            );
+                padding: EdgeInsets.fromLTRB(
+                    screenWidth * 0.05,
+                    screenHeight * 0.03,
+                    screenWidth * 0.05,
+                    screenWidth * 0.05),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...tasks.map((tasks) => TeamTaskBox(
+                            teamtask: tasks,
+                            userId: widget.userId,
+                          )),
+                    ],
+                  ),
+                ));
           }
         },
       ),
@@ -544,19 +547,18 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return GestureDetector(
         onTap: () {
-          // เมื่อ TaskBox ถูกกด จะเปลี่ยนไปที่หน้า CoopDetailPage พร้อมส่งข้อมูล
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => CoopDetailPage(
-                teamjobmodel: widget.teamtask,
+                jobId: widget.teamtask.jobId,
                 loginuserid: widget.userId,
               ),
             ),
           );
         },
         child: Container(
-          width: screenWidth * 0.98,
+          width: screenWidth * 0.95,
           height: screenHeight * 0.13,
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
           margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
@@ -577,6 +579,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                   Text(
                     overflow: TextOverflow.ellipsis,
                     widget.teamtask.name,
+                    maxLines: 1,
                     style: TextStyle(
                         fontSize: screenWidth * 0.065,
                         color: pastel.pastelFont),

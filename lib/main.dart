@@ -93,7 +93,10 @@ class MyApp extends StatelessWidget {
                           return const Center(
                               child: CircularProgressIndicator());
                         } else {
-                          return MyHomePage(userId: userIdSnapshot.data ?? '');
+                          return MyHomePage(
+                            userId: userIdSnapshot.data ?? '',
+                            index: 2,
+                          );
                         }
                       },
                     );
@@ -117,10 +120,12 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final String userId;
+  final int index;
 
   const MyHomePage({
     super.key,
     required this.userId,
+    required this.index,
   });
 
   @override
@@ -128,10 +133,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
-  int _currentIndex = 2;
+  late int _currentIndex;
   @override
   void initState() {
     super.initState();
+    print(widget.index);
+    _currentIndex = widget.index;
     _triggerServerCreation(); // เรียกใช้ฟังก์ชันเมื่อแอพเริ่มทำงาน
   }
 
