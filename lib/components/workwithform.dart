@@ -75,14 +75,7 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        overflow: TextOverflow.ellipsis,
-        'Add a Participant',
-        style: TextStyle(
-          color: widget.pastel.pastelFont,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      title: Text(AppLocalizations.of(context).translate('add_parti')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -106,8 +99,9 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
                 }
               }
             },
-            child:
-                const Text(overflow: TextOverflow.ellipsis, 'Add Participant'),
+            child: Text(
+                overflow: TextOverflow.ellipsis,
+                AppLocalizations.of(context).translate('add_parti')),
           ),
         ],
       ),
@@ -123,20 +117,22 @@ class _AddParticipantPopupState extends State<AddParticipantPopup> {
 
 class SelectParticipantsWidget extends StatefulWidget {
   final Teamsubjobmodel teamsubJobmodel;
-  final List<User> participatingUsers;
+  final List<String> alluserinJob;
   final List<String> selectedUserIds;
   final Function(String) onToggleUserSelection;
   final Pastel pastel;
   final BuildContext context;
+  final VoidCallback onComplete;
 
   const SelectParticipantsWidget({
     super.key,
-    required this.participatingUsers,
+    required this.alluserinJob,
     required this.selectedUserIds,
     required this.onToggleUserSelection,
     required this.pastel,
     required this.teamsubJobmodel,
     required this.context,
+    required this.onComplete,
   });
 
   @override
@@ -146,10 +142,13 @@ class SelectParticipantsWidget extends StatefulWidget {
 
 class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
   late List<String> selectedUserIds;
+  late List<User> participatingUsers;
 
   @override
   void initState() {
     super.initState();
+    participatingUsers = [];
+    fetchParticipatingUsers();
     selectedUserIds = List.from(widget.selectedUserIds);
   }
 
@@ -185,6 +184,16 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
     }
   }
 
+  Future<void> fetchParticipatingUsers() async {
+    for (String userId in widget.alluserinJob) {
+      User? user = await fetchUserById(userId, context);
+      if (user != null) {
+        participatingUsers.add(user);
+      }
+    }
+    setState(() {});
+  }
+
   void toggleUserSelection(String userId) {
     setState(() {
       if (selectedUserIds.contains(userId)) {
@@ -212,7 +221,7 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              "เพิ่มคนรับผิดชอบ",
+              AppLocalizations.of(context).translate('add_parti'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -230,9 +239,9 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
-              itemCount: widget.participatingUsers.length,
+              itemCount: participatingUsers.length,
               itemBuilder: (context, index) {
-                final user = widget.participatingUsers[index];
+                final user = participatingUsers[index];
                 final isSelected = selectedUserIds.contains(user.userId);
 
                 return GestureDetector(
@@ -283,7 +292,10 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
             ElevatedButton(
               onPressed: () async {
                 await _updateParticipantsInTeamSubJob();
-                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  widget.onComplete();
+                  Navigator.pop(context);
+                }
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
@@ -305,11 +317,13 @@ class _SelectParticipantsWidgetState extends State<SelectParticipantsWidget> {
 class AddTeamSubWorkArea extends StatefulWidget {
   final Teamsubjobmodel teamsubJobmodel;
   final Pastel pastel;
+  final VoidCallback onComplete;
 
   const AddTeamSubWorkArea({
     super.key,
     required this.pastel,
     required this.teamsubJobmodel,
+    required this.onComplete,
   });
 
   @override
@@ -336,8 +350,6 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
       // เช็คว่าอัปเดตสำเร็จหรือไม่
       if (response.statusCode == 200) {
         print('Update successful');
-        print(
-            'With $apiUrl/v1/teamSubJob/${widget.teamsubJobmodel.subJobId} By $data');
       } else {
         print('Update failed with status: ${response.statusCode}');
       }
@@ -376,13 +388,9 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () async {
-              _updateParticipantsInTeamSubJob();
+              await _updateParticipantsInTeamSubJob();
+              widget.onComplete();
               Navigator.pop(context, true); // ปิด popup
-
-              // หลังจากปิดหน้า dialog, สามารถรีเฟรชหน้าหลักด้วย setState
-              setState(() {
-                // รีเซ็ตหน้าหลักหรือโหลดข้อมูลใหม่ถ้าต้องการ
-              });
             },
             child:
                 const Text(overflow: TextOverflow.ellipsis, 'Change Work Link'),
@@ -402,11 +410,13 @@ class AddTeamSubWorkAreaState extends State<AddTeamSubWorkArea> {
 class AddTeamSubWorkSubmit extends StatefulWidget {
   final Teamsubjobmodel teamsubJobmodel;
   final Pastel pastel;
+  final VoidCallback onComplete;
 
   const AddTeamSubWorkSubmit({
     super.key,
     required this.pastel,
     required this.teamsubJobmodel,
+    required this.onComplete,
   });
 
   @override
@@ -473,13 +483,9 @@ class AddTeamSubWorkSubmitState extends State<AddTeamSubWorkSubmit> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () async {
-              _updateParticipantsInTeamSubJob();
-              Navigator.pop(context, true); // ปิด popup
-
-              // หลังจากปิดหน้า dialog, สามารถรีเฟรชหน้าหลักด้วย setState
-              setState(() {
-                // รีเซ็ตหน้าหลักหรือโหลดข้อมูลใหม่ถ้าต้องการ
-              });
+              await _updateParticipantsInTeamSubJob();
+              widget.onComplete();
+              Navigator.pop(context, true);
             },
             child:
                 const Text(overflow: TextOverflow.ellipsis, 'Change Work Link'),
@@ -579,16 +585,16 @@ Future<void> showDeleteConfirmationDialogCoop(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this job?'),
+        title: Text(AppLocalizations.of(context).translate('confirm_delete')),
+        content: Text(AppLocalizations.of(context).translate('delete')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
+            child: Text(AppLocalizations.of(context).translate('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Yes'),
+            child: Text(AppLocalizations.of(context).translate('yes')),
           ),
         ],
       );
@@ -642,16 +648,16 @@ Future<void> showDeleteConfirmationAndReDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this job?'),
+        title: Text(AppLocalizations.of(context).translate('confirm_delete')),
+        content: Text(AppLocalizations.of(context).translate('delete')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
+            child: Text(AppLocalizations.of(context).translate('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Yes'),
+            child: Text(AppLocalizations.of(context).translate('yes')),
           ),
         ],
       );

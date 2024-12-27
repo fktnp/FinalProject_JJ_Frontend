@@ -11,6 +11,7 @@ class Pastel extends ThemeExtension<Pastel> {
     required this.pastelIcon,
     required this.pastelBlock,
     required this.participant,
+    required this.pastelColors, // เพิ่ม List<Color>
   });
 
   final Color? pastel1;
@@ -21,6 +22,7 @@ class Pastel extends ThemeExtension<Pastel> {
   final Color? pastelIcon;
   final Color? pastelBlock;
   final Color? participant;
+  final List<Color> pastelColors; // List ของสี Pastel
 
   @override
   Pastel copyWith({
@@ -32,6 +34,7 @@ class Pastel extends ThemeExtension<Pastel> {
     Color? pastelIcon,
     Color? pastelBlock,
     Color? participant,
+    List<Color>? pastelColors,
   }) {
     return Pastel(
       pastel1: pastel1 ?? this.pastel1,
@@ -42,6 +45,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelIcon: pastelIcon ?? this.pastelIcon,
       pastelBlock: pastelBlock ?? this.pastelBlock,
       participant: participant ?? this.participant,
+      pastelColors: pastelColors ?? this.pastelColors,
     );
   }
 
@@ -59,6 +63,14 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelIcon: Color.lerp(pastelIcon, other.pastelIcon, t),
       pastelBlock: Color.lerp(pastelBlock, other.pastelBlock, t),
       participant: Color.lerp(participant, other.participant, t),
+      pastelColors: List<Color>.generate(
+        pastelColors.length,
+        (index) => Color.lerp(
+          pastelColors[index],
+          other.pastelColors[index],
+          t,
+        )!,
+      ),
     );
   }
 }
@@ -106,6 +118,13 @@ class ThemeNotifier with ChangeNotifier {
         pastelIcon: Colors.black,
         pastelBlock: Color.fromARGB(255, 190, 223, 255),
         participant: Color.fromARGB(255, 41, 41, 41),
+        pastelColors: [
+        Color(0xFFFFD1DC), // สี Pastel 1
+        Color(0xFFB2E4FA), // สี Pastel 2
+        Color(0xFFFFF4B2), // สี Pastel 3
+        Color(0xFFC9FFD5), // สี Pastel 4
+        Color(0xFFE2CFFF), // สี Pastel 5
+      ],
       ),
     ],
   );
@@ -121,6 +140,13 @@ class ThemeNotifier with ChangeNotifier {
         pastelIcon: Colors.white,
         pastelBlock: Color.fromARGB(255, 90, 90, 90),
         participant: Color.fromARGB(255, 26, 26, 26),
+        pastelColors: [
+        Color(0xFF8E6C88), // สี Pastel 1 (โทนเข้ม)
+        Color(0xFF577D91), // สี Pastel 2
+        Color(0xFF6A5E4F), // สี Pastel 3
+        Color(0xFF8C936D), // สี Pastel 4
+        Color(0xFF725E7A), // สี Pastel 5
+      ],
       ),
     ],
   );

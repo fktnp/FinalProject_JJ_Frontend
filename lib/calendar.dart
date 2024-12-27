@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
 import 'package:flutter_application_1/sub_components_calendar/daydaterow.dart';
 import 'package:flutter_application_1/sub_components_calendar/monthdaterow.dart';
@@ -30,25 +29,10 @@ class CalendarViewState extends State<MyCalendarView> {
   @override
   void initState() {
     super.initState();
-
     currentDateTime = DateTime.now();
     _calendarController = CalendarController();
     _calendarDataSource = AppointmentDataSource([]);
     _initializationFuture = _generateSampleTasks(widget.pastel);
-  }
-
-  Future<List<CalendarModel>> fetchCalendarData() async {
-    final Dio dio = Dio();
-    final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
-    final String url = '$apiUrl/v1/calendar/user/${widget.userId}';
-
-    final response = await dio.get(url);
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((item) => CalendarModel.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load calendar data');
-    }
   }
 
   Future<SubJobModel> fetchSubJob(String subJobID) async {
@@ -67,8 +51,7 @@ class CalendarViewState extends State<MyCalendarView> {
     final Dio dio = Dio();
     // ตรวจสอบให้แน่ใจว่า URL ถูกต้อง
     final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
-    String url =
-        '$apiUrl/v1/subjob/user/${widget.userId}'; // เพิ่ม 'user' ในพาท
+    String url = '$apiUrl/v1/subjob/user/${widget.userId}';
 
     try {
       // กำหนดค่า validateStatus เพื่อไม่ให้ throw error ทันที
@@ -146,12 +129,21 @@ class CalendarViewState extends State<MyCalendarView> {
 
   Future<void> _generateSampleTasks(Pastel pastel) async {
     try {
-      // เปลี่ยนจาก fetchCalendarData() เป็น fetchAllSubJob()
       List<SubJobModel> subJobs = await fetchAllSubJob();
       List<Appointment> appointments = [];
+      List<Color> colorList = [
+        const Color.fromARGB(255, 105, 174, 231),
+        const Color.fromARGB(255, 212, 157, 75),
+        const Color.fromARGB(255, 207, 101, 94),
+        const Color.fromARGB(255, 114, 201, 117),
+        const Color.fromARGB(255, 166, 83, 180),
+        const Color.fromARGB(255, 85, 168, 179),
+        const Color.fromARGB(255, 202, 107, 138),
+      ];
+
+      Map<DateTime, int> dateColorIndex = {};
 
       for (var subJob in subJobs) {
-        // ใช้วันที่จาก subJob.startDate โดยตรง
         DateTime currentstartTime = DateTime(
           subJob.startDate.year,
           subJob.startDate.month,
@@ -168,6 +160,17 @@ class CalendarViewState extends State<MyCalendarView> {
           subJob.lastTimeGoal.minute,
         );
 
+        if (!dateColorIndex.containsKey(subJob.startDate)) {
+          dateColorIndex[subJob.startDate] = 0;
+        }
+
+        // เลือกสีจาก colorList ตาม index
+        Color currentColor = colorList[dateColorIndex[subJob.startDate]!];
+
+        // อัปเดต index ของสีในวันนั้น
+        dateColorIndex[subJob.startDate] =
+            (dateColorIndex[subJob.startDate]! + 1) % colorList.length;
+
         appointments.add(Appointment(
           startTime: currentstartTime,
           endTime: currentendTime,
@@ -175,7 +178,7 @@ class CalendarViewState extends State<MyCalendarView> {
           recurrenceRule: _getRecurrenceRule(subJob),
           color: subJob.status == 'completed'
               ? const Color.fromARGB(255, 155, 255, 172)
-              : pastel.pastel1 ?? Colors.grey, // กำหนด fallback color
+              : currentColor,
           isAllDay: false,
         ));
       }

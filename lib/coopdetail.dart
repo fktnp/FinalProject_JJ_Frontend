@@ -300,8 +300,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                   ),
                                 );
                               } else {
-                                return const Center(
-                                    child: Text('Failed to load tasks'));
+                                return const Center(child: Text(''));
                               }
                             },
                           ),
@@ -459,42 +458,56 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                           toggleUserSelection(user.userId);
                                         });
                                       },
-                                      child: Stack(
+                                      child: Column(
                                         children: [
-                                          CircleAvatar(
-                                            radius: screenWidth * 0.06,
-                                            backgroundColor: isSelected
-                                                ? pastel.pastelFont
-                                                : pastel.pastel1,
-                                            child: Text(
-                                              user.name[0].toUpperCase(),
-                                              style: TextStyle(
-                                                color: isSelected
-                                                    ? pastel.pastel1
-                                                    : pastel.pastelFont,
-                                                fontSize: screenWidth * 0.045,
-                                                fontWeight: FontWeight.bold,
+                                          Stack(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: screenWidth * 0.06,
+                                                backgroundColor: isSelected
+                                                    ? pastel.pastelFont
+                                                    : pastel.pastel1,
+                                                child: Text(
+                                                  user.name[0].toUpperCase(),
+                                                  style: TextStyle(
+                                                    color: isSelected
+                                                        ? pastel.pastel1
+                                                        : pastel.pastelFont,
+                                                    fontSize:
+                                                        screenWidth * 0.045,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
                                               ),
+                                              if (isSelected)
+                                                Positioned(
+                                                  right: 0,
+                                                  bottom: 0,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(2),
+                                                    decoration: BoxDecoration(
+                                                      color: pastel.pastelFont,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.check,
+                                                      size: screenWidth * 0.035,
+                                                      color: pastel.pastel1,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          Text(
+                                            user.name,
+                                            style: TextStyle(
+                                              color: isSelected
+                                                  ? pastel.pastelFont
+                                                  : pastel.pastelFont,
+                                              fontSize: screenWidth * 0.04,
                                             ),
                                           ),
-                                          if (isSelected)
-                                            Positioned(
-                                              right: 0,
-                                              bottom: 0,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(2),
-                                                decoration: BoxDecoration(
-                                                  color: pastel.pastelFont,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(
-                                                  Icons.check,
-                                                  size: screenWidth * 0.035,
-                                                  color: pastel.pastel1,
-                                                ),
-                                              ),
-                                            ),
                                         ],
                                       ),
                                     ),
@@ -548,7 +561,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                           Navigator.pop(context); // Close bottom sheet
                         },
                         child: Icon(
-                          Icons.add,
+                          Icons.check,
                           color: pastel.pastelFont,
                           size: screenWidth * 0.06,
                         ),

@@ -198,8 +198,12 @@ class _CoopPageState extends State<CoopPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+
       backgroundColor: pastel.pastel2, // Peach background color
       builder: (BuildContext context) {
+        final mediaQuery = MediaQuery.of(context);
+        // final screenHeight = mediaQuery.size.height;
+        final screenWidth = mediaQuery.size.width;
         return SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
@@ -319,22 +323,32 @@ class _CoopPageState extends State<CoopPage> {
                                 const EdgeInsets.symmetric(horizontal: 4.0),
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: pastel
-                                      .pastel1, // ใช้สีพื้นหลังตามธีมหรือที่กำหนดไว้
-                                  child: Text(
-                                    overflow: TextOverflow.ellipsis,
-                                    participant.name[0]
-                                        .toUpperCase(), // ตัวอักษรตัวแรก
+                                Column(children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: pastel.pastel1,
+                                    child: Text(
+                                      overflow: TextOverflow.ellipsis,
+                                      participant.name[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color:
+                                            pastel.pastelFont, // สีข้อความในรูป
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    participant.name,
                                     style: TextStyle(
                                       color:
                                           pastel.pastelFont, // สีข้อความในรูป
-                                      fontSize: 18,
+                                      fontSize: screenWidth * 0.04,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
+                                ]),
+
                                 const SizedBox(
                                     width: 8), // เว้นระยะห่างระหว่างรูปและชื่อ
                               ],
@@ -385,8 +399,8 @@ class _CoopPageState extends State<CoopPage> {
                       }
                     },
                     child: Icon(
-                      Icons.add,
-                      color: pastel.pastelProgress,
+                      Icons.check,
+                      color: pastel.pastelFont,
                       size: 30,
                     ),
                   ),

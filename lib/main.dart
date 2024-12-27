@@ -196,7 +196,7 @@ class MyHomePageState extends State<MyHomePage> {
                     BlendMode.srcIn,
                   ),
                   child: Image.asset(
-                    'lib/Pic/settings.png',
+                    'lib/Pic/goal.png',
                     width: _currentIndex == 0
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
@@ -250,7 +250,7 @@ class MyHomePageState extends State<MyHomePage> {
                     BlendMode.srcIn,
                   ),
                   child: Image.asset(
-                    'lib/Pic/goal.png',
+                    'lib/Pic/Co-op.png',
                     width: _currentIndex == 3
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
@@ -268,7 +268,7 @@ class MyHomePageState extends State<MyHomePage> {
                     BlendMode.srcIn,
                   ),
                   child: Image.asset(
-                    'lib/Pic/Co-op.png',
+                    'lib/Pic/settings.png',
                     width: _currentIndex == 4
                         ? screenWidth * 0.08
                         : screenWidth * 0.10,
@@ -289,7 +289,7 @@ class MyHomePageState extends State<MyHomePage> {
   Widget _getPage(int index, Pastel pastel) {
     switch (index) {
       case 0:
-        return SettingsPage(userId: widget.userId);
+        return GoalsPage(userId: widget.userId);
       case 1:
         return MyCalendarView(
           userId: widget.userId,
@@ -298,9 +298,9 @@ class MyHomePageState extends State<MyHomePage> {
       case 2:
         return ToDoList(userId: widget.userId);
       case 3:
-        return GoalsPage(userId: widget.userId);
-      case 4:
         return CoopPage(userId: widget.userId);
+      case 4:
+        return SettingsPage(userId: widget.userId);
       default:
         return ToDoList(userId: widget.userId);
     }

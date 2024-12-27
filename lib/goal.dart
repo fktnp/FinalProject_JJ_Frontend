@@ -80,11 +80,35 @@ class _GoalsPageState extends State<GoalsPage> {
         .toList(); // ใช้ category ในการกรอง
   }
 
+  String _getGoalTranslation(String? goal) {
+    switch (goal) {
+      case 'Health':
+        return AppLocalizations.of(context).translate('health');
+      case 'Financial':
+        return AppLocalizations.of(context).translate('financial');
+      case 'Career':
+        return AppLocalizations.of(context).translate('career');
+      case 'Family':
+        return AppLocalizations.of(context).translate('family');
+      case 'Social':
+        return AppLocalizations.of(context).translate('social');
+      case 'Leisure':
+        return AppLocalizations.of(context).translate('leisure');
+      case 'Friendship':
+        return AppLocalizations.of(context).translate('friendship');
+      case null:
+        return AppLocalizations.of(context).translate('goals');
+      default:
+        return goal;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     // final screenHeight = mediaQuery.size.height;
+    final goalTranslation = _getGoalTranslation(selectedGoal);
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     print(selectedGoal);
     return Scaffold(
@@ -93,7 +117,11 @@ class _GoalsPageState extends State<GoalsPage> {
         centerTitle: true,
         title: Text(
           overflow: TextOverflow.ellipsis,
-          AppLocalizations.of(context).translate('goals'),
+          selectedGoal == null
+              ? AppLocalizations.of(context).translate('goals')
+              : AppLocalizations.of(context)
+                  .translate('planing')
+                  .replaceFirst('{goal}', goalTranslation),
           style:
               TextStyle(color: pastel.pastelFont, fontWeight: FontWeight.bold),
         ),
@@ -240,7 +268,10 @@ class GoalTask extends StatelessWidget {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
       width: MediaQuery.of(context).size.width * 0.93,
-      color: pastel.pastel2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(screenWidth * 0.04),
+        color: pastel.pastel1,
+      ),
       child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
@@ -372,89 +403,50 @@ class _GoalSectionState extends State<GoalSection> {
     return tasks.where((task) => task.category == selectedGoal).toList();
   }
 
-  String _getGoalTranslation(String goal) {
-    switch (goal) {
-      case 'Health':
-        return AppLocalizations.of(context).translate('health');
-      case 'Financial':
-        return AppLocalizations.of(context).translate('financial');
-      case 'Career':
-        return AppLocalizations.of(context).translate('career');
-      case 'Family':
-        return AppLocalizations.of(context).translate('family');
-      case 'Social':
-        return AppLocalizations.of(context).translate('social');
-      case 'Leisure':
-        return AppLocalizations.of(context).translate('leisure');
-      case 'Friendship':
-        return AppLocalizations.of(context).translate('friendship');
-      default:
-        return goal;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
-    final goalTranslation = _getGoalTranslation(widget.goal);
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
 
-    return Stack(
-      children: [
-        Column(
-          children: [
-            Card(
-              color: pastel.pastel1,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-                title: Text(
-                  overflow: TextOverflow.ellipsis,
-                  AppLocalizations.of(context)
-                      .translate('planing')
-                      .replaceFirst('{goal}', goalTranslation),
-                  style: TextStyle(
-                      fontSize: screenWidth * 0.05, color: pastel.pastelFont),
-                ),
-              ),
-            ),
-            if (isLoading)
-              const CircularProgressIndicator(), // แสดง Loading Indicator
-            if (!isLoading && tasks.isNotEmpty)
-              ...tasks.map((task) => GoalTask(
-                    task: task,
-                    loginuserid: widget.loginuserid,
-                  )),
-            if (!isLoading && tasks.isEmpty)
-              const Text('No tasks available for this goal.'), // กรณีไม่มี task
-          ],
-        ),
-        if (widget.conditionToShowButton)
-          Positioned(
-            bottom: 25,
-            right: 10,
-            child: FloatingActionButton(
-              onPressed: () {
-                AddFromGoal(
-                  context: context,
-                  goal: widget.goal,
-                  loginuserid: widget.loginuserid,
-                ).show(() async {
-                  await _refreshTasks(); // โหลดข้อมูลใหม่เมื่อเพิ่มสำเร็จ
-                });
-              },
-              backgroundColor: pastel.pastelFont,
-              child: Icon(Icons.add, color: pastel.pastel1),
-            ),
+    return SizedBox(
+      width: screenWidth * 1,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (isLoading)
+                const CircularProgressIndicator(), // แสดง Loading Indicator
+              if (!isLoading && tasks.isNotEmpty)
+                ...tasks.map((task) => GoalTask(
+                      task: task,
+                      loginuserid: widget.loginuserid,
+                    )),
+              if (!isLoading && tasks.isEmpty) const Text(''), // กรณีไม่มี task
+            ],
           ),
-      ],
+          if (widget.conditionToShowButton)
+            Positioned(
+              bottom: 25,
+              right: 10,
+              child: FloatingActionButton(
+                onPressed: () {
+                  AddFromGoal(
+                    context: context,
+                    goal: widget.goal,
+                    loginuserid: widget.loginuserid,
+                  ).show(() async {
+                    await _refreshTasks(); // โหลดข้อมูลใหม่เมื่อเพิ่มสำเร็จ
+                  });
+                },
+                backgroundColor: pastel.pastelFont,
+                child: Icon(Icons.add, color: pastel.pastel1),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

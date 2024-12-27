@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'components/analysis.dart';
 import 'components/workwithform.dart';
+import 'l10n/app_localizations.dart';
 import 'main.dart';
 import 'model/theme.dart';
 import 'model/subjobmodel.dart';
@@ -47,7 +49,7 @@ class TaskDetailPageState extends State<TaskDetailPage> {
           alignment: Alignment.centerRight,
           child: Text(
             overflow: TextOverflow.ellipsis,
-            'Goal',
+            AppLocalizations.of(context).translate('goals'),
             style: TextStyle(color: pastel.pastelFont),
           ),
         ),
@@ -83,23 +85,36 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                       const SizedBox(height: 10),
                       Text(
                         overflow: TextOverflow.ellipsis,
-                        'Date : ${widget.mainJobModel.startTimeGoal.day.toString()}/${widget.mainJobModel.startTimeGoal.month.toString()}/${widget.mainJobModel.startTimeGoal.year.toString()} - ${widget.mainJobModel.lastTimeGoal.day.toString()}/${widget.mainJobModel.lastTimeGoal.month.toString()}/${widget.mainJobModel.lastTimeGoal.year.toString()}',
+                        '${AppLocalizations.of(context).translate('date')} : ${widget.mainJobModel.startTimeGoal.day.toString()}/${widget.mainJobModel.startTimeGoal.month.toString()}/${widget.mainJobModel.startTimeGoal.year.toString()} - ${widget.mainJobModel.lastTimeGoal.day.toString()}/${widget.mainJobModel.lastTimeGoal.month.toString()}/${widget.mainJobModel.lastTimeGoal.year.toString()}',
                         style:
                             TextStyle(fontSize: 16, color: pastel.pastelFont),
                       ),
                       const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomPopup(
+                                mainJobModel: widget.mainJobModel,
+                              );
+                            },
+                          );
+                        },
+                        child: const Text('Show Popup'),
+                      ),
                     ],
                   ),
                   IconButton(
                     icon: const Icon(Icons.block_sharp),
                     onPressed: () {
                       showDeleteConfirmationDialog(
-                          context,
-                          'job',
-                          widget.mainJobModel.jobId,
-                          'goal',
-                          widget.loginuserid,
-                          );
+                        context,
+                        'job',
+                        widget.mainJobModel.jobId,
+                        'goal',
+                        widget.loginuserid,
+                      );
                     },
                   ),
                 ],

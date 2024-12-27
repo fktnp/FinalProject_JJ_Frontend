@@ -65,7 +65,7 @@ class LanguageToggleButton extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: currentLocale == 'en'
                         ? pastel.pastel1
-                        : Colors.grey[300], // เปลี่ยนสีตามสถานะ
+                        : pastel.pastel2, // เปลี่ยนสีตามสถานะ
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -98,7 +98,7 @@ class LanguageToggleButton extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: currentLocale == 'th'
                         ? pastel.pastel1
-                        : Colors.grey[300], // เปลี่ยนสีตามสถานะ
+                        : pastel.pastel2, // เปลี่ยนสีตามสถานะ
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

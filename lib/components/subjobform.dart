@@ -246,7 +246,7 @@ class AddSubTaskForm {
                                 padding: const EdgeInsets.all(10),
                               ),
                               child: Icon(
-                                Icons.add,
+                                Icons.check,
                                 color: pastel.pastelFont,
                                 size: 40,
                               ),
