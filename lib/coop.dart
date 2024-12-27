@@ -227,7 +227,10 @@ class _CoopPageState extends State<CoopPage> {
                   child: Center(
                     child: Text(
                       overflow: TextOverflow.ellipsis,
-                      'Add a Collective Goal',
+                      AppLocalizations.of(context)
+                          .translate('add_goal')
+                          .replaceFirst('{text}',
+                              AppLocalizations.of(context).translate('main')),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

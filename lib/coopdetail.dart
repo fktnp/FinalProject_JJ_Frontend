@@ -364,7 +364,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                     AppLocalizations.of(context)
                         .translate('add_goal')
                         .replaceFirst('{text}',
-                            AppLocalizations.of(context).translate('main')),
+                            AppLocalizations.of(context).translate('sub')),
                     style: TextStyle(
                       fontSize: screenWidth * 0.06,
                       fontWeight: FontWeight.bold,

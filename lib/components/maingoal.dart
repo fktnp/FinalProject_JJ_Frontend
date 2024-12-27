@@ -198,7 +198,7 @@ class AddFromGoal {
                                   }
                                 },
                                 child: Icon(
-                                  Icons.add,
+                                  Icons.check,
                                   color: pastel.pastelFont,
                                   size: 30,
                                 ),

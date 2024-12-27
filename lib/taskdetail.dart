@@ -91,6 +91,9 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                       ),
                       const SizedBox(height: 10),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: pastel.pastel1,
+                        ),
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -101,7 +104,13 @@ class TaskDetailPageState extends State<TaskDetailPage> {
                             },
                           );
                         },
-                        child: const Text('Show Popup'),
+                        child: Text(
+                          AppLocalizations.of(context).translate('measurement'),
+                          style: TextStyle(
+                              fontSize: screenWidth * 0.037,
+                              fontWeight: FontWeight.bold,
+                              color: pastel.pastelFont),
+                        ),
                       ),
                     ],
                   ),
