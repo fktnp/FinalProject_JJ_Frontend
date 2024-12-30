@@ -11,7 +11,8 @@ class Pastel extends ThemeExtension<Pastel> {
     required this.pastelIcon,
     required this.pastelBlock,
     required this.participant,
-    required this.pastelColors, // เพิ่ม List<Color>
+    required this.pastelColors,
+    required this.pastelProgressFail, // เพิ่ม List<Color>
   });
 
   final Color? pastel1;
@@ -23,6 +24,7 @@ class Pastel extends ThemeExtension<Pastel> {
   final Color? pastelBlock;
   final Color? participant;
   final List<Color> pastelColors; // List ของสี Pastel
+  final Color? pastelProgressFail;
 
   @override
   Pastel copyWith({
@@ -35,6 +37,7 @@ class Pastel extends ThemeExtension<Pastel> {
     Color? pastelBlock,
     Color? participant,
     List<Color>? pastelColors,
+    Color? pastelProgressFail,
   }) {
     return Pastel(
       pastel1: pastel1 ?? this.pastel1,
@@ -46,6 +49,7 @@ class Pastel extends ThemeExtension<Pastel> {
       pastelBlock: pastelBlock ?? this.pastelBlock,
       participant: participant ?? this.participant,
       pastelColors: pastelColors ?? this.pastelColors,
+      pastelProgressFail: pastelProgressFail ?? this.pastelProgressFail,
     );
   }
 
@@ -71,6 +75,8 @@ class Pastel extends ThemeExtension<Pastel> {
           t,
         )!,
       ),
+      pastelProgressFail:
+          Color.lerp(pastelProgressFail, other.pastelProgressFail, t),
     );
   }
 }
@@ -115,16 +121,17 @@ class ThemeNotifier with ChangeNotifier {
         pastelFont: Color.fromARGB(255, 41, 41, 41),
         pastelFont2: Color.fromARGB(255, 150, 150, 150),
         pastelProgress: Color.fromARGB(255, 155, 255, 172),
+        pastelProgressFail: Color.fromARGB(255, 255, 155, 155),
         pastelIcon: Colors.black,
         pastelBlock: Color.fromARGB(255, 190, 223, 255),
         participant: Color.fromARGB(255, 41, 41, 41),
         pastelColors: [
-        Color(0xFFFFD1DC), // สี Pastel 1
-        Color(0xFFB2E4FA), // สี Pastel 2
-        Color(0xFFFFF4B2), // สี Pastel 3
-        Color(0xFFC9FFD5), // สี Pastel 4
-        Color(0xFFE2CFFF), // สี Pastel 5
-      ],
+          Color(0xFFFFD1DC), // สี Pastel 1
+          Color(0xFFB2E4FA), // สี Pastel 2
+          Color(0xFFFFF4B2), // สี Pastel 3
+          Color(0xFFC9FFD5), // สี Pastel 4
+          Color(0xFFE2CFFF), // สี Pastel 5
+        ],
       ),
     ],
   );
@@ -136,17 +143,18 @@ class ThemeNotifier with ChangeNotifier {
         pastel2: Color.fromARGB(255, 44, 44, 44),
         pastelFont: Color(0xFFECDFCC),
         pastelFont2: Color.fromARGB(255, 165, 157, 144),
-        pastelProgress: Color(0xFFECDFCC),
+        pastelProgress: Color.fromARGB(255, 31, 65, 41),
+        pastelProgressFail: Color.fromARGB(255, 102, 50, 50),
         pastelIcon: Colors.white,
         pastelBlock: Color.fromARGB(255, 90, 90, 90),
         participant: Color.fromARGB(255, 26, 26, 26),
         pastelColors: [
-        Color(0xFF8E6C88), // สี Pastel 1 (โทนเข้ม)
-        Color(0xFF577D91), // สี Pastel 2
-        Color(0xFF6A5E4F), // สี Pastel 3
-        Color(0xFF8C936D), // สี Pastel 4
-        Color(0xFF725E7A), // สี Pastel 5
-      ],
+          Color(0xFF8E6C88), // สี Pastel 1 (โทนเข้ม)
+          Color(0xFF577D91), // สี Pastel 2
+          Color(0xFF6A5E4F), // สี Pastel 3
+          Color(0xFF8C936D), // สี Pastel 4
+          Color(0xFF725E7A), // สี Pastel 5
+        ],
       ),
     ],
   );

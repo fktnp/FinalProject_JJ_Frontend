@@ -68,4 +68,6 @@ Map<String, String> enTranslations = {
   'gModer': 'Goal is moderate',
   'gQEasy': 'Goal is quite easy',
   'gEasy': 'Goal is too easy',
+  'stt': 'Start',
+  'nd': 'End',
 };

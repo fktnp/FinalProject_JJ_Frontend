@@ -68,4 +68,6 @@ Map<String, String> thTranslations = {
   'gModer': 'เป้าหมายเหมาะสม',
   'gQEasy': 'เป้าหมายค่อนข้างง่าย',
   'gEasy': 'เป้าหมายง่ายเกินไป',
+  'stt': 'เริ่ม',
+  'nd': 'จบ',
 };

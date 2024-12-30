@@ -206,7 +206,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                             height: screenWidth * 0.09,
                             margin: EdgeInsets.only(left: screenWidth * 0.02),
                             decoration: BoxDecoration(
-                              color: pastel.pastelProgress,
+                              color: pastel.pastel1,
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -216,7 +216,7 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                                     ? user.name[0].toUpperCase()
                                     : '',
                                 style: TextStyle(
-                                  color: pastel.participant,
+                                  color: pastel.pastelFont,
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth * 0.05,
                                 ),
@@ -246,10 +246,10 @@ class CoopDetailPageState extends State<CoopDetailPage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: const CircleBorder(),
-                                backgroundColor: pastel.pastelProgress,
+                                backgroundColor: pastel.pastel1,
                                 foregroundColor: pastel.participant,
                               ),
-                              child: Icon(Icons.add, color: pastel.participant),
+                              child: Icon(Icons.add, color: pastel.pastelFont),
                             )
                           : const SizedBox()
                     ],
@@ -748,9 +748,11 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
         margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
         decoration: BoxDecoration(
-          color: widget.teamSubtask.status != "Completed"
-              ? pastel.pastelBlock
-              : const Color.fromARGB(255, 190, 255, 201),
+          color: widget.teamSubtask.status == "Complete"
+              ? pastel.pastelProgress
+              : DateTime.now().isAfter(widget.teamSubtask.lastDate)
+                  ? pastel.pastelProgressFail
+                  : pastel.pastelBlock,
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
         ),
         child: Row(
@@ -782,7 +784,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
                       height: screenWidth * 0.08,
                       margin: const EdgeInsets.symmetric(horizontal: 2.0),
                       decoration: BoxDecoration(
-                        color: pastel.pastelProgress,
+                        color: pastel.pastel1,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -792,7 +794,7 @@ class _CoopSubTaskBoxState extends State<CoopSubTaskBox> {
                               ? user.name[0].toUpperCase()
                               : '',
                           style: TextStyle(
-                            color: pastel.participant,
+                            color: pastel.pastelFont,
                             fontWeight: FontWeight.bold,
                             fontSize: screenWidth * 0.04,
                           ),

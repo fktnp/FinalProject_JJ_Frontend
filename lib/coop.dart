@@ -580,9 +580,11 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
           margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
           decoration: BoxDecoration(
-            color: widget.teamtask.status != "Completed"
-                ? pastel.pastelBlock
-                : const Color.fromARGB(255, 190, 255, 201),
+            color: widget.teamtask.status == "Complete"
+                ? pastel.pastelProgress
+                : DateTime.now().isAfter(widget.teamtask.lastDate)
+                    ? pastel.pastelProgressFail
+                    : pastel.pastelBlock,
             borderRadius: BorderRadius.circular(screenWidth * 0.05),
           ),
           child: Row(
@@ -618,7 +620,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                           height: screenWidth * 0.08,
                           margin: const EdgeInsets.symmetric(horizontal: 2.0),
                           decoration: BoxDecoration(
-                            color: pastel.pastelProgress,
+                            color: pastel.pastel1,
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -628,7 +630,7 @@ class _TeamTaskBoxState extends State<TeamTaskBox> {
                                   ? user.name[0].toUpperCase()
                                   : '',
                               style: TextStyle(
-                                color: pastel.participant,
+                                color: pastel.pastelFont,
                                 fontWeight: FontWeight.bold,
                                 fontSize: screenWidth * 0.04,
                               ),

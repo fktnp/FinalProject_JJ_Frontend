@@ -78,7 +78,7 @@ class _CustomPopupState extends State<CustomPopup> {
 
   Future<void> _showResultPopup() async {
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
+    // final screenHeight = mediaQuery.size.height;
     final screenWidth = mediaQuery.size.width;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     await showDialog(

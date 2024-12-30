@@ -13,12 +13,13 @@ import 'setting.dart';
 import 'todotolist.dart';
 import 'calendar.dart';
 import 'package:http/http.dart' as http;
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   final prefs = await SharedPreferences.getInstance();
-  print(
-      'Initial language code: ${prefs.getString('language_code')}'); // Debug print
+  print('Initial language code: ${prefs.getString('language_code')}');
   await dotenv.load(fileName: "assets/env/api.env");
 
   runApp(

@@ -226,9 +226,11 @@ class SubTaskBox extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.035),
         margin: EdgeInsets.symmetric(vertical: screenHeight * 0.006),
         decoration: BoxDecoration(
-          color: subtask.percentProgress < 100
-              ? pastel.pastelBlock
-              : const Color.fromARGB(255, 190, 255, 201),
+          color: subtask.percentProgress == 100
+              ? pastel.pastelProgress
+              : DateTime.now().isAfter(subtask.lastDate)
+                  ? pastel.pastelProgressFail
+                  : pastel.pastelBlock,
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
         ),
         child: Row(

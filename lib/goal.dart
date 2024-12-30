@@ -267,10 +267,15 @@ class GoalTask extends StatelessWidget {
     final screenWidth = mediaQuery.size.width;
     final Pastel pastel = Theme.of(context).extension<Pastel>()!;
     return Container(
+      margin: EdgeInsets.only(bottom: screenHeight * 0.01),
       width: MediaQuery.of(context).size.width * 0.93,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(screenWidth * 0.04),
-        color: pastel.pastel1,
+        color: task.percentProgress == 100
+            ? pastel.pastelProgress
+            : DateTime.now().isAfter(task.lastTimeGoal)
+                ? pastel.pastelProgressFail
+                : pastel.pastel1,
       ),
       child: ListTile(
           contentPadding:
@@ -322,7 +327,9 @@ class GoalTask extends StatelessWidget {
                   center: Text(
                       overflow: TextOverflow.ellipsis,
                       '${task.percentProgress.toString()}%'),
-                  progressColor: pastel.pastelProgress,
+                  progressColor: task.percentProgress == 100
+                      ? pastel.pastelProgress
+                      : pastel.pastelBlock,
                   backgroundColor: const Color.fromARGB(82, 0, 0, 0),
                 ),
               )

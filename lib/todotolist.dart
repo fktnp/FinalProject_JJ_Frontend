@@ -2,12 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/calendarModel.dart';
 import 'package:flutter_application_1/model/subJobModel.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'l10n/app_localizations.dart';
 import 'main.dart';
 import 'model/teamsubjobmodel.dart';
 import 'model/theme.dart';
 import 'sub_components_calendar/daydaterow.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class ToDoList extends StatefulWidget {
   final String userId;
@@ -18,9 +20,109 @@ class ToDoList extends StatefulWidget {
 }
 
 class ToDoListState extends State<ToDoList> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   DateTime currentDateTime = DateTime.now();
   List<Task> allTasks = [];
   final Dio _dio = Dio();
+  bool isNotificationsEnabled = false;
+
+  Future<void> _checkNotificationPermission() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    final bool? permissionGranted =
+        await androidImplementation?.requestPermission();
+    setState(() {
+      isNotificationsEnabled = permissionGranted ?? false;
+    });
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestSoundPermission: false,
+      requestBadgePermission: false,
+      requestAlertPermission: false,
+    );
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse details) {
+        print('Notification clicked with payload: ${details.payload}');
+      },
+    );
+
+    // สร้าง notification channel
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'task_reminders',
+      'Task Reminders',
+      description: 'Notifications for upcoming tasks',
+      importance: Importance.max,
+    );
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  // ฟังก์ชันสำหรับตั้งเวลาแจ้งเตือนสำหรับ task
+  Future<void> _scheduleTaskNotification(Task task) async {
+    try {
+      // ใช้ startTimeGoal โดยตรงเนื่องจากเป็น DateTime อยู่แล้ว
+      final DateTime startTime = DateTime(
+        task.startDate.year,
+        task.startDate.month,
+        task.startDate.day,
+        task.startTimeGoal.hour, // ใช้ .hour แทน split
+        task.startTimeGoal.minute, // ใช้ .minute แทน split
+      );
+
+      // คำนวณเวลาแจ้งเตือน (30 นาทีก่อน startTime)
+      final notificationTime = startTime.subtract(const Duration(minutes: 30));
+
+      // ถ้าเวลาแจ้งเตือนยังไม่ผ่านไป
+      if (notificationTime.isAfter(DateTime.now())) {
+        const AndroidNotificationDetails androidPlatformChannelSpecifics =
+            AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Notifications for upcoming tasks',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
+
+        const NotificationDetails platformChannelSpecifics =
+            NotificationDetails(android: androidPlatformChannelSpecifics);
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          task.id.hashCode, // ใช้ hash ของ task id เป็น notification id
+          'เตือนความจำ: ${task.title}',
+          'งานของคุณจะเริ่มในอีก 30 นาที',
+          tz.TZDateTime.from(notificationTime, tz.local),
+          platformChannelSpecifics,
+          // androidAllowWhileIdle: true,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+        print(
+            'Scheduled notification for task: ${task.title} at $notificationTime');
+      }
+    } catch (e) {
+      print('Error scheduling notification for task: $e');
+    }
+  }
 
   Future<List<CalendarModel>> fetchCalendars() async {
     final apiUrl = Provider.of<EnvProvider>(context, listen: false).apiUrl;
@@ -139,15 +241,28 @@ class ToDoListState extends State<ToDoList> {
       setState(() {
         allTasks = fetchedTasks;
         print('all task complete with ${fetchedTasks.length} tasks');
+        _scheduleNotificationsForToday();
       });
     } catch (e) {
       print('Error in _fetchAllTasks: $e');
     }
   }
 
+  void _scheduleNotificationsForToday() {
+    final now = DateTime.now();
+    for (var task in allTasks) {
+      // เช็คว่าเป็น task ของวันนี้
+      if (isSameDate(task.startDate, now) && !task.isCompleted) {
+        _scheduleTaskNotification(task);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
+    _checkNotificationPermission();
     _fetchAllTasks();
   }
 
@@ -461,7 +576,7 @@ class ShowListTask extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             overflow: TextOverflow.ellipsis,
-                            'Start: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} : ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
+                            '${AppLocalizations.of(context).translate('stt')}: ${task.startTimeGoal.hour.toString().padLeft(2, '0')} : ${task.startTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
                                   ? pastel.pastelFont2
@@ -474,7 +589,7 @@ class ShowListTask extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             overflow: TextOverflow.ellipsis,
-                            'End: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} : ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
+                            '${AppLocalizations.of(context).translate('nd')}: ${task.lastTimeGoal.hour.toString().padLeft(2, '0')} : ${task.lastTimeGoal.minute.toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: task.isCompleted
                                   ? pastel.pastelFont2
