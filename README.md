@@ -1,16 +1,27 @@
-# flutter_application_1
+# FinalProject_JudJamApp
 
-A new Flutter project.
+BaseOn :
+- Docker
+- Github
 
-## Getting Started
+Fontend : 
+- Use Flutter 
 
-This project is a starting point for a Flutter application.
+Backend :
+- Use Golang
+- Implementation by Clean Architecture
+- Database Use Postgres
+- Implementation Database by Gorm
+- Implementation Server by Echo
+- UnitTest
 
-A few resources to get you started if this is your first Flutter project:
+ER-Diagram
+![image](https://github.com/user-attachments/assets/8a646759-c332-4934-8c79-f3692472c22a)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Developer BY
+- Pan Nitiyothin 64120501003 MDT
+- Nattamet Lertvongtrakhun 64120501054 MDT
+- Thanapon Wanichnumcharoen 64120501056 MDT
+
+Final Project Of King Mongkut's University of Technology Thonburi
