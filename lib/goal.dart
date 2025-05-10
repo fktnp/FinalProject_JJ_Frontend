@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/maingoal.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'components/custom_button.dart';
-import 'taskdetail.dart'; 
+import 'taskdetail.dart';
 import 'task.dart';
 
 class GoalsPage extends StatefulWidget {
@@ -12,8 +13,6 @@ class GoalsPage extends StatefulWidget {
 }
 
 class _GoalsPageState extends State<GoalsPage> {
-  late Future<List<Task>> tasksFuture;
-
   final List<String> goals = [
     'Health',
     'Financial',
@@ -26,15 +25,19 @@ class _GoalsPageState extends State<GoalsPage> {
 
   String? selectedGoal;
 
+  late Future<List<MainTask>> futureTasks;
+
   @override
   void initState() {
     super.initState();
-    tasksFuture = loadTasks();
+    futureTasks = fetchMainTasks(); // ดึงข้อมูลจาก API เมื่อหน้าเริ่มต้น
   }
 
-  List<Task> filterTasks(List<Task> tasks, String? goal) {
-    if (goal == null) return [];
-    return tasks.where((task) => task.taskCore == goal).toList();
+  List<MainTask> filterTasks(List<MainTask> tasks, String? selectedGoal) {
+    if (selectedGoal == null) return [];
+    return tasks
+        .where((task) => task.category == selectedGoal)
+        .toList(); // ใช้ category ในการกรอง
   }
 
   @override
@@ -64,8 +67,8 @@ class _GoalsPageState extends State<GoalsPage> {
       body: Container(
         color: const Color(0xFFFFECDB),
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder<List<Task>>(
-            future: tasksFuture,
+        child: FutureBuilder<List<MainTask>>(
+            future: futureTasks,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -83,7 +86,7 @@ class _GoalsPageState extends State<GoalsPage> {
                         itemBuilder: (context, index) {
                           final goal = goals[index];
                           final showTask = tasks
-                              .where((task) => task.taskCore == goal)
+                              .where((task) => task.category == goal)
                               .toList();
 
                           return Padding(
@@ -106,7 +109,8 @@ class _GoalsPageState extends State<GoalsPage> {
                                   ),
                                 ),
                                 backgroundColor: const Color(0xFFFFDCBC),
-                                collapsedBackgroundColor: const Color(0xFFFFDCBC),
+                                collapsedBackgroundColor:
+                                    const Color(0xFFFFDCBC),
                                 shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
@@ -142,117 +146,76 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 }
 
-// class GoalSection extends StatelessWidget {
-//   final String goal;
-//   final List<Task> tasks;
-//   final List<Task> filteredTasks;
-//   final bool conditionToShowButton; // Assuming this is a boolean to control button visibility
-
-//   const GoalSection({
-//     super.key,
-//     required this.goal,
-//     required this.tasks,
-//     required this.filteredTasks,
-//     this.conditionToShowButton = true,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Stack(
-//       children: [
-//         Column(
-//           children: [
-//             Card(
-//               color: const Color(0xFFFFDCBC),
-//               shape: const RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20)),
-//               ),
-//               child: ListTile(
-//                 contentPadding: const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-//                 title: Text(
-//                   '$goal Planning',
-//                   style: const TextStyle(fontSize: 18),
-//                 ),
-//               ),
-//             ),
-//             if (filteredTasks.isNotEmpty)
-//               ...filteredTasks.map((task) => GoalTask(task: task)),
-//           ],
-//         ),
-//         if (conditionToShowButton)
-//            Positioned(
-//             bottom: 25,
-//             right: 10,
-//             child: FixedBottomButton(onPressed: () {
-//               Navigator.push(
-//                     context,
-//                     MaterialPageRoute(builder: (context) => RegisterScreen()),
-//                   );
-//              },
-//             ),
-//           ),
-//       ],
-//     );
-//   }
-// }
-
 class GoalTask extends StatelessWidget {
-  final Task task;
+  final MainTask task;
   const GoalTask({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+
     return Container(
       width: MediaQuery.of(context).size.width * 0.93,
       color: const Color.fromARGB(255, 251, 197, 255),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TaskDetailPage(task: task),
-                  ),
-                );
-              },
-              child: Row(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    task.taskName,
-                    style: const TextStyle(fontSize: 18),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TaskDetailPage(task: task),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Text(
+                          task.name,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    width: 20,
-                  ),
                   Text(
-                    task.taskDate.toString(),
-                    style: const TextStyle(fontSize: 12),
+                    '${task.startTimeGoal.day.toString()}/${task.startTimeGoal.month.toString()}/${task.startTimeGoal.year.toString()} - ${task.lastTimeGoal.day.toString()}/${task.lastTimeGoal.month.toString()}/${task.lastTimeGoal.year.toString()}',
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ],
               ),
-            ),
-            Text(
-              '${task.taskStartHour.toString().padLeft(2, '0')}:00 - ${task.taskEndHour.toString().padLeft(2, '0')}:00',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+              SizedBox(
+                height: screenHeight * 0.07,
+                child: CircularPercentIndicator(
+                  radius: screenWidth * 0.07,
+                  lineWidth: screenWidth * 0.014,
+                  percent: task.percentProgress / 100,
+                  center: Text('${task.percentProgress.toString()}%'),
+                  progressColor: const Color.fromARGB(255, 92, 216, 97),
+                  backgroundColor: const Color.fromARGB(82, 0, 0, 0),
+                ),
+              )
+            ],
+          )),
     );
   }
 }
 
-
-
-
 class GoalSection extends StatelessWidget {
   final String goal;
-  final List<Task> tasks;
-  final List<Task> filteredTasks;
+  final List<MainTask> tasks;
+  final List<MainTask> filteredTasks;
   final bool conditionToShowButton;
 
   const GoalSection({
@@ -262,25 +225,6 @@ class GoalSection extends StatelessWidget {
     required this.filteredTasks,
     this.conditionToShowButton = true,
   });
-
-  void showGoalAddBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // ให้ pop-up สามารถขยายได้ตามเนื้อหา
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      builder: (BuildContext context) {
-        return const FractionallySizedBox(
-          heightFactor: 0.8, // กำหนดความสูงเป็น 80% ของหน้าจอ
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: GoaladdPage(),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -315,9 +259,6 @@ class GoalSection extends StatelessWidget {
             child: FixedBottomButton(
               onPressed: () {
                 AddFromGoal(context: context, goal: goal).show();
-                 //showGoalAddBottomSheet(context)ของเพิ่มย่อย
-                // AddFromGoal(context: context, goal: goal).show(); ของอันหลัก
-                // เรียกใช้ฟังก์ชัน showOverlay
               },
             ),
           ),

@@ -3,7 +3,7 @@ import 'goal.dart';
 import 'login_screen.dart';
 import 'setting.dart';
 import 'task.dart';
-import 'todotoday.dart';
+import 'todolist.dart';
 import 'calendar.dart';
 
 void main() {
@@ -45,10 +45,10 @@ class MyHomePageState extends State<MyHomePage> {
         index: _currentIndex,
         children: const [
           SettingsPage(),
-          CalendarView(),
-          TryTodotoday(),
+          MyCalendarView(),
+          ToDoList(),
           GoalsPage(),
-          TaskList(),
+          TaskListPage(),
         ],
       ),
       bottomNavigationBar: SizedBox(
